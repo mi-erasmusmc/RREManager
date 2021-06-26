@@ -99,7 +99,7 @@ public class RREManager {
 					if (!inEclipse) {
 						mainFrame.logLn("");
 						mainFrame.logLn("");
-						mainFrame.logLn("RREManager.ini:");
+						mainFrame.logLn(iniFile.getFileName() + ":");
 						mainFrame.logLn("--------------------------------------------------------------------------------------");
 						iniFile.writeFile(System.out);
 						mainFrame.logLn("--------------------------------------------------------------------------------------");

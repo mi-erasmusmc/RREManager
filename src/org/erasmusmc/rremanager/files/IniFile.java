@@ -33,6 +33,11 @@ public class IniFile {
 	}
 	
 	
+	public String getFileName() {
+		return fileName;
+	}
+	
+	
 	public boolean readFile() {
 		boolean ok = false;
 		if (iniFile.canRead()) {
@@ -142,11 +147,6 @@ public class IniFile {
 		}
 		
 		return ok;
-	}
-	
-	
-	public String getFileName() {
-		return fileName;
 	}
 	
 	
