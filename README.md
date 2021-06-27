@@ -105,7 +105,7 @@ The following tags can be used only as the only contents of a text line:
 
 [IP ADDRESSES] = A table containing selected IP-addresses (only applicable to "Firewall Add Mail" and "Firewall Remove Mail").
 [Picture_<nr>] = A reference to a picture specified in the same definition. Pictures are only included in HTML type emails. A PICTURE definition looks like:
-
-`PICTURE_1 = <img alt="Embedded Image" height="<picture height>" width="<picture wdth>" src="data:image/png;base64,<base 64 string of png image>" />`
-
+```
+PICTURE_1 = <img alt="Embedded Image" height="<picture height>" width="<picture wdth>" src="data:image/png;base64,<base 64 string of png image>" />`
+```
 [xxxxxx] = When not equal to any of the predefined tags a reference to an email sub part that will be inserted here. 
