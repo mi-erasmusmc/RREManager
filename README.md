@@ -95,17 +95,17 @@ Firewall Remove Mail
 
 In an email you can use the following in-line tags:
 
-[BOLD START] = Start text in bold.
-[BOLD END] = End text in bold.
-[ITALIC START] = Start of text in italics.
-[ITALIC END] = End of text in italics.
-[FIRST NAME] = The first name of the recipient.
-[LAST NAME] = The last name of the recipient.
-[USER NAME] = The user name of the recipient.
+[BOLD START] = Start text in bold.<br>
+[BOLD END] = End text in bold.<br>
+[ITALIC START] = Start of text in italics.<br>
+[ITALIC END] = End of text in italics.<br>
+[FIRST NAME] = The first name of the recipient.<br>
+[LAST NAME] = The last name of the recipient.<br>
+[USER NAME] = The user name of the recipient.<br>
 [PASSWORD] = The password of the recipient.
 
 The following tags can be used only as the only contents of a text line:
 
-[IP ADDRESSES] = A table containing selected IP-addresses (only applicable to "Firewall Add Mail" and "Firewall Remove Mail").
-[Picture_<nr>] = A reference to a picture specified in the same definition. Pictures are only included in HTML type emails.
+[IP ADDRESSES] = A table containing selected IP-addresses (only applicable to "Firewall Add Mail" and "Firewall Remove Mail").<br>
+[Picture_<nr>] = A reference to a picture specified in the same definition. Pictures are only included in HTML type emails.<br>
 [xxxxxx] = When not equal to any of the predefined tags a reference to an email sub part that will be inserted here. 
