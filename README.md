@@ -13,17 +13,17 @@ The RREManager works with the user definitions as specified in an Excel file. Th
 
 | Column name          | Contents                                                     |
 | -------------------- | ------------------------------------------------------------ |
-| Update column        | Flag (empty or 1) to signal that a user should be updated (added projects/groups) in the active directory. |
-| Projects column      | A comma separated list of projects the user participates in. |
-| Groups column        | A comma separated list of groups the user participates in. A group name always consists of the project name followed by a space followed by the group name. |
-| First name column    | The first name of the user.                                  |
-| Initials column      | The initials of the user.                                    |
-| Last name column     | The last name of the user.                                   |
-| User name column     | The user name of the user. Usually the first initial followed by the last name. |
-| Password column      | The password of the user.                                    |
-| Email address column | The email addres of the user.                                |
-| Email Format column  | The prefered email format, HTML or TEXT, of the user.        |
-| IP-Addresses column  | The IP-addresses the user wants to access the RRE from.      |
+| Update Column        | Flag (empty or 1) to signal that a user should be updated (added projects/groups) in the active directory. |
+| Projects Column      | A comma separated list of projects the user participates in. |
+| Groups Column        | A comma separated list of groups the user participates in. A group name always consists of the project name followed by a space followed by the group name. |
+| First Name Column    | The first name of the user.                                  |
+| Initials Column      | The initials of the user.                                    |
+| Last Name Column     | The last name of the user.                                   |
+| User Name Column     | The user name of the user. Usually the first initial followed by the last name. |
+| Password Column      | The password of the user.                                    |
+| Email Column         | The email addres of the user.                                |
+| Email Format Column  | The prefered email format, HTML or TEXT, of the user.        |
+| IP-Addresses Column  | The IP-addresses the user wants to access the RRE from.      |
 
 
 
