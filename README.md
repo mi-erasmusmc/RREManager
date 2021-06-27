@@ -70,10 +70,10 @@ Text_1  = <line 1 of the email>
 Text_N  = <line N of the email>
 Attachment_1 = <optional path of extra attachment 1 (e.g. an .rdp file)>
     :
-Attachment_N = <optional path of extra attachment N> 
-Picture_1 = <picture 1 as base 64 html image>
-    : 
-Picture_N = <picture N as base 64 html image>
+Attachment_N = <optional path of extra attachment N>
+Picture_1 = <img alt="Embedded Image" height="<picture height>" width="<picture wdth>" src="data:image/png;base64,<base 64 string of png image>" />
+    :
+Picture_N = <img alt="Embedded Image" height="<picture height>" width="<picture wdth>" src="data:image/png;base64,<base 64 string of png image>" />
 
 [<message sup part>]
 Text_1  = <line 1 of the email>
