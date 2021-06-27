@@ -4,7 +4,7 @@ The RREManager is a tool to support the management of projects and users on the 
 
 java -jar RREManager-vx.x.jar [settings=<path of ini file]
 
-When no parameter is specified it uses the RREManager.ini file that is in the same folder as the RREManager-vx.x.jar file.
+When no parameter is specified it uses the RREManager-vx.x.ini file that is in the same folder as the RREManager-vx.x.jar file.
 
 
 ## The user definitions

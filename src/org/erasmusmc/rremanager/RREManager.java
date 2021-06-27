@@ -71,7 +71,7 @@ public class RREManager {
 		noLogging = parameters.keySet().contains("nologging");
 		inEclipse = ((System.getProperty("runInEclipse") != null) && System.getProperty("runInEclipse").equalsIgnoreCase("true"));
 		if (setCurrentPath()) {
-			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager.ini"));
+			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
 				allTimeLogFileName = noLogging ? null : (iniFile.getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
 				String allTimeLogHeader = "Date";
