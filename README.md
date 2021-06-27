@@ -33,12 +33,12 @@ The structure of the ini file is:
 
 `[General]`
 `Log Folder = <path to where the log files will be written>`
-
+``
 `[User Projects File]`
 `File                = <path to the users Excel file>`
 `Sheet               = <the name of the sheet in the Excel file with the users>`
-`Update Column       = <the name of the column in the Excel file with the update flag>` 
-`Projects Column     = <the name of the column in the Excel file with the projects of the user>` 
+`Update Column       = <the name of the column in the Excel file with the update flag>`
+`Projects Column     = <the name of the column in the Excel file with the projects of the user> `
 `Groups Column       = <the name of the column in the Excel file with the groups of the user>`
 `First Name Column   = <the name of the column in the Excel file with the first name of the user>`
 `Initials Column     = <the name of the column in the Excel file with the initials of the user>`
@@ -48,35 +48,35 @@ The structure of the ini file is:
 `Email Column        = <the name of the column in the Excel file with the email address of the user>`
 `Email Format Column = <the name of the column in the Excel file with the perferred email format (HTML or TEXT) of the user>`
 `IP-Addresses Column = <the name of the column in the Excel file with the IP-addresses of the user>`
-
-
+``
+``
 `[MultiOTP]`
 `PDFFolder = <the path to the folder with the MultiOTP pdf files with the account information>`
-
+``
 `[SMTP Mail Server]`
 `Server = <the smtp mailserver>`
 `Port   = <the smtp port, usually 25>`
 `User   = <the smpt mail user>`
 `from   = <the from email address>`
 `cc     = <optional, the cc email address>`
-
+``
 `[<mail message type>]`
 `Subject = <subject of the email>`
 `Email   = Only when <email message type> is Firewall Add Mail or Firewall Remove Mail: <recipient email address>`
 `Format  = Only when <email message type> is Firewall Add Mail or Firewall Remove Mail: HTML or TEXT`
 `Text_1  = <line 1 of the email>`
-    `:`
+`    :`
 `Text_N  = <line N of the email>`
 `Attachment_1 = <optional path of extra attachment 1 (e.g. an .rdp file)>`
-    `:`
-`Attachment_N = <optional path of extra attachment N>` 
+`    :`
+`Attachment_N = <optional path of extra attachment N> `
 `PICTURE_1 = <picture 1 as base 64 html image>`
-    `:` 
+`    : `
 `PICTURE_N = <picture N as base 64 html image>`
-
+``
 `[<message sup part>]`
 `Text_1  = <line 1 of the email>`
-    `:` 
+`    : `
 `Text_N  = <line N of the email>Picture_1 = <picture 1 as base 64 html image>:Picture_N = <picture N as base 64 html image>`
 
 
