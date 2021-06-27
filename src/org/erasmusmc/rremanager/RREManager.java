@@ -198,30 +198,36 @@ public class RREManager {
 	public void sendPasswords(int[] selectedUsers) {
 		String messageType = "Password Mail";
 		if (getIniFile().hasGroup(messageType)) {
-			if (getMailClient()) {
-				for (int userNr : selectedUsers) {
-					String[] user = userData.getUser(userNr);
-					if (user != null) {
-						String userAccountName = user[UserData.INITIALS].length() > 0 ? user[UserData.INITIALS].substring(0, 1) : "";
-						userAccountName += user[UserData.LAST_NAME];
-						userAccountName = userAccountName.toLowerCase();
-						if (!user[UserData.PASSWORD].equals("")) {
-							List<String> attachments = new ArrayList<String>();
-							attachments.addAll(getAdditionalAttachments(messageType));
-							
-							String allTimeLogRecord = "Send Password";
-							allTimeLogRecord += "," + user[UserData.EMAIL];
-							allTimeLogRecord += "," + user[UserData.USER_NAME];
-							allTimeLogRecord += "," + user[UserData.FIRST_NAME];
-							allTimeLogRecord += "," + user[UserData.LAST_NAME];
-							allTimeLogRecord += "," + user[UserData.PASSWORD];
-							allTimeLogRecord += ",";
-							
-							mail(messageType, user, attachments, allTimeLogRecord);
-						}
-						else {
-							mainFrame.logWithTimeLn("ERROR: No password found!");
-							JOptionPane.showMessageDialog(mainFrame.getFrame(), "No password found!", "No password", JOptionPane.ERROR_MESSAGE);
+			if (!getIniFile().hasVariable(messageType, "Text_1")) {
+				mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
+				JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message definition for " + messageType, "No message", JOptionPane.ERROR_MESSAGE);
+			}
+			else {
+				if (getMailClient()) {
+					for (int userNr : selectedUsers) {
+						String[] user = userData.getUser(userNr);
+						if (user != null) {
+							String userAccountName = user[UserData.INITIALS].length() > 0 ? user[UserData.INITIALS].substring(0, 1) : "";
+							userAccountName += user[UserData.LAST_NAME];
+							userAccountName = userAccountName.toLowerCase();
+							if (!user[UserData.PASSWORD].equals("")) {
+								List<String> attachments = new ArrayList<String>();
+								attachments.addAll(getAdditionalAttachments(messageType));
+								
+								String allTimeLogRecord = "Send Password";
+								allTimeLogRecord += "," + user[UserData.EMAIL];
+								allTimeLogRecord += "," + user[UserData.USER_NAME];
+								allTimeLogRecord += "," + user[UserData.FIRST_NAME];
+								allTimeLogRecord += "," + user[UserData.LAST_NAME];
+								allTimeLogRecord += "," + user[UserData.PASSWORD];
+								allTimeLogRecord += ",";
+								
+								mail(messageType, user, attachments, allTimeLogRecord);
+							}
+							else {
+								mainFrame.logWithTimeLn("ERROR: No password found!");
+								JOptionPane.showMessageDialog(mainFrame.getFrame(), "No password found!", "No password", JOptionPane.ERROR_MESSAGE);
+							}
 						}
 					}
 				}
@@ -237,76 +243,77 @@ public class RREManager {
 	public void sendFirewallAddRequest(int[] selectedUsers) {
 		String messageType = "Firewall Add Mail";
 		if (getIniFile().hasGroup(messageType)) {
-			String format = getIniFile().getValue(messageType, "Format");
-			if (!getIniFile().hasVariable(messageType, "TEXT_1")) {
+			if (!getIniFile().hasVariable(messageType, "Text_1")) {
 				mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
 				JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message definition for " + messageType, "No message", JOptionPane.ERROR_MESSAGE);
 			}
-			if (format != null) {
-				Map<String, List<String>> ipMap = new HashMap<String,List<String>>();
-				for (int userNr : selectedUsers) {
-					String[] user = userData.getUser(userNr);
-					String userName = user[UserData.USER_NAME];
-					if (user != null) {
-						String ipAddresses = user[UserData.IP_ADDRESSES];
-						if ((ipAddresses != null) && (!ipAddresses.trim().equals(""))) {
-							String[] ipAddressesSplit = ipAddresses.split(";");
-							for (String ipAddress : ipAddressesSplit) {
-								ipAddress = ipAddress.trim();
-								if (!ipAddress.equals("")) {
-									List<String> ipUserList = ipMap.get(ipAddress);
-									if (ipUserList == null) {
-										ipUserList = new ArrayList<String>();
-										ipMap.put(ipAddress, ipUserList);
+			else {
+				String format = getIniFile().getValue(messageType, "Format");
+				if (format != null) {
+					Map<String, List<String>> ipMap = new HashMap<String,List<String>>();
+					for (int userNr : selectedUsers) {
+						String[] user = userData.getUser(userNr);
+						String userName = user[UserData.USER_NAME];
+						if (user != null) {
+							String ipAddresses = user[UserData.IP_ADDRESSES];
+							if ((ipAddresses != null) && (!ipAddresses.trim().equals(""))) {
+								String[] ipAddressesSplit = ipAddresses.split(";");
+								for (String ipAddress : ipAddressesSplit) {
+									ipAddress = ipAddress.trim();
+									if (!ipAddress.equals("")) {
+										List<String> ipUserList = ipMap.get(ipAddress);
+										if (ipUserList == null) {
+											ipUserList = new ArrayList<String>();
+											ipMap.put(ipAddress, ipUserList);
+										}
+										ipUserList.add(userName);
 									}
-									ipUserList.add(userName);
 								}
 							}
 						}
 					}
-				}
-				
-				ipAddressSelector.selectIPAddresses(ipMap, null);
-				ipMap = ipAddressSelector.getIPSelection();
-				
-				if ((ipMap != null) && (ipMap.keySet().size() > 0)) {
-					if (getMailClient()) {
-						String info[] = new String[UserData.OBJECT_SIZE + (ipMap.keySet().size() * 2)];
-						info[UserData.EMAIL] = getIniFile().getValue(messageType, "Email");
-						info[UserData.EMAIL_FORMAT] = format;
-						int ipNr = 0;
-						String ipAddressString = "";
-						for (String ipAddress : ipMap.keySet()) {
-							String users = "";
-							for (String user : ipMap.get(ipAddress)) {
-								users += (users.equals("") ? "" : ", ") + user;
+					
+					ipAddressSelector.selectIPAddresses(ipMap, null);
+					ipMap = ipAddressSelector.getIPSelection();
+					
+					if ((ipMap != null) && (ipMap.keySet().size() > 0)) {
+						if (getMailClient()) {
+							String info[] = new String[UserData.OBJECT_SIZE + (ipMap.keySet().size() * 2)];
+							info[UserData.EMAIL] = getIniFile().getValue(messageType, "Email");
+							info[UserData.EMAIL_FORMAT] = format;
+							int ipNr = 0;
+							String ipAddressString = "";
+							for (String ipAddress : ipMap.keySet()) {
+								String users = "";
+								for (String user : ipMap.get(ipAddress)) {
+									users += (users.equals("") ? "" : ", ") + user;
+								}
+								info[UserData.OBJECT_SIZE + (ipNr * 2)] = ipAddress;
+								info[UserData.OBJECT_SIZE + (ipNr * 2) + 1] = users;
+								ipAddressString += (ipAddressString.equals("") ? "" : ";") + ipAddress + " (" + users + ")";
+								ipNr++;
 							}
-							mainFrame.logWithTimeLn((ipNr == 0 ? "    IP-Addresses: " : "                  ") + ipAddress + " (" + users + ")");
-							info[UserData.OBJECT_SIZE + (ipNr * 2)] = ipAddress;
-							info[UserData.OBJECT_SIZE + (ipNr * 2) + 1] = users;
-							ipAddressString += (ipAddressString.equals("") ? "" : ";") + ipAddress + " (" + users + ")";
-							ipNr++;
+							info[UserData.IP_ADDRESSES] = ipAddressString;
+							
+							List<String> attachments = new ArrayList<String>();
+							attachments.addAll(getAdditionalAttachments(messageType));
+							
+							String allTimeLogRecord = "Send Firewall Add Request";
+							allTimeLogRecord += "," + getIniFile().getValue(messageType, "Email");
+							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
+							allTimeLogRecord += "," + "\"" + ipAddressString + "\"";
+							
+							mail(messageType, info, attachments, allTimeLogRecord);
 						}
-						
-						List<String> attachments = new ArrayList<String>();
-						attachments.addAll(getAdditionalAttachments(messageType));
-						
-						String allTimeLogRecord = "Send Firewall Add Request";
-						allTimeLogRecord += "," + getIniFile().getValue(messageType, "Email");
-						allTimeLogRecord += ",";
-						allTimeLogRecord += ",";
-						allTimeLogRecord += ",";
-						allTimeLogRecord += ",";
-						allTimeLogRecord += "," + "\"" + ipAddressString + "\"";
-						
-						mail(messageType, info, attachments, allTimeLogRecord);
 					}
 				}
-				
-			}
-			else {
-				mainFrame.logWithTimeLn("ERROR: No message format specified for " + messageType);
-				JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message format specified for " + messageType, "No message format", JOptionPane.ERROR_MESSAGE);
+				else {
+					mainFrame.logWithTimeLn("ERROR: No message format specified for " + messageType);
+					JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message format specified for " + messageType, "No message format", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 		else {
@@ -319,99 +326,101 @@ public class RREManager {
 	public void sendFirewallRemoveRequest(int[] selectedUsers) {
 		String messageType = "Firewall Remove Mail";
 		if (getIniFile().hasGroup(messageType)) {
-			String format = getIniFile().getValue(messageType, "Format");
-			if (!getIniFile().hasVariable(messageType, "TEXT_1")) {
+			if (!getIniFile().hasVariable(messageType, "Text_1")) {
 				mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
 				JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message definition for " + messageType, "No message", JOptionPane.ERROR_MESSAGE);
 			}
-			if (format != null) {
-				Map<String, Set<String>> ipUsersMap = userData.getIPAddressUsersMap();
-				Set<String> selectSet = new HashSet<String>();
-				Map<String, List<String>> ipMap = new HashMap<String, List<String>>();
-				for (int userNr : selectedUsers) {
-					String[] user = userData.getUser(userNr);
-					
-					if (user != null) {
-						String userDescription = user[UserData.USER_NAME];
+			else {
+				String format = getIniFile().getValue(messageType, "Format");
+				if (format != null) {
+					Map<String, Set<String>> ipUsersMap = userData.getIPAddressUsersMap();
+					Set<String> selectSet = new HashSet<String>();
+					Map<String, List<String>> ipMap = new HashMap<String, List<String>>();
+					for (int userNr : selectedUsers) {
+						String[] user = userData.getUser(userNr);
 						
-						for (String ipAddress : ipUsersMap.keySet()) {
-							if (ipUsersMap.containsKey(ipAddress)) {
-								ipUsersMap.get(ipAddress).remove(userDescription);
+						if (user != null) {
+							String userDescription = user[UserData.USER_NAME];
+							
+							for (String ipAddress : ipUsersMap.keySet()) {
+								if (ipUsersMap.containsKey(ipAddress)) {
+									ipUsersMap.get(ipAddress).remove(userDescription);
+								}
 							}
-						}
 
-						String ipAddresses = user[UserData.IP_ADDRESSES];
-						if ((ipAddresses != null) && (!ipAddresses.trim().equals(""))) {
-							String[] ipAddressesSplit = ipAddresses.split(";");
-							for (String ipAddress : ipAddressesSplit) {
-								ipAddress = ipAddress.trim();
-								if (!ipAddress.equals("")) {
-									List<String> ipUsers = ipMap.get(ipAddress);
-									if (ipUsers == null) {
-										ipUsers = new ArrayList<String>();
-										ipMap.put(ipAddress, ipUsers);
-									}
-									if (!ipUsers.contains(userDescription)) {
-										ipUsers.add(userDescription);
-									}
-									
-									for (String otherUser : ipUsersMap.get(ipAddress)) {
-										if (!ipUsers.contains(otherUser)) {
-											ipUsers.add(otherUser);
+							String ipAddresses = user[UserData.IP_ADDRESSES];
+							if ((ipAddresses != null) && (!ipAddresses.trim().equals(""))) {
+								String[] ipAddressesSplit = ipAddresses.split(";");
+								for (String ipAddress : ipAddressesSplit) {
+									ipAddress = ipAddress.trim();
+									if (!ipAddress.equals("")) {
+										List<String> ipUsers = ipMap.get(ipAddress);
+										if (ipUsers == null) {
+											ipUsers = new ArrayList<String>();
+											ipMap.put(ipAddress, ipUsers);
 										}
-									}
-									
-									if (ipUsersMap.get(ipAddress).size() == 0) {
-										selectSet.add(ipAddress);
+										if (!ipUsers.contains(userDescription)) {
+											ipUsers.add(userDescription);
+										}
+										
+										for (String otherUser : ipUsersMap.get(ipAddress)) {
+											if (!ipUsers.contains(otherUser)) {
+												ipUsers.add(otherUser);
+											}
+										}
+										
+										if (ipUsersMap.get(ipAddress).size() == 0) {
+											selectSet.add(ipAddress);
+										}
 									}
 								}
 							}
 						}
 					}
-				}
-				
-				ipAddressSelector.selectIPAddresses(ipMap, selectSet);
-				ipMap = ipAddressSelector.getIPSelection();
-				
-				if ((ipMap != null) && (ipMap.keySet().size() > 0)) {
-					if (getMailClient()) {
-						String info[] = new String[UserData.OBJECT_SIZE + (ipMap.keySet().size() * 2)];
-						info[UserData.EMAIL] = getIniFile().getValue(messageType, "Email");
-						info[UserData.EMAIL_FORMAT] = format;
-						
-						int ipNr = 0;
-						String ipAddressString = "";
-						for (String ipAddress : ipMap.keySet()) {
-							String users = "";
-							for (String user : ipMap.get(ipAddress)) {
-								users += (users.equals("") ? "" : ", ") + user;
+					
+					ipAddressSelector.selectIPAddresses(ipMap, selectSet);
+					ipMap = ipAddressSelector.getIPSelection();
+					
+					if ((ipMap != null) && (ipMap.keySet().size() > 0)) {
+						if (getMailClient()) {
+							String info[] = new String[UserData.OBJECT_SIZE + (ipMap.keySet().size() * 2)];
+							info[UserData.EMAIL] = getIniFile().getValue(messageType, "Email");
+							info[UserData.EMAIL_FORMAT] = format;
+							
+							int ipNr = 0;
+							String ipAddressString = "";
+							for (String ipAddress : ipMap.keySet()) {
+								String users = "";
+								for (String user : ipMap.get(ipAddress)) {
+									users += (users.equals("") ? "" : ", ") + user;
+								}
+								info[UserData.OBJECT_SIZE + (ipNr * 2)] = ipAddress;
+								info[UserData.OBJECT_SIZE + (ipNr * 2) + 1] = users;
+								ipAddressString += (ipAddressString.equals("") ? "" : ";") + ipAddress + " (" + users + ")";
+								ipNr++;
 							}
-							mainFrame.logWithTimeLn((ipNr == 0 ? "    IP-Addresses: " : "                  ") + ipAddress + " (" + users + ")");
-							info[UserData.OBJECT_SIZE + (ipNr * 2)] = ipAddress;
-							info[UserData.OBJECT_SIZE + (ipNr * 2) + 1] = users;
-							ipAddressString += (ipAddressString.equals("") ? "" : ";") + ipAddress + " (" + users + ")";
-							ipNr++;
+							info[UserData.IP_ADDRESSES] = ipAddressString;
+							
+							List<String> attachments = new ArrayList<String>();
+							attachments.addAll(getAdditionalAttachments(messageType));
+							
+							String allTimeLogRecord = "Send Firewall Remove Request";
+							allTimeLogRecord += "," + getIniFile().getValue(messageType, "Email");
+							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
+							allTimeLogRecord += "," + "\"" + ipAddressString + "\"";
+							
+							mail(messageType, info, attachments, allTimeLogRecord);
 						}
-						
-						List<String> attachments = new ArrayList<String>();
-						attachments.addAll(getAdditionalAttachments(messageType));
-						
-						String allTimeLogRecord = "Send Firewall Remove Request";
-						allTimeLogRecord += "," + getIniFile().getValue(messageType, "Email");
-						allTimeLogRecord += ",";
-						allTimeLogRecord += ",";
-						allTimeLogRecord += ",";
-						allTimeLogRecord += ",";
-						allTimeLogRecord += "," + "\"" + ipAddressString + "\"";
-						
-						mail(messageType, info, attachments, allTimeLogRecord);
 					}
+					
 				}
-				
-			}
-			else {
-				mainFrame.logWithTimeLn("ERROR: No message format specified for " + messageType);
-				JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message format specified for " + messageType, "No message format", JOptionPane.ERROR_MESSAGE);
+				else {
+					mainFrame.logWithTimeLn("ERROR: No message format specified for " + messageType);
+					JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message format specified for " + messageType, "No message format", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 		else {
@@ -447,6 +456,16 @@ public class RREManager {
 		mainFrame.logLn("");
 		mainFrame.logWithTimeLn("Send " + messageType + " to " + recipientDescription + " as " + info[UserData.EMAIL_FORMAT] + " ...");
 
+		if (messageType.startsWith("Firewall") && (!info[UserData.IP_ADDRESSES].equals(""))) {
+			int ipNr = 0;
+			while ((ipNr * 2) < (info.length - UserData.OBJECT_SIZE)) {
+				String ipAddress = info[UserData.OBJECT_SIZE + (ipNr * 2)];
+				String users = info[UserData.OBJECT_SIZE + (ipNr * 2) + 1];
+				mainFrame.logWithTimeLn((ipNr == 0 ? "    IP-Addresses: " : "                  ") + ipAddress + " (" + users + ")");
+				ipNr++;
+			}
+		}
+
 		String attachementsString = "";
 		String unreadableAttachments = "";
 		for (int attachentNr = 0; attachentNr < attachments.size(); attachentNr++) {
@@ -459,7 +478,8 @@ public class RREManager {
 			}
 			mainFrame.logWithTimeLn((attachentNr == 0 ? "    Attachments: " : "                 ") + attachments.get(attachentNr) + (unreadable ? " UNREADABLE" : ""));
 		}
-		
+
+		String mailError = "";
 		if (unreadableAttachments.equals("")) {
 			String text = approveEmail(getEmailText(messageType, info), info, getIniFile().getValue(messageType, "Subject"));
 			
@@ -483,23 +503,27 @@ public class RREManager {
 					allTimeLogRecord += "," + "Succeeded";
 				}
 				else {
-					String mailError = (unreadableAttachments.equals("") ? mailClient.getError() : "Cannot read attachments " + unreadableAttachments);
 					allTimeLogRecord += "," + "Yes";
 					allTimeLogRecord += "," + "Failed";
+					mailError = mailClient.getError();
 					mainFrame.logWithTimeLn("  FAILED: " + mailError);
 				}
 			}
 			else {
 				allTimeLogRecord += "," + "No";
 				allTimeLogRecord += "," + "Failed";
+				mailError = "Rejected by user.";
+				mainFrame.logWithTimeLn("  REJECTED by user.");
 			}
 		}
 		else {
 			allTimeLogRecord += "," + "";
 			allTimeLogRecord += "," + "Failed";
+			mailError = "Cannot read attachments " + unreadableAttachments;
+			mainFrame.logWithTimeLn("  REJECTED: Cannot read attachments " + unreadableAttachments);
+			JOptionPane.showMessageDialog(mainFrame.getFrame(), "  REJECTED: Cannot read attachments " + unreadableAttachments, "Unreadble attachments", JOptionPane.ERROR_MESSAGE);
 		}
 
-		String mailError = (unreadableAttachments.equals("") ? mailClient.getError() : "Cannot read attachments " + unreadableAttachments);
 		allTimeLogRecord += "," + "\"" + mailError + "\"";
 		allTimeLogRecord += "," + mainFrame.getLogFileName();
 		allTimeLogRecord += "," + "\"" + attachementsString + "\"";

@@ -2,6 +2,7 @@ package org.erasmusmc.rremanager.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BoxLayout;
@@ -32,7 +33,7 @@ public class EmailReviewer {
 	
 	public void reviewEmail(String emailText, String emailFormat, String[] user, String subject) {
 		approved = false;
-		Dimension ipSelectorDialogSize = new Dimension(800, 600);
+		Dimension ipSelectorDialogSize = new Dimension(800, 800);
 		JDialog emailReviewerDialog = new JDialog(parentFrame, true);
 		emailReviewerDialog.setTitle("Email Reviewer");
 		emailReviewerDialog.setLayout(new BorderLayout());
@@ -49,12 +50,13 @@ public class EmailReviewer {
 		toPanel.add(subjectPanel, BorderLayout.CENTER);
 		
 		JPanel emailPanel = new JPanel(new BorderLayout());
+		JScrollPane emailReviewScrollPane;
 		if (emailFormat.equals("TEXT")) {
 			JPanel textPanel = new JPanel(new BorderLayout());
 			JTextArea emailTextField = new JTextArea(emailText);
 			emailTextField.setEditable(false);
 			textPanel.add(emailTextField, BorderLayout.CENTER);
-			JScrollPane emailReviewScrollPane = new JScrollPane(textPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			emailReviewScrollPane = new JScrollPane(textPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			emailPanel.add(emailReviewScrollPane, BorderLayout.CENTER);
 		}
 		else {
@@ -63,7 +65,7 @@ public class EmailReviewer {
 	        emailHTMLField.setContentType("text/html");
 	        emailHTMLField.setText(emailText);
 	        emailHTMLField.setEditable(false);
-			JScrollPane emailReviewScrollPane = new JScrollPane(emailHTMLField, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			emailReviewScrollPane = new JScrollPane(emailHTMLField, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			emailPanel.add(emailReviewScrollPane, BorderLayout.CENTER);
 		}
 		subjectPanel.add(emailPanel, BorderLayout.CENTER);
@@ -95,6 +97,8 @@ public class EmailReviewer {
 		
 		emailReviewerDialog.pack();
 		emailReviewerDialog.setLocationRelativeTo(parentFrame);
+		
+		emailReviewScrollPane.getViewport().setViewPosition( new Point(0, 0) );
 		
 		emailReviewerDialog.setVisible(true);
 	}
