@@ -7,7 +7,7 @@ java -jar RREManager-vx.x.jar [settings=<path of ini file]
 When no parameter is specified it uses the RREManager.ini file that is in the same folder as the RREManager-vx.x.jar file.
 
 
-#The user definitions
+## The user definitions
 
 The RREManager works with the user definitions as specified in an Excel file. This Excel file should have the following columns in the specified order:
 
@@ -84,6 +84,7 @@ Picture_1 = <img alt="Embedded Image" height="<picture height>" width="<picture 
 Picture_N = <img alt="Embedded Image" height="<picture height>" width="<picture wdth>" src="data:image/png;base64,<base 64 string of png image>" />
 ```
 
+Comments can be added by starting a line with a '#' character.
 
 There are five predefined email messages that should be defined:
 
