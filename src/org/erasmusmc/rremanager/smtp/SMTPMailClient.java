@@ -181,29 +181,4 @@ public class SMTPMailClient {
 	public void setError(String error) {
 		this.error = error;
 	}
-	
-
-	public static void main(String[] args) {
-		SMTPMailClient smtp = new SMTPMailClient("mailgate.erasmusmc.nl", "25", "584641", "IkBenR!2021");
-		List<String> to = new ArrayList<String>();
-		to.add("mees_mosseveld@yahoo.com");
-		List<String> cc = new ArrayList<String>();
-		cc.add("b.mosseveld@erasmusmc.nl");
-		List<String> bcc = new ArrayList<String>();
-		bcc.add("mees.mosseveld@gmail.com");
-		List<String> attachments = new ArrayList<String>();
-		attachments.add("D:\\Temp\\RRE\\User Manager\\RREManager\\MultiOTP\\bmosseveld.pdf");
-		if (smtp.sendMail("Test subject", "<h1>Dit is een test</h1>", null, "b.mosseveld@erasmusmc.nl", to, cc, bcc, null)) {
-	        System.out.println("Message 1 Sent successfully....");
-		}
-		else {
-	        System.out.println("Message 1 ERROR: " + smtp.getError());
-		}
-		if (smtp.sendMail("Test subject", "<h1>Dit is een test</h1>", null, "rre@erasmusmc.nl", to, cc, bcc, null)) {
-	        System.out.println("Message 2 Sent successfully....");
-		}
-		else {
-	        System.out.println("Message 2 ERROR: " + smtp.getError());
-		}
-	}
 }
