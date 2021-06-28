@@ -383,7 +383,7 @@ public class MainFrame {
 		if ((logFolder == null) || logFolder.equals("")) {
 			logFolder = new File(".").getAbsolutePath();
 		}
-		String logFileName = "RRE UserManager.log";
+		String logFileName = "RREManager.log";
 		String outputVersion = getOutputVersion(logFileName);;
 		String baseName = logFolder + "/" + outputVersion;
 		fullLogFileName = baseName + logFileName;
