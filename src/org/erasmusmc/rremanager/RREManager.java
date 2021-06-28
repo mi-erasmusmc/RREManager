@@ -25,7 +25,7 @@ import org.erasmusmc.rremanager.utilities.DateUtilities;
 
 public class RREManager {
 	public static boolean inEclipse = false;
-	public static String version = "1.0";
+	public static String version = "1.1";
 	public static boolean noLogging = true;
 	
 	private static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();

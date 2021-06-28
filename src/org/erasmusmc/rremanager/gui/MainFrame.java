@@ -385,7 +385,7 @@ public class MainFrame {
 		}
 		String logFileName = "RREManager.log";
 		String outputVersion = getOutputVersion(logFileName);;
-		String baseName = logFolder + "/" + outputVersion;
+		String baseName = logFolder + File.separator + outputVersion;
 		fullLogFileName = baseName + logFileName;
 		console.setDebugFile(RREManager.noLogging ? null : fullLogFileName);
 	}
