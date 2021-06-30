@@ -501,11 +501,12 @@ public class RREManager {
 						)) {
 					allTimeLogRecord += "," + "Yes";
 					allTimeLogRecord += "," + "Succeeded";
+					mainFrame.logWithTimeLn("  SUCCEEDED");
 				}
 				else {
 					allTimeLogRecord += "," + "Yes";
 					allTimeLogRecord += "," + "Failed";
-					mailError = mailClient.getError();
+					mailError = mailClient.getError().replaceAll("\r\n", " ").replaceAll("\r", " ").replaceAll("\n", " ");
 					mainFrame.logWithTimeLn("  FAILED: " + mailError);
 				}
 			}
