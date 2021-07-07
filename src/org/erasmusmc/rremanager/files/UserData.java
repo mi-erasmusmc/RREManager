@@ -27,14 +27,32 @@ public class UserData {
 	public static int MULTIOTP_PDF = 12;
 	public static int OBJECT_SIZE  = 13;
 	
+	public static String[] fieldName = new String[] {
+			"First name",
+			"Iniitials",
+			"Last name",
+			"User name",
+			"Password",
+			"Email address",
+			"Email format",
+			"Access type",
+			"QR-Code available",
+			"Projects",
+			"Project groups",
+			"IP Adresses",
+			"MultiOTP PDF"
+	};
+	
 
 	private List<String[]> users = new ArrayList<String[]>();
 	
 	
-	public static String getUserDescription(String[] user) {
+	public static String getUserDescription(String[] user, boolean withEmail) {
 		String userDescription = user[UserData.FIRST_NAME] == null ? "" : user[UserData.FIRST_NAME];
 		userDescription += (userDescription.equals("") ? "" : (((user[UserData.LAST_NAME] == null) || user[UserData.LAST_NAME].equals("")) ? "" : " ")) + (user[UserData.LAST_NAME] == null ? "" : user[UserData.LAST_NAME]);
-		userDescription += (userDescription.equals("") ? user[UserData.EMAIL] : " (" + user[UserData.EMAIL] + ")");
+		if (withEmail) {
+			userDescription += (userDescription.equals("") ? user[UserData.EMAIL] : " (" + user[UserData.EMAIL] + ")");
+		}
 		return userDescription;
 	}
 	

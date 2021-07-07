@@ -180,14 +180,14 @@ public class IPAddressSelector {
 				ipSelectLabelPanel.add(ipSelectCheckBox, BorderLayout.WEST);
 			}
 			
-			JPanel fileLabelPanel = new JPanel(new BorderLayout());
-			JLabel fileLabel = new JLabel(ipAddress);
+			JPanel ipAddressLabelPanel = new JPanel(new BorderLayout());
+			JLabel ipAddressLabel = new JLabel(ipAddress);
 			if ((userList != null) && (!users.equals("Users"))) {
-				fileLabel.setFont(fileLabel.getFont().deriveFont(java.awt.Font.PLAIN));
+				ipAddressLabel.setFont(ipAddressLabel.getFont().deriveFont(java.awt.Font.PLAIN));
 			}
-			fileLabelPanel.add(fileLabel, BorderLayout.WEST);
+			ipAddressLabelPanel.add(ipAddressLabel, BorderLayout.WEST);
 			
-			ipSelectLabelPanel.add(fileLabelPanel, BorderLayout.CENTER);
+			ipSelectLabelPanel.add(ipAddressLabelPanel, BorderLayout.CENTER);
 			 
 			JTextField userNamesField;
 			if ((userList == null) || users.equals("Users")) {

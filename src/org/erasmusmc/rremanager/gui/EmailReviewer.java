@@ -40,7 +40,7 @@ public class EmailReviewer {
 		emailReviewerDialog.setMinimumSize(ipSelectorDialogSize);
 		emailReviewerDialog.setPreferredSize(ipSelectorDialogSize);
 		
-		String to = UserData.getUserDescription(user);
+		String to = UserData.getUserDescription(user, true);
 		
 		JPanel toPanel = new JPanel(new BorderLayout());
 		toPanel.add(new InfoRow("To:", to), BorderLayout.NORTH);

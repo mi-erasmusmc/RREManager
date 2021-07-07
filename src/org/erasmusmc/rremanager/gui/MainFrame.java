@@ -3,6 +3,7 @@ package org.erasmusmc.rremanager.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -50,6 +52,8 @@ public class MainFrame {
 	private String fullLogFileName;
 	private JFrame frame;
 	private JPanel usersPanel;
+	private JPanel usersListPanel;
+	private JPanel detailsPanel;
 	private Console console;
 	private JButton sendAccountsButton;
 	private JButton sendPasswordsButton;
@@ -116,6 +120,8 @@ public class MainFrame {
 		
 		usersPanel = new JPanel(new BorderLayout());
 		usersPanel.setBorder(BorderFactory.createTitledBorder("Users"));
+		
+		usersListPanel = new JPanel(new BorderLayout());
 		
 		JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel searchLabel = new JLabel("Search: ");
@@ -203,20 +209,29 @@ public class MainFrame {
 			public void valueChanged(ListSelectionEvent e) {
 				if (!e.getValueIsAdjusting()) {
 					int[] selection = usersTable.getSelectedRows();
-					if (selection.length == 1) {
-						int realIndex = usersTable.convertRowIndexToModel(selection[0]);
+					if (selection.length > 0) {
+						/*
 						sendAccountsButton.setEnabled(true);
 						sendPasswordsButton.setEnabled(true);
 						sendFirewallAddRequestButton.setEnabled(true);
 						sendFirewallRemoveRequestButton.setEnabled(true);
-						showInfo(realIndex);
+						List<Integer> realSelection = new ArrayList<Integer>();
+						int realIndex = usersTable.convertRowIndexToModel(selection[0]);
+						realSelection.add(realIndex);
+						showInfo(realSelection);
 					}
 					else if (selection.length > 1) {
+					*/
 						sendAccountsButton.setEnabled(true);
 						sendPasswordsButton.setEnabled(true);
 						sendFirewallAddRequestButton.setEnabled(true);
 						sendFirewallRemoveRequestButton.setEnabled(true);
-						//TODO ShowInfo
+						List<Integer> realSelection = new ArrayList<Integer>();
+						for (int selectionIndex : selection) {
+							int realIndex = usersTable.convertRowIndexToModel(selectionIndex);
+							realSelection.add(realIndex);
+						}
+						showInfo(realSelection);
 					}
 					else {
 						sendAccountsButton.setEnabled(false);
@@ -247,11 +262,11 @@ public class MainFrame {
 		usersTable.getColumnModel().getColumn(UserData.LAST_NAME).setMaxWidth(150);
 		usersTable.getColumnModel().getColumn(UserData.LAST_NAME).setPreferredWidth(80);
 		
-		// Last Name
+		// User Name
 		usersTable.getColumnModel().getColumn(UserData.USER_NAME).setMinWidth(80);
 		usersTable.getColumnModel().getColumn(UserData.USER_NAME).setMaxWidth(150);
 		usersTable.getColumnModel().getColumn(UserData.USER_NAME).setPreferredWidth(80);
-		
+/*		
 		// Password
 		usersTable.getColumnModel().getColumn(UserData.PASSWORD).setMinWidth(80);
 		usersTable.getColumnModel().getColumn(UserData.PASSWORD).setMaxWidth(100);
@@ -276,13 +291,20 @@ public class MainFrame {
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setMinWidth(60);
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setMaxWidth(60);
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setPreferredWidth(60);
-		
+*/		
 		RREManager.disableWhenRunning(usersTable);
 		
 		usersPanel.add(searchPanel, BorderLayout.NORTH);
 
-		JScrollPane usersScrollPane = new JScrollPane(usersTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        usersPanel.add(usersScrollPane, BorderLayout.CENTER);
+		JScrollPane usersListScrollPane = new JScrollPane(usersTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        usersListPanel.add(usersListScrollPane, BorderLayout.CENTER);
+        
+        detailsPanel = new JPanel(new BorderLayout());
+        
+        usersPanel.add(usersListPanel, BorderLayout.WEST);
+        usersPanel.add(detailsPanel, BorderLayout.CENTER);
+        
+        
         
         JPanel buttonLogPanel = new JPanel(new BorderLayout());
         buttonLogPanel.setMinimumSize(new Dimension(700, 200));
@@ -451,12 +473,12 @@ public class MainFrame {
 				"First Name",
 				"Initials",
 				"Last Name",
-				"User Name",
+				"User Name"/*,
 				"Password",
 				"Email address",
 				"Email Format",
 				"Access",
-				"MultiOTP"
+				"MultiOTP"*/
 		};
 
 		@Override
@@ -490,8 +512,83 @@ public class MainFrame {
 	}
 	
 	
-	private void showInfo(int userNr) {
-		//this.logLn(users.get(userNr)[UserData.FIRST_NAME] + " " + users.get(userNr)[UserData.LAST_NAME]);
+	private void showInfo(List<Integer> selection) {
+		final int rowLabelWidth = 150;
+		final int rowHeight = 20;
+		
+		final int[] itemsToShow = new int[] {
+				UserData.USER_NAME,
+				UserData.PASSWORD,
+				UserData.EMAIL,
+				UserData.EMAIL_FORMAT,
+				UserData.IP_ADDRESSES,
+				UserData.ACCESS,
+				UserData.PROJECTS,
+				UserData.GROUPS,
+				UserData.MULTIOTP
+		};
+		
+		detailsPanel.removeAll();
+		JPanel usersDetailPanel = new JPanel(new BorderLayout());
+		JPanel currentPanel = usersDetailPanel;
+		for (int userNr : selection) {
+			String[] user = users.get(userNr);
+			JPanel userPanel = new JPanel(new BorderLayout());
+			JLabel nameLabel = new JLabel(UserData.getUserDescription(user, false));
+			nameLabel.setFont(new Font(nameLabel.getFont().getName(), Font.BOLD, 18));
+			userPanel.add(nameLabel, BorderLayout.NORTH);
+			
+			JPanel parentPanel = userPanel;
+			JPanel levelPanel;
+			JPanel rowPanel;
+			JPanel rowLabelPanel;
+			JLabel rowLabel;
+			JLabel rowValueLabel;
+			JPanel nextPanel;
+
+			for (int item : itemsToShow) {
+				levelPanel = new JPanel(new BorderLayout());
+				rowPanel = new JPanel();
+				rowPanel.setLayout(new BoxLayout(rowPanel, BoxLayout.X_AXIS));
+				
+				rowLabelPanel = new JPanel(new BorderLayout());
+				rowLabel = new JLabel("    " + UserData.fieldName[item] + ":");
+				rowLabel.setMinimumSize(new Dimension(rowLabelWidth, rowHeight));
+				rowLabel.setMaximumSize(new Dimension(rowLabelWidth, rowHeight));
+				rowLabel.setPreferredSize(new Dimension(rowLabelWidth, rowHeight));
+				rowLabelPanel.add(rowLabel, BorderLayout.CENTER);
+				
+				rowValueLabel = new JLabel(user[item]);
+				rowValueLabel.setFont(rowValueLabel.getFont().deriveFont(Font.PLAIN));
+				rowValueLabel.setMinimumSize(new Dimension(10, rowHeight));
+				rowValueLabel.setPreferredSize(new Dimension(10000, rowHeight));
+
+				rowPanel.add(rowLabelPanel);
+				rowPanel.add(rowValueLabel);
+				
+				levelPanel.add(rowPanel, BorderLayout.NORTH);
+				parentPanel.add(levelPanel, BorderLayout.CENTER);
+				parentPanel = levelPanel;
+			}
+			
+			currentPanel.add(userPanel, BorderLayout.NORTH);
+			nextPanel = new JPanel(new BorderLayout());
+			currentPanel.add(nextPanel, BorderLayout.CENTER);
+			currentPanel = nextPanel;
+			
+			// Create blank space between users
+			JPanel blankSpacePanel = new JPanel();
+			blankSpacePanel.setMinimumSize(new Dimension(10, rowHeight));
+			blankSpacePanel.setPreferredSize(new Dimension(10000, rowHeight));
+			
+			currentPanel.add(blankSpacePanel, BorderLayout.NORTH);
+			nextPanel = new JPanel(new BorderLayout());
+			currentPanel.add(nextPanel, BorderLayout.CENTER);
+			currentPanel = nextPanel;
+		}
+        JScrollPane usersDetailScrollPane = new JScrollPane(usersDetailPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        detailsPanel.add(usersDetailScrollPane, BorderLayout.CENTER);
+        detailsPanel.validate();
 	}
 	
 	
