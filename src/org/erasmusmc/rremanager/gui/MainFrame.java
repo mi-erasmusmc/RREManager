@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -50,6 +52,9 @@ public class MainFrame {
 	private RREManager rreManager;
 	private String logFolder;
 	private String fullLogFileName;
+	private String allTimeLogFileName = null;
+	private File allTimeLogFile = null;
+	
 	private JFrame frame;
 	private JPanel usersPanel;
 	private JPanel usersListPanel;
@@ -210,18 +215,6 @@ public class MainFrame {
 				if (!e.getValueIsAdjusting()) {
 					int[] selection = usersTable.getSelectedRows();
 					if (selection.length > 0) {
-						/*
-						sendAccountsButton.setEnabled(true);
-						sendPasswordsButton.setEnabled(true);
-						sendFirewallAddRequestButton.setEnabled(true);
-						sendFirewallRemoveRequestButton.setEnabled(true);
-						List<Integer> realSelection = new ArrayList<Integer>();
-						int realIndex = usersTable.convertRowIndexToModel(selection[0]);
-						realSelection.add(realIndex);
-						showInfo(realSelection);
-					}
-					else if (selection.length > 1) {
-					*/
 						sendAccountsButton.setEnabled(true);
 						sendPasswordsButton.setEnabled(true);
 						sendFirewallAddRequestButton.setEnabled(true);
@@ -409,7 +402,6 @@ public class MainFrame {
 		String outputVersion = getOutputVersion(logFileName);;
 		String baseName = logFolder + File.separator + outputVersion;
 		fullLogFileName = baseName + logFileName;
-		console.setDebugFile(RREManager.noLogging ? null : fullLogFileName);
 	}
 	
 	
@@ -447,7 +439,56 @@ public class MainFrame {
 	
 	
 	public void logLn(String logText) {
+		if (!RREManager.loggingStarted) {
+			RREManager.loggingStarted = true;
+			console.setDebugFile(RREManager.noLogging ? null : fullLogFileName);
+			allTimeLogFileName = RREManager.noLogging ? null : (RREManager.getIniFile().getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
+			String allTimeLogHeader = "Date";
+			allTimeLogHeader += "," + "Time";
+			allTimeLogHeader += "," + "Action";
+			allTimeLogHeader += "," + "Recipient";
+			allTimeLogHeader += "," + "User";
+			allTimeLogHeader += "," + "First Name";
+			allTimeLogHeader += "," + "Last Name";
+			allTimeLogHeader += "," + "Password";
+			allTimeLogHeader += "," + "IP-addresses";
+			allTimeLogHeader += "," + "Approved";
+			allTimeLogHeader += "," + "Result";
+			allTimeLogHeader += "," + "Error";
+			allTimeLogHeader += "," + "Log File";
+			allTimeLogHeader += "," + "Attachments";
+			allTimeLogFile = RREManager.noLogging ? null : new File(allTimeLogFileName);
+			if (RREManager.noLogging || allTimeLogFile.exists() || allTimeLog(allTimeLogHeader)) {
+				logWithTimeLn("RRE Manager v" + RREManager.version);
+				if (!RREManager.inEclipse) {
+					logLn("");
+					logLn("");
+					logLn(RREManager.getIniFile().getFileName() + ":");
+					logLn("--------------------------------------------------------------------------------------");
+					RREManager.getIniFile().writeFile(System.out);
+					logLn("--------------------------------------------------------------------------------------");
+					logLn("");
+				}
+			}
+		}
 		System.out.println(logText);
+	}
+	
+	
+	public boolean allTimeLog(String record) {
+		boolean success = true;
+		if (!RREManager.noLogging) {
+			try {
+				FileWriter logWriter = new FileWriter(new File(allTimeLogFileName), true);
+				logWriter.write(record + "\r\n");
+				logWriter.close();
+				success = true;
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "Cannot write all time log file '" + allTimeLogFileName + "'.", "RREManager Log Error", JOptionPane.ERROR_MESSAGE);
+				success = false;
+			}
+		}
+		return success;
 	}
 	
 	

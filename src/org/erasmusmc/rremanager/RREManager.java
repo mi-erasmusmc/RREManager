@@ -1,8 +1,6 @@
 package org.erasmusmc.rremanager;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,14 +25,13 @@ public class RREManager {
 	public static boolean inEclipse = false;
 	public static String version = "1.2";
 	public static boolean noLogging = true;
+	public static boolean loggingStarted = false;
 	
 	private static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	
 	private static String currentPath = null;
 	private static IniFile iniFile;
 	
-	private String allTimeLogFileName = null;
-	private File allTimeLogFile = null;
 	private PasswordManager passwordManager;
 	private IPAddressSelector ipAddressSelector;
 	private EmailReviewer emailReviewer;
@@ -73,39 +70,11 @@ public class RREManager {
 		if (setCurrentPath()) {
 			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
-				allTimeLogFileName = noLogging ? null : (iniFile.getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
-				String allTimeLogHeader = "Date";
-				allTimeLogHeader += "," + "Time";
-				allTimeLogHeader += "," + "Action";
-				allTimeLogHeader += "," + "Recipient";
-				allTimeLogHeader += "," + "User";
-				allTimeLogHeader += "," + "First Name";
-				allTimeLogHeader += "," + "Last Name";
-				allTimeLogHeader += "," + "Password";
-				allTimeLogHeader += "," + "IP-addresses";
-				allTimeLogHeader += "," + "Approved";
-				allTimeLogHeader += "," + "Result";
-				allTimeLogHeader += "," + "Error";
-				allTimeLogHeader += "," + "Log File";
-				allTimeLogHeader += "," + "Attachments";
-				allTimeLogFile = noLogging ? null : new File(allTimeLogFileName);
-				if (noLogging || allTimeLogFile.exists() || allTimeLog(allTimeLogFileName, allTimeLogHeader)) {
-					userData = new UserData(getIniFile().getValue("User Projects File","File"));
-					mainFrame = new MainFrame(this, userData.getUsersList());
-					passwordManager = new PasswordManager(mainFrame.getFrame());
-					ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
-					emailReviewer = new EmailReviewer(mainFrame.getFrame());
-					mainFrame.logWithTimeLn("RRE Manager v" + version);
-					if (!inEclipse) {
-						mainFrame.logLn("");
-						mainFrame.logLn("");
-						mainFrame.logLn(iniFile.getFileName() + ":");
-						mainFrame.logLn("--------------------------------------------------------------------------------------");
-						iniFile.writeFile(System.out);
-						mainFrame.logLn("--------------------------------------------------------------------------------------");
-						mainFrame.logLn("");
-					}
-				}
+				userData = new UserData(getIniFile().getValue("User Projects File","File"));
+				mainFrame = new MainFrame(this, userData.getUsersList());
+				passwordManager = new PasswordManager(mainFrame.getFrame());
+				ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
+				emailReviewer = new EmailReviewer(mainFrame.getFrame());
 			}
 			else {
 				JOptionPane.showMessageDialog(null, iniFile.getError(), "RREManager Error", JOptionPane.ERROR_MESSAGE);
@@ -529,7 +498,7 @@ public class RREManager {
 		allTimeLogRecord += "," + mainFrame.getLogFileName();
 		allTimeLogRecord += "," + "\"" + attachementsString + "\"";
 		
-		allTimeLog(allTimeLogFileName, allTimeLogRecord);
+		mainFrame.allTimeLog(allTimeLogRecord);
 	}
 	
 	
@@ -664,23 +633,6 @@ public class RREManager {
 			} while (attachment != null);
 		}
 		return attachments;
-	}
-	
-	
-	private boolean allTimeLog(String fileName, String record) {
-		boolean success = false;
-		if (!noLogging) {
-			try {
-				FileWriter logWriter = new FileWriter(new File(fileName), true);
-				logWriter.write(record + "\r\n");
-				logWriter.close();
-				success = true;
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "Cannot write all time log file '" + fileName + "'.", "RREManager Log Error", JOptionPane.ERROR_MESSAGE);
-				success = false;
-			}
-		}
-		return success;
 	}
 	
 
