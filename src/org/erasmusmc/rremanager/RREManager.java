@@ -23,7 +23,7 @@ import org.erasmusmc.rremanager.utilities.DateUtilities;
 
 public class RREManager {
 	public static boolean inEclipse = false;
-	public static String version = "1.2";
+	public static String version = "1.3";
 	public static boolean noLogging = true;
 	public static boolean loggingStarted = false;
 	
