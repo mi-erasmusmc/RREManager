@@ -225,14 +225,12 @@ public class IniFile {
 				}
 				variableOrder.add(variable);
 			}
-			if (value != null) {
-				Map<String, String> variableValues = iniFileMap.get(group);
-				if (variableValues == null) {
-					variableValues = new HashMap<String, String>();
-					iniFileMap.put(group, variableValues);
-				}
-				variableValues.put(variable, value);
+			Map<String, String> variableValues = iniFileMap.get(group);
+			if (variableValues == null) {
+				variableValues = new HashMap<String, String>();
+				iniFileMap.put(group, variableValues);
 			}
+			variableValues.put(variable, value);
 			result = setVariableComments(group, variable, comments);
 		}
 		return result;
