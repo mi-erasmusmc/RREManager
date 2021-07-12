@@ -26,7 +26,7 @@ public class PasswordManager {
 	public String getPassword(String userName) {
 		Dimension dimension = new Dimension(250, 100);
 		JDialog passwordDialog = new JDialog(parentFrame, true);
-		passwordDialog.setTitle("Password for user " + userName);
+		passwordDialog.setTitle("Password for " + userName);
 		passwordDialog.setLayout(new BorderLayout());
 		passwordDialog.setMinimumSize(dimension);
 		passwordDialog.setMaximumSize(dimension);

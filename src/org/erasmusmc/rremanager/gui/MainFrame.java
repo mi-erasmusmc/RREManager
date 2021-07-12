@@ -86,7 +86,7 @@ public class MainFrame {
 		
 		frame.setSize(1000, 800);
 		frame.setMinimumSize(new Dimension(800, 600));
-		frame.setTitle("RRE User Manager v" + RREManager.version);
+		setTitle(null);
 		MainFrame.setIcon(frame);
 		frame.setLocationRelativeTo(null);
 		frame.setLayout(new BorderLayout());
@@ -100,7 +100,7 @@ public class MainFrame {
 		
 		tabbedPane.addTab("Users", usersTab); 
 		tabbedPane.addTab("Specials", specialsTab);        		
-		//tabbedPane.addTab("Projects", projectsTab);
+		//TODO tabbedPane.addTab("Projects", projectsTab);
 
         logPanel = new JPanel(new BorderLayout());
         logPanel.setMinimumSize(new Dimension(700, 200));
@@ -162,6 +162,11 @@ public class MainFrame {
 		}
 		
 		return version;
+	}
+	
+	
+	public void setTitle(String user) {
+		frame.setTitle("RRE User Manager v" + RREManager.version + (user == null ? "" : " - " + user));
 	}
 	
 	

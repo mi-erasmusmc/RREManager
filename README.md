@@ -35,7 +35,23 @@ The structure of the ini file is:
 [General]
 Log Folder = <path to where the log files will be written>
 
-[User Projects File]
+
+[Administrators]
+<admnistrator name>
+  :
+<admnistrator name>
+
+
+# This section should be present for each administrator in the [Administrators] section.
+# When it is not present that administrator cannot be selected.
+[<admnistrator name>]
+User Account = <the email username of the administrator>
+Title        = <the title of the administrator>
+Telephone    = <the telephone number of the administrator>
+
+
+# Excel file and sheet specifications for regular RDP and FTP-Only researchers
+[User Projects]
 File                = <path to the users Excel file>
 Sheet               = <the name of the sheet in the Excel file with the users>
 Update Column       = <the name of the column in the Excel file with the update flag>
@@ -51,15 +67,41 @@ Email Format Column = <the name of the column in the Excel file with the perferr
 IP-Addresses Column = <the name of the column in the Excel file with the IP-addresses of the user>
 
 
+# Excel file and sheet specifications for special FTP-Only users (NOT researchers; e.g. GP Information Systems)
+[Specials]
+File                = <path to the users Excel file>
+Sheet               = <the name of the sheet in the Excel file with the users>
+Update Column       = <the name of the column in the Excel file with the update flag>
+Projects Column     = <the name of the column in the Excel file with the projects of the user> 
+Groups Column       = <the name of the column in the Excel file with the groups of the user>
+First Name Column   = <the name of the column in the Excel file with the first name of the user>
+Initials Column     = <the name of the column in the Excel file with the initials of the user>
+Last Name Column    = <the name of the column in the Excel file with the last name of the user>
+User Name Column    = <the name of the column in the Excel file with the user name of the user>
+Password Column     = <the name of the column in the Excel file with the password of the user>
+Email Column        = <the name of the column in the Excel file with the email address of the user>
+Email Format Column = <the name of the column in the Excel file with the perferred email format (HTML or TEXT) of the user>
+IP-Addresses Column = <the name of the column in the Excel file with the IP-addresses of the user>
+
+
+# Excel file and sheet specifications for the definitions of the projects (NOT YET USED)
+[Projects]
+File                = <path to the users Excel file>
+Sheet               = <the name of the sheet in the Excel file with the project definitions>
+Project Column      = <the name of the column in the Excel file with the project name> 
+Group Column        = <the name of the column in the Excel file with the project groups>
+
+
 [MultiOTP]
-PDFFolder = <the path to the folder with the MultiOTP pdf files with the account information>
+PDFFolder = <the path to the folder with the MultiOTP .pdf files with the account information>
+
 
 [SMTP Mail Server]
 Server = <the smtp mailserver>
 Port   = <the smtp port, usually 25>
-User   = <the smpt mail user>
 from   = <the from email address>
 cc     = <optional, the cc email address>
+
 
 [<mail message type>]
 Subject = <subject of the email>
@@ -74,6 +116,7 @@ Attachment_N = <optional path of extra attachment N>
 Picture_1 = <img alt="Embedded Image" height="<picture height>" width="<picture wdth>" src="data:image/png;base64,<base 64 string of png image>" />
     :
 Picture_N = <img alt="Embedded Image" height="<picture height>" width="<picture wdth>" src="data:image/png;base64,<base 64 string of png image>" />
+
 
 [<message sup part>]
 Text_1  = <line 1 of the email>
@@ -103,10 +146,13 @@ In an email you can use the following in-line tags:
 [FIRST NAME] = The first name of the recipient.<br>
 [LAST NAME] = The last name of the recipient.<br>
 [USER NAME] = The user name of the recipient.<br>
-[PASSWORD] = The password of the recipient.
+[PASSWORD] = The password of the recipient.<br>
+[ADMINISTRATOR] = The name of the administrator.<br>
+[ADMINISTRATOR TITLE] = ', ' followed he title of the administrator when specified, otherwise nothing.
 
 The following tags can be used only as the only contents of a text line:
 
 [IP ADDRESSES] = A table containing selected IP-addresses (only applicable to "Firewall Add Mail" and "Firewall Remove Mail").<br>
-[Picture_<nr>] = A reference to a picture specified in the same definition. Pictures are only included in HTML type emails.<br>
-[xxxxxx] = When not equal to any of the predefined tags a reference to an email sub part that will be inserted here. 
+[Picture_...] = A reference to a picture specified in the same definition. Pictures are only included in HTML type emails.<br>
+[ADMINISTRATOR TELEPHONE] = 'Tel. " followed by the telephone number of the administrator.<br>
+[xxxxxx] = When not equal to any of the predefined tags a reference to an email sub part that will be inserted here.

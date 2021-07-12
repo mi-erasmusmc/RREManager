@@ -180,6 +180,11 @@ public class IniFile {
 	}
 	
 	
+	public Map<String, String> getGroup(String group) {
+		return iniFileMap.get(group);
+	}
+	
+	
 	public boolean hasVariable(String group, String variable) {
 		return (hasGroup(group) && groupVariableOrder.get(group).contains(variable));
 	}

@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 
 import org.erasmusmc.rremanager.files.IniFile;
 import org.erasmusmc.rremanager.files.UserData;
+import org.erasmusmc.rremanager.gui.AdministratorSelector;
 import org.erasmusmc.rremanager.gui.EmailReviewer;
 import org.erasmusmc.rremanager.gui.IPAddressSelector;
 import org.erasmusmc.rremanager.gui.MainFrame;
@@ -23,7 +24,7 @@ import org.erasmusmc.rremanager.utilities.DateUtilities;
 
 public class RREManager {
 	public static boolean inEclipse = false;
-	public static String version = "1.3";
+	public static String version = "1.4";
 	public static boolean noLogging = true;
 	public static boolean loggingStarted = false;
 	
@@ -33,11 +34,14 @@ public class RREManager {
 	private static String currentPath = null;
 	private static IniFile iniFile;
 	
+	private AdministratorSelector administratorSelector;
 	private PasswordManager passwordManager;
 	private IPAddressSelector ipAddressSelector;
 	private EmailReviewer emailReviewer;
 	private SMTPMailClient mailClient = null;
 	private MainFrame mainFrame = null;
+	
+	private String administrator = null;
 	
 	
 	public static IniFile getIniFile() {
@@ -73,9 +77,18 @@ public class RREManager {
 			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
 				mainFrame = new MainFrame(this);
-				passwordManager = new PasswordManager(mainFrame.getFrame());
-				ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
-				emailReviewer = new EmailReviewer(mainFrame.getFrame());
+
+				administratorSelector = new AdministratorSelector(mainFrame.getFrame());
+				administrator = administratorSelector.getAdministrator();
+				if (administrator != null) {
+					mainFrame.setTitle(administrator);
+					passwordManager = new PasswordManager(mainFrame.getFrame());
+					ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
+					emailReviewer = new EmailReviewer(mainFrame.getFrame());
+				}
+				else {
+		            System.exit(0);
+				}
 			}
 			else {
 				JOptionPane.showMessageDialog(null, iniFile.getError(), "RREManager Error", JOptionPane.ERROR_MESSAGE);
@@ -403,12 +416,12 @@ public class RREManager {
 	private boolean getMailClient() {
 		boolean mailClientSet = false;
 		mailClient = null;
-		String password = passwordManager.getPassword(getIniFile().getValue("SMTP Mail Server","User"));
+		String password = passwordManager.getPassword(administrator);
 		if (password != null) {
 			mailClient = new SMTPMailClient(
 					getIniFile().getValue("SMTP Mail Server","Server"), 
 					getIniFile().getValue("SMTP Mail Server","Port"), 
-					getIniFile().getValue("SMTP Mail Server","User"),  
+					getIniFile().getValue(administrator, "User Account"),  
 					getIniFile().getValue("SMTP Mail Server","SMTP Authentication"), 
 					getIniFile().getValue("SMTP Mail Server","Enable TLS"),
 					password
@@ -567,10 +580,26 @@ public class RREManager {
 						email += indent + "</table>" + "\r\n";
 					}
 				}
+				else if (line.equals("[ADMINISTRATOR TELEPHONE]")) {
+					String telephone = getIniFile().getValue(administrator, "Telephone");
+					if ((telephone != null) && (!telephone.equals(""))) {
+						email += indent + "Tel.: " + telephone + "<br>\r\n";
+					} 
+				}
 				else if (line.startsWith("[") && line.endsWith("]") && getIniFile().hasGroup(line.substring(1, line.length() - 1))) {
 					email += getEmailText(line.substring(1, line.length() - 1), info, indent);
 				}
 				else {
+					if (line.contains("[ADMINISTRATOR TITLE]")) {
+						String title = getIniFile().getValue(administrator, "Title");
+						if ((title != null) && (!title.equals(""))) {
+							title = ", " + title;
+						}
+						else {
+							title = "";
+						}
+						line = replaceAllTags(line, "[ADMINISTRATOR TITLE]", title);
+					}
 					line = replaceAllTags(line, "[BOLD START]", info[UserData.EMAIL_FORMAT].equals("HTML") ? "<b>" : "");
 					line = replaceAllTags(line, "[BOLD END]", info[UserData.EMAIL_FORMAT].equals("HTML") ? "</b>" : "");
 					line = replaceAllTags(line, "[ITALIC START]", info[UserData.EMAIL_FORMAT].equals("HTML") ? "<i>" : "");
@@ -579,6 +608,7 @@ public class RREManager {
 					line = replaceAllTags(line, "[LAST NAME]", info[UserData.LAST_NAME]);
 					line = replaceAllTags(line, "[USER NAME]", info[UserData.USER_NAME]);
 					line = replaceAllTags(line, "[PASSWORD]", info[UserData.PASSWORD]);
+					line = replaceAllTags(line, "[ADMINISTRATOR]", administrator);
 					line = replaceSpecialCharacters(line);
 					email += indent + line + (info[UserData.EMAIL_FORMAT].equals("HTML") ? "<br>" : "") + "\r\n";
 				}
