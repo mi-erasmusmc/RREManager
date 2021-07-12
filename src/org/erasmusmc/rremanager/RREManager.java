@@ -114,6 +114,11 @@ public class RREManager {
 	}
 	
 	
+	public String getAdministrator() {
+		return administrator;
+	}
+	
+	
 	public void sendAccountInformation(int[] selectedUsers, UserData userData) {
 		if (getMailClient()) {
 			for (int userNr : selectedUsers) {
@@ -437,7 +442,7 @@ public class RREManager {
 		recipientDescription += (recipientDescription.equals("") ? "" : (((info[UserData.LAST_NAME] == null) || info[UserData.LAST_NAME].equals("")) ? "" : " ")) + (info[UserData.LAST_NAME] == null ? "" : info[UserData.LAST_NAME]);
 		recipientDescription += (recipientDescription.equals("") ? info[UserData.EMAIL] : " (" + info[UserData.EMAIL] + ")");
 
-		allTimeLogRecord = DateUtilities.getCurrentTime().replaceAll(" ", ",") + "," + allTimeLogRecord;
+		allTimeLogRecord = DateUtilities.getCurrentTime().replaceAll(" ", ",") + "," + administrator + "," + allTimeLogRecord;
 		mainFrame.logLn("");
 		mainFrame.logWithTimeLn("Send " + messageType + " to " + recipientDescription + " as " + info[UserData.EMAIL_FORMAT] + " ...");
 

@@ -192,6 +192,7 @@ public class MainFrame {
 			allTimeLogFileName = RREManager.noLogging ? null : (RREManager.getIniFile().getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
 			String allTimeLogHeader = "Date";
 			allTimeLogHeader += "," + "Time";
+			allTimeLogHeader += "," + "Administrator";
 			allTimeLogHeader += "," + "Action";
 			allTimeLogHeader += "," + "Recipient";
 			allTimeLogHeader += "," + "User";
@@ -206,7 +207,7 @@ public class MainFrame {
 			allTimeLogHeader += "," + "Attachments";
 			allTimeLogFile = RREManager.noLogging ? null : new File(allTimeLogFileName);
 			if (RREManager.noLogging || allTimeLogFile.exists() || allTimeLog(allTimeLogHeader)) {
-				logWithTimeLn("RRE Manager v" + RREManager.version);
+				logWithTimeLn("RRE Manager v" + RREManager.version + " - " + rreManager.getAdministrator());
 				if (!RREManager.inEclipse) {
 					logLn("");
 					logLn("");
