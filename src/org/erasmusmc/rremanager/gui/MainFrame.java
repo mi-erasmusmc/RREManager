@@ -9,8 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
-import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -36,6 +34,7 @@ public class MainFrame {
 	private JFrame frame;
 	private JTabbedPane tabbedPane;
 	private UsersTab usersTab;
+	private UsersTab specialsTab;
 	private ProjectsTab projectsTab;
 	private JPanel logPanel;
 	private Console console;
@@ -59,13 +58,13 @@ public class MainFrame {
 	}
 	
 	
-	public MainFrame(RREManager rreManager, List<String[]> users) {
+	public MainFrame(RREManager rreManager) {
 		this.rreManager = rreManager;
-		createInterface(users);
+		createInterface();
 	}
 	
 	
-	private void createInterface(List<String[]> users) {
+	private void createInterface() {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -95,11 +94,13 @@ public class MainFrame {
 		tabbedPane = new JTabbedPane();
 		RREManager.disableWhenRunning(tabbedPane);
 		
-		usersTab = new UsersTab(rreManager, this, users);
+		usersTab = new UsersTab(rreManager, this, "User Projects");
+		specialsTab = new UsersTab(rreManager, this, "Specials");
 		projectsTab = new ProjectsTab(rreManager, this);
 		
-		tabbedPane.addTab("Users", usersTab);        		
-		tabbedPane.addTab("Projects", projectsTab);
+		tabbedPane.addTab("Users", usersTab); 
+		tabbedPane.addTab("Specials", specialsTab);        		
+		//tabbedPane.addTab("Projects", projectsTab);
 
         logPanel = new JPanel(new BorderLayout());
         logPanel.setMinimumSize(new Dimension(700, 200));

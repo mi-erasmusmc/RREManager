@@ -24,14 +24,18 @@ public class SMTPMailClient {
 	private String port;
 	private String userName;
 	private String password;
+	private String smtpAuthentication;
+	private String enableTLS;
 	private String error;
 
 	
-	public SMTPMailClient(String mailServer, String port, String userName, String password) {
+	public SMTPMailClient(String mailServer, String port, String userName, String password, String smtpAuthentication, String enableTLS) {
 		this.mailServer = mailServer;
 		this.port = port;
 		this.userName = userName;
 		this.password = password;
+		this.smtpAuthentication = ((smtpAuthentication != null) && smtpAuthentication.toLowerCase().equals("yes")) ? "true" : "false";
+		this.enableTLS = ((enableTLS != null) && enableTLS.toLowerCase().equals("yes")) ? "true" : "false";
 		error = "";
 	}
 	
@@ -41,8 +45,8 @@ public class SMTPMailClient {
 		error = "";
 		
 		Properties properties = new Properties();
-	    properties.put("mail.smtp.auth", "true");
-	    properties.put("mail.smtp.starttls.enable", "true");
+	    properties.put("mail.smtp.auth", smtpAuthentication);
+	    properties.put("mail.smtp.starttls.enable", enableTLS);
 	    properties.put("mail.smtp.host", mailServer);
 	    properties.put("mail.smtp.port", port);
 

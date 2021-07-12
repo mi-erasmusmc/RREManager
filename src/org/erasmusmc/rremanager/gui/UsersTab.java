@@ -35,6 +35,8 @@ import org.erasmusmc.rremanager.files.UserData;
 public class UsersTab extends MainFrameTab {
 	private static final long serialVersionUID = 8108196841438054711L;
 	
+	private UserData userData = null;
+	
 	private JPanel usersListPanel;
 	private JPanel detailsPanel;
 	private JButton sendAccountsButton;
@@ -48,9 +50,10 @@ public class UsersTab extends MainFrameTab {
 	private int[] selectedUsers;
 
 	
-	public UsersTab(RREManager rreManager, MainFrame mainFrame, List<String[]> users) {
+	public UsersTab(RREManager rreManager, MainFrame mainFrame, String settingsGroup) {
 		super(rreManager, mainFrame);
-		this.users = users;
+		userData = new UserData(settingsGroup);
+		users = userData.getUsersList();
 		
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createTitledBorder("Users"));
@@ -232,7 +235,7 @@ public class UsersTab extends MainFrameTab {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				RREManager.disableComponents();
-				rreManager.sendAccountInformation(selectedUsers);
+				rreManager.sendAccountInformation(selectedUsers, userData);
 				RREManager.enableComponents();
 			}
 		});
@@ -245,7 +248,7 @@ public class UsersTab extends MainFrameTab {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				RREManager.disableComponents();
-				rreManager.sendPasswords(selectedUsers);
+				rreManager.sendPasswords(selectedUsers, userData);
 				RREManager.enableComponents();
 			}
 		});
@@ -258,7 +261,7 @@ public class UsersTab extends MainFrameTab {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				RREManager.disableComponents();
-				rreManager.sendFirewallAddRequest(selectedUsers);
+				rreManager.sendFirewallAddRequest(selectedUsers, userData);
 				RREManager.enableComponents();
 			}
 		});
@@ -271,7 +274,7 @@ public class UsersTab extends MainFrameTab {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				RREManager.disableComponents();
-				rreManager.sendFirewallRemoveRequest(selectedUsers);
+				rreManager.sendFirewallRemoveRequest(selectedUsers, userData);
 				RREManager.enableComponents();
 			}
 		});

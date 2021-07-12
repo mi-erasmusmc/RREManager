@@ -28,6 +28,7 @@ public class RREManager {
 	public static boolean loggingStarted = false;
 	
 	private static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
+	private static Map<JComponent, Boolean> componentsStatusBeforeRun = new HashMap<JComponent, Boolean>();
 	
 	private static String currentPath = null;
 	private static IniFile iniFile;
@@ -37,7 +38,6 @@ public class RREManager {
 	private EmailReviewer emailReviewer;
 	private SMTPMailClient mailClient = null;
 	private MainFrame mainFrame = null;
-	private UserData userData = null;
 	
 	
 	public static IniFile getIniFile() {
@@ -51,7 +51,9 @@ public class RREManager {
 	
 	
 	public static void disableComponents() {
+		componentsStatusBeforeRun.clear();
 		for (JComponent component : componentsToDisableWhenRunning) {
+			componentsStatusBeforeRun.put(component, component.isEnabled());
 			component.setEnabled(false);
 		}
 	}
@@ -59,7 +61,7 @@ public class RREManager {
 	
 	public static void enableComponents() {
 		for (JComponent component : componentsToDisableWhenRunning) {
-			component.setEnabled(true);
+			component.setEnabled(componentsStatusBeforeRun.get(component));
 		}
 	}
 	
@@ -70,8 +72,7 @@ public class RREManager {
 		if (setCurrentPath()) {
 			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
-				userData = new UserData(getIniFile().getValue("User Projects File","File"));
-				mainFrame = new MainFrame(this, userData.getUsersList());
+				mainFrame = new MainFrame(this);
 				passwordManager = new PasswordManager(mainFrame.getFrame());
 				ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
 				emailReviewer = new EmailReviewer(mainFrame.getFrame());
@@ -100,7 +101,7 @@ public class RREManager {
 	}
 	
 	
-	public void sendAccountInformation(int[] selectedUsers) {
+	public void sendAccountInformation(int[] selectedUsers, UserData userData) {
 		if (getMailClient()) {
 			for (int userNr : selectedUsers) {
 				String[] user = userData.getUser(userNr);
@@ -164,7 +165,7 @@ public class RREManager {
 	}
 	
 	
-	public void sendPasswords(int[] selectedUsers) {
+	public void sendPasswords(int[] selectedUsers, UserData userData) {
 		String messageType = "Password Mail";
 		if (getIniFile().hasGroup(messageType)) {
 			if (!getIniFile().hasVariable(messageType, "Text_1")) {
@@ -209,7 +210,7 @@ public class RREManager {
 	}
 	
 	
-	public void sendFirewallAddRequest(int[] selectedUsers) {
+	public void sendFirewallAddRequest(int[] selectedUsers, UserData userData) {
 		String messageType = "Firewall Add Mail";
 		if (getIniFile().hasGroup(messageType)) {
 			if (!getIniFile().hasVariable(messageType, "Text_1")) {
@@ -292,7 +293,7 @@ public class RREManager {
 	}
 	
 	
-	public void sendFirewallRemoveRequest(int[] selectedUsers) {
+	public void sendFirewallRemoveRequest(int[] selectedUsers, UserData userData) {
 		String messageType = "Firewall Remove Mail";
 		if (getIniFile().hasGroup(messageType)) {
 			if (!getIniFile().hasVariable(messageType, "Text_1")) {
@@ -407,7 +408,9 @@ public class RREManager {
 			mailClient = new SMTPMailClient(
 					getIniFile().getValue("SMTP Mail Server","Server"), 
 					getIniFile().getValue("SMTP Mail Server","Port"), 
-					getIniFile().getValue("SMTP Mail Server","User"), 
+					getIniFile().getValue("SMTP Mail Server","User"),  
+					getIniFile().getValue("SMTP Mail Server","SMTP Authentication"), 
+					getIniFile().getValue("SMTP Mail Server","Enable TLS"),
 					password
 					);
 			mailClientSet = true;
