@@ -104,26 +104,26 @@ public class UserData {
 	
 	
 	private void getData(String settingsGroup) {
-		String userProjectsFileName = RREManager.getIniFile().getValue(settingsGroup,"File");
+		String usersFileName = RREManager.getIniFile().getValue(settingsGroup,"File");
 		String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
-		File file = new File(userProjectsFileName);
+		File file = new File(usersFileName);
 		if (file.exists() && file.canRead()) {
-			ExcelFile userProjectsFile = new ExcelFile(userProjectsFileName);
-			if (userProjectsFile.open()) {
-				if (userProjectsFile.getSheet(sheetName, true)) {
-					while (userProjectsFile.hasNext(sheetName)) {
-						Row row = userProjectsFile.getNext(sheetName);
+			ExcelFile usersFile = new ExcelFile(usersFileName);
+			if (usersFile.open()) {
+				if (usersFile.getSheet(sheetName, true)) {
+					while (usersFile.hasNext(sheetName)) {
+						Row row = usersFile.getNext(sheetName);
 
-						String projects     = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Projects Column"));
-						String groups       = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Groups Column"));
-						String firstName    = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"First Name Column"));
-						String initials     = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Initials Column"));
-						String lastName     = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Last Name Column"));
-						String userName     = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"User Name Column"));
-						String password     = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Password Column"));
-						String email        = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Email Column"));
-						String format       = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Email Format Column"));
-						String ipAddresses  = userProjectsFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column"));
+						String projects     = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Projects Column"));
+						String groups       = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Groups Column"));
+						String firstName    = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"First Name Column"));
+						String initials     = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Initials Column"));
+						String lastName     = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Last Name Column"));
+						String userName     = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"User Name Column"));
+						String password     = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Password Column"));
+						String email        = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Email Column"));
+						String format       = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"Email Format Column"));
+						String ipAddresses  = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column"));
 						String multiOTP     = "";
 						
 						String access = "FTP-Only";
@@ -159,7 +159,7 @@ public class UserData {
 						
 					}
 				}
-				userProjectsFile.close();
+				usersFile.close();
 			}
 		}
 	}
