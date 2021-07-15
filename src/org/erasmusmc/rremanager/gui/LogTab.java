@@ -1,7 +1,6 @@
 package org.erasmusmc.rremanager.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
@@ -31,7 +30,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.log4j.pattern.LoggerPatternConverter;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.files.LogData;
 
@@ -127,9 +125,9 @@ public class LogTab extends MainFrameTab {
 		}
 
 		logListTablePanel = new JPanel(new BorderLayout());
-		logListTablePanel.setMinimumSize(new Dimension(100, 300));
-		logListTablePanel.setMaximumSize(new Dimension(10000, 300));
-		logListTablePanel.setPreferredSize(new Dimension(100, 300));
+		logListTablePanel.setMinimumSize(new Dimension(100, 400));
+		logListTablePanel.setMaximumSize(new Dimension(10000, 400));
+		logListTablePanel.setPreferredSize(new Dimension(100, 400));
 		logTable = getLogTable();
 		logTableScrollPane = new JScrollPane(logTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		logListTablePanel.add(logTableScrollPane, BorderLayout.CENTER);

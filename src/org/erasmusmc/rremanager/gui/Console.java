@@ -17,6 +17,8 @@ package org.erasmusmc.rremanager.gui;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
@@ -27,27 +29,39 @@ public class Console extends OutputStream {
 	
 	private StringBuffer	buffer	= new StringBuffer();
 	private WriteTextFile	debug	= null;
-	private JTextArea		textArea;
+	private List<JTextArea>	textAreas = new ArrayList<JTextArea>();;
 	
 	public void println(String string) {
-		textArea.append(string + "\n");
-		textArea.repaint();
+		for (JTextArea textArea : textAreas) {
+			textArea.append(string + "\n");
+			textArea.repaint();
+		}
 		System.out.println(string);
 	}
 	
 	public void print(String string) {
-		textArea.append(string);
-		textArea.repaint();
+		for (JTextArea textArea : textAreas) {
+			textArea.append(string);
+			textArea.repaint();
+		}
 		System.out.print(string);
 	}
 	
-	public void setTextArea(JTextArea textArea) {
-		this.textArea = textArea;
+	public void addTextArea(JTextArea textArea) {
+		if (!textAreas.contains(textArea)) {
+			textAreas.add(textArea);
+		}
+	}
+	
+	public void removeTextArea(JTextArea textArea) {
+		textAreas.remove(textArea);
 	}
 	
 	public void setDebugFile(String filename) {
 		closeDebugFile();
-		textArea.setText("");
+		for (JTextArea textArea : textAreas) {
+			textArea.setText("");
+		}
 		if (filename != null) {
 			debug = new WriteTextFile(filename);
 		}
@@ -65,10 +79,12 @@ public class Console extends OutputStream {
 	
 	public void clear() {
 		closeDebugFile();
-		textArea.setText("");
+		for (JTextArea textArea : textAreas) {
+			textArea.setText("");
+		}
 	}
 	
-	public String getText() {
+	public String getText(JTextArea textArea) {
 		try {
 			return textArea.getDocument().getText(0, textArea.getDocument().getLength());
 		} catch (BadLocationException e) {
@@ -81,7 +97,7 @@ public class Console extends OutputStream {
 	public void write(int b) throws IOException {
 		buffer.append((char) b);
 		if ((char) b == '\n') {
-			if (textArea != null) {
+			for (JTextArea textArea : textAreas) {
 				textArea.append(buffer.toString());
 				textArea.setCaretPosition(textArea.getDocument().getLength());
 			}

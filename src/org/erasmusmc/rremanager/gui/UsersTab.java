@@ -282,11 +282,14 @@ public class UsersTab extends MainFrameTab {
         buttonPanel.add(sendFirewallAddRequestButton);
         buttonPanel.add(sendFirewallRemoveRequestButton);
 
+        JPanel usersLogPanel = new JPanel(new BorderLayout());
+		usersLogPanel.add(usersListPanel, BorderLayout.WEST);
+		usersLogPanel.add(detailsPanel, BorderLayout.CENTER);
+		usersLogPanel.add(buttonPanel, BorderLayout.SOUTH);
         
 		add(searchPanel, BorderLayout.NORTH);
-        add(usersListPanel, BorderLayout.WEST);
-        add(detailsPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+		add(usersLogPanel, BorderLayout.CENTER);
+		add(mainFrame.createLogPanel(), BorderLayout.SOUTH);
 	}
 	
 	

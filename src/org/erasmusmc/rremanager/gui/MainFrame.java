@@ -37,8 +37,7 @@ public class MainFrame {
 	private UsersTab specialsTab;
 	private ProjectsTab projectsTab;
 	private LogTab logTab;
-	private JPanel logPanel;
-	private Console console;
+	private Console console = null;
 	private String busy = null; 
 
 	/**
@@ -105,14 +104,8 @@ public class MainFrame {
 		tabbedPane.addTab("Specials", specialsTab);        		
 		//TODO tabbedPane.addTab("Projects", projectsTab);
 		tabbedPane.addTab("Log", logTab);
-
-        logPanel = new JPanel(new BorderLayout());
-        logPanel.setMinimumSize(new Dimension(700, 200));
-        logPanel.setPreferredSize(new Dimension(700, 200));
-        logPanel.add(createConsolePanel(), BorderLayout.CENTER);
-        
+		
         frame.add(tabbedPane, BorderLayout.CENTER);
-        frame.add(logPanel, BorderLayout.SOUTH);
         
         frame.setVisible(true);
 
@@ -127,12 +120,14 @@ public class MainFrame {
 	}
 	
 	
-	private JScrollPane createConsolePanel() {
+	public JPanel createLogPanel() {
 		JTextArea consoleArea = new JTextArea();
 		consoleArea.setToolTipText("General progress information");
 		consoleArea.setEditable(false);
-		console = new Console();
-		console.setTextArea(consoleArea);
+		if (console == null) {
+			console = new Console();
+		}
+		console.addTextArea(consoleArea);
 		if (!(System.getProperty("runInEclipse") == null ? false : System.getProperty("runInEclipse").equalsIgnoreCase("true"))) {
 			System.setOut(new PrintStream(console));
 			System.setErr(new PrintStream(console));
@@ -140,7 +135,13 @@ public class MainFrame {
 		JScrollPane consoleScrollPane = new JScrollPane(consoleArea);
 		consoleScrollPane.setBorder(BorderFactory.createTitledBorder("Console"));
 		consoleScrollPane.setAutoscrolls(true);
-		return consoleScrollPane;
+		
+		JPanel logPanel = new JPanel(new BorderLayout());
+        logPanel.setMinimumSize(new Dimension(700, 200));
+        logPanel.setPreferredSize(new Dimension(700, 200));
+        logPanel.add(consoleScrollPane, BorderLayout.CENTER);
+        
+		return logPanel;
 	}
 	
 	
