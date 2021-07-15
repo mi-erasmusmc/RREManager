@@ -32,7 +32,7 @@ public class RREManager {
 	private static Map<JComponent, Boolean> componentsStatusBeforeRun = new HashMap<JComponent, Boolean>();
 	
 	private static String currentPath = null;
-	private static IniFile iniFile;
+	private static IniFile iniFile = null;
 	
 	private AdministratorSelector administratorSelector;
 	private PasswordManager passwordManager;
@@ -671,6 +671,15 @@ public class RREManager {
 			} while (attachment != null);
 		}
 		return attachments;
+	}
+	
+	
+	public String getAllTimeLogFileName() {
+		String allTimeLogFileName = null;
+		if (getIniFile() != null) {
+			allTimeLogFileName = noLogging ? null : (getIniFile().getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
+		}
+		return allTimeLogFileName;
 	}
 	
 

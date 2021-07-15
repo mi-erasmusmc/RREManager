@@ -8,11 +8,8 @@ public class MainFrameTab extends JPanel {
 	private static final long serialVersionUID = -6443432062427097014L;
 	
 	
-	@SuppressWarnings("unused")
-	private RREManager rreManager;
-	
-	@SuppressWarnings("unused")
-	private MainFrame mainFrame;
+	protected RREManager rreManager;
+	protected MainFrame mainFrame;
 	
 
 	public MainFrameTab(RREManager rreManager, MainFrame mainFrame) {

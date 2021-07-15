@@ -36,6 +36,7 @@ public class MainFrame {
 	private UsersTab usersTab;
 	private UsersTab specialsTab;
 	private ProjectsTab projectsTab;
+	private LogTab logTab;
 	private JPanel logPanel;
 	private Console console;
 	private String busy = null; 
@@ -60,6 +61,7 @@ public class MainFrame {
 	
 	public MainFrame(RREManager rreManager) {
 		this.rreManager = rreManager;
+		allTimeLogFileName = RREManager.noLogging ? null : (RREManager.getIniFile().getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
 		createInterface();
 	}
 	
@@ -97,10 +99,12 @@ public class MainFrame {
 		usersTab = new UsersTab(rreManager, this, "User Projects");
 		specialsTab = new UsersTab(rreManager, this, "Specials");
 		projectsTab = new ProjectsTab(rreManager, this);
+		logTab = new LogTab(rreManager, this);
 		
-		tabbedPane.addTab("Users", usersTab); 
+		tabbedPane.addTab("Users", usersTab);
 		tabbedPane.addTab("Specials", specialsTab);        		
 		//TODO tabbedPane.addTab("Projects", projectsTab);
+		tabbedPane.addTab("Log", logTab);
 
         logPanel = new JPanel(new BorderLayout());
         logPanel.setMinimumSize(new Dimension(700, 200));
@@ -115,6 +119,11 @@ public class MainFrame {
 		if (!RREManager.inEclipse) {
 	        setLogFile();
 		}
+	}
+	
+	
+	public void refreshLog() {
+		logTab.refresh();
 	}
 	
 	
@@ -189,7 +198,6 @@ public class MainFrame {
 		if (!RREManager.loggingStarted) {
 			RREManager.loggingStarted = true;
 			console.setDebugFile(RREManager.noLogging ? null : fullLogFileName);
-			allTimeLogFileName = RREManager.noLogging ? null : (RREManager.getIniFile().getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
 			String allTimeLogHeader = "Date";
 			allTimeLogHeader += "," + "Time";
 			allTimeLogHeader += "," + "Administrator";
@@ -257,6 +265,11 @@ public class MainFrame {
 	
 	public String getLogFileName() {
 		return fullLogFileName;
+	}
+	
+	
+	public String getAllTimeLogFileName() {
+		return allTimeLogFileName;
 	}
 
 }

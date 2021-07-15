@@ -90,13 +90,7 @@ public class UsersTab extends MainFrameTab {
                 }
                 
                 if (rowSorter.getViewRowCount() == 0) {
-                	/* TODO
-                	drugMappingLogPanel.removeAll();
-                	drugMappingResultPanel.removeAll();
-            		mainFrame.getFrame().repaint();
-            		lastSelectedSourceDrug = null;
-            		lastSelectedLogRecord = null;
-            		*/
+                	// TODO
                 }
 
                 if (usersTable.getRowCount() > 0) {
@@ -217,8 +211,7 @@ public class UsersTab extends MainFrameTab {
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setMaxWidth(60);
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setPreferredWidth(60);
 */		
-		RREManager.disableWhenRunning(usersTable);
-		
+		RREManager.disableWhenRunning(usersTable);		
 
 		JScrollPane usersListScrollPane = new JScrollPane(usersTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         usersListPanel.add(usersListScrollPane, BorderLayout.CENTER);
@@ -237,6 +230,7 @@ public class UsersTab extends MainFrameTab {
 				RREManager.disableComponents();
 				rreManager.sendAccountInformation(selectedUsers, userData);
 				RREManager.enableComponents();
+				mainFrame.refreshLog();
 			}
 		});
 		RREManager.disableWhenRunning(sendAccountsButton);
@@ -250,6 +244,7 @@ public class UsersTab extends MainFrameTab {
 				RREManager.disableComponents();
 				rreManager.sendPasswords(selectedUsers, userData);
 				RREManager.enableComponents();
+				mainFrame.refreshLog();
 			}
 		});
 		RREManager.disableWhenRunning(sendPasswordsButton);
@@ -263,6 +258,7 @@ public class UsersTab extends MainFrameTab {
 				RREManager.disableComponents();
 				rreManager.sendFirewallAddRequest(selectedUsers, userData);
 				RREManager.enableComponents();
+				mainFrame.refreshLog();
 			}
 		});
 		RREManager.disableWhenRunning(sendFirewallAddRequestButton);
@@ -276,6 +272,7 @@ public class UsersTab extends MainFrameTab {
 				RREManager.disableComponents();
 				rreManager.sendFirewallRemoveRequest(selectedUsers, userData);
 				RREManager.enableComponents();
+				mainFrame.refreshLog();
 			}
 		});
 		RREManager.disableWhenRunning(sendFirewallRemoveRequestButton);
