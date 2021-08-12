@@ -97,12 +97,12 @@ public class MainFrame {
 		
 		usersTab = new UsersTab(rreManager, this, "User Projects");
 		specialsTab = new UsersTab(rreManager, this, "Specials");
-		projectsTab = new ProjectsTab(rreManager, this);
+		projectsTab = new ProjectsTab(rreManager, this, "Projects");
 		logTab = new LogTab(rreManager, this);
 		
 		tabbedPane.addTab("Users", usersTab);
 		tabbedPane.addTab("Specials", specialsTab);        		
-		//TODO tabbedPane.addTab("Projects", projectsTab);
+		tabbedPane.addTab("Projects", projectsTab);
 		tabbedPane.addTab("Log", logTab);
 		
         frame.add(tabbedPane, BorderLayout.CENTER);

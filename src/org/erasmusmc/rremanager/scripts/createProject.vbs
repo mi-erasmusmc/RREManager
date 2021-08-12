@@ -34,7 +34,7 @@
   If args < 2 then
     strSubFolders = inputbox("Enter any subfolders (comma-seperated) or press enter")
   else
-    strSubFolders = Wscript.Arguments.Item(0)
+    strSubFolders = Wscript.Arguments.Item(1)
   end If
 
 

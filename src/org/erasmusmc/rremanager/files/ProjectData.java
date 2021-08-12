@@ -2,6 +2,7 @@ package org.erasmusmc.rremanager.files;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,24 @@ public class ProjectData {
 				projectsFile.close();
 			}
 		}
+	}
+	
+	
+	public List<String> getProjectNames() {
+		List<String> sortedProjectNames = new ArrayList<String>();
+		sortedProjectNames.addAll(projects.keySet());
+		Collections.sort(sortedProjectNames);
+		return sortedProjectNames;
+	}
+	
+	
+	public List<String> getProjectGroups(String projectName) {
+		List<String> sortedProjectGroups = new ArrayList<String>();
+		if (projects.containsKey(projectName)) {
+			sortedProjectGroups.addAll(projects.get(projectName));
+			Collections.sort(sortedProjectGroups);
+		}
+		return sortedProjectGroups;
 	}
 	
 	

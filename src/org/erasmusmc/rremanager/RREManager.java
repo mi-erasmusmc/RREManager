@@ -18,6 +18,7 @@ import org.erasmusmc.rremanager.gui.AdministratorSelector;
 import org.erasmusmc.rremanager.gui.EmailReviewer;
 import org.erasmusmc.rremanager.gui.IPAddressSelector;
 import org.erasmusmc.rremanager.gui.MainFrame;
+import org.erasmusmc.rremanager.gui.ProjectDefiner;
 import org.erasmusmc.rremanager.gui.PasswordManager;
 import org.erasmusmc.rremanager.smtp.SMTPMailClient;
 import org.erasmusmc.rremanager.utilities.DateUtilities;
@@ -39,6 +40,7 @@ public class RREManager {
 	private IPAddressSelector ipAddressSelector;
 	private EmailReviewer emailReviewer;
 	private SMTPMailClient mailClient = null;
+	private ProjectDefiner projectDefiner = null;
 	private MainFrame mainFrame = null;
 	
 	private String administrator = null;
@@ -85,6 +87,7 @@ public class RREManager {
 					passwordManager = new PasswordManager(mainFrame.getFrame());
 					ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
 					emailReviewer = new EmailReviewer(mainFrame.getFrame());
+					projectDefiner = new ProjectDefiner(mainFrame.getFrame());
 				}
 				else {
 		            System.exit(0);
@@ -680,6 +683,11 @@ public class RREManager {
 			allTimeLogFileName = noLogging ? null : (getIniFile().getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
 		}
 		return allTimeLogFileName;
+	}
+	
+	
+	public ProjectDefiner getProjectDefiner() {
+		return projectDefiner;
 	}
 	
 

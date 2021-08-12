@@ -57,7 +57,7 @@
   end If
 
   strSharedDirectory = strDriveName & ":\projects\"
-  WScript.Echo "project folder: " &  strSharedDirectory
+  ' WScript.Echo "project folder: " &  strSharedDirectory
 
 
   If Len(strUserName) > 0 Then
