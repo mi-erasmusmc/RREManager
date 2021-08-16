@@ -5,15 +5,15 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -27,7 +27,8 @@ public class ProjectsTab extends MainFrameTab {
 	private static final long serialVersionUID = 5033121660144362646L;
 	
 	private ProjectData projectData;
-	private Map<String, List<String>> newProjects;
+	private Map<String, List<String>> newProjects = null;
+	private JPanel projectsPanel;
 	@SuppressWarnings("rawtypes")
 	private JList projectsList;
 	@SuppressWarnings("rawtypes")
@@ -35,10 +36,9 @@ public class ProjectsTab extends MainFrameTab {
 	private JPanel groupsPanel;
 	private JButton addProjectButton;
 	private JButton addGroupButton;
-	private JButton createGroupButton;
+	private JButton createNewButton;
 
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ProjectsTab(RREManager rreManager, MainFrame mainFrame, String settingsGroup) {
 		super(rreManager, mainFrame);
 		
@@ -49,12 +49,87 @@ public class ProjectsTab extends MainFrameTab {
 		
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		
-		JPanel projectsPanel = new JPanel(new BorderLayout());
+		projectsPanel = new JPanel(new BorderLayout());
 		projectsPanel.setBorder(BorderFactory.createTitledBorder("Projects"));
 		projectsPanel.setPreferredSize(new Dimension(300, 50));
+
+		groupsPanel = new JPanel(new BorderLayout());
+		groupsPanel.setBorder(BorderFactory.createTitledBorder("Groups"));
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        addProjectButton = new JButton("Add Project");
+        addProjectButton.setEnabled(true);
+        addProjectButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addProjectGroups(null);
+				mainFrame.refreshLog();
+			}
+		});
+		RREManager.disableWhenRunning(addProjectButton);
+        
+        addGroupButton = new JButton("Add Groups");
+		addGroupButton.setEnabled(false);
+		addGroupButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addProjectGroups((String) projectsList.getSelectedValue());
+				mainFrame.refreshLog();
+			}
+		});
+		RREManager.disableWhenRunning(addGroupButton);
+        
+        createNewButton = new JButton("Create New");
+        createNewButton.setEnabled(false);
+        createNewButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				RREManager.disableComponents();
+				projectData.addProjects(newProjects);
+				newProjects = new HashMap<String, List<String>>();
+				RREManager.enableComponents();
+				createNewButton.setEnabled(false);
+				showProjects();
+				mainFrame.refreshLog();
+			}
+		});
+		RREManager.disableWhenRunning(createNewButton);
 		
+		buttonPanel.add(addProjectButton);
+        buttonPanel.add(addGroupButton);
+        buttonPanel.add(createNewButton);
+		
+		mainPanel.add(projectsPanel, BorderLayout.WEST);
+		mainPanel.add(groupsPanel, BorderLayout.CENTER);
+		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+		
+		add(mainPanel, BorderLayout.CENTER);
+		add(mainFrame.createLogPanel(), BorderLayout.SOUTH);
+		
+		showProjects();
+	}
+	
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void showProjects() {
+		projectsPanel.removeAll();
 		DefaultListModel<String> projectsListModel = new DefaultListModel<String>();
+		
+		List<String> projectNames = new ArrayList<String>();
 		for (String projectName : projectData.getProjectNames()) {
+			projectNames.add(projectName);
+		}
+		if (newProjects != null) {
+			for (String projectName : newProjects.keySet()) {
+				projectNames.add(projectName);
+			}
+		}
+		Collections.sort(projectNames);
+		for (String projectName : projectNames) {
 			projectsListModel.addElement(projectName);
 		}
 		projectsList = new JList(projectsListModel);
@@ -72,75 +147,34 @@ public class ProjectsTab extends MainFrameTab {
 		});
 		JScrollPane projectsScrollPane = new JScrollPane(projectsList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		projectsPanel.add(projectsScrollPane, BorderLayout.CENTER);
-
-		groupsPanel = new JPanel(new BorderLayout());
-		groupsPanel.setBorder(BorderFactory.createTitledBorder("Groups"));
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        
-        addProjectButton = new JButton("Add Project");
-        addProjectButton.setEnabled(true);
-        addProjectButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				RREManager.disableComponents();
-				addProject();
-				RREManager.enableComponents();
-				mainFrame.refreshLog();
-			}
-		});
-		RREManager.disableWhenRunning(addProjectButton);
-        
-        addGroupButton = new JButton("Add Group");
-		addGroupButton.setEnabled(false);
-		addGroupButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				RREManager.disableComponents();
-				//rreManager.sendAccountInformation(selectedUsers, userData);
-				RREManager.enableComponents();
-				mainFrame.refreshLog();
-			}
-		});
-		RREManager.disableWhenRunning(addGroupButton);
-        
-        createGroupButton = new JButton("Add Group");
-        createGroupButton.setEnabled(false);
-        createGroupButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				RREManager.disableComponents();
-				//rreManager.sendAccountInformation(selectedUsers, userData);
-				RREManager.enableComponents();
-				mainFrame.refreshLog();
-			}
-		});
-		RREManager.disableWhenRunning(createGroupButton);
-		
-		buttonPanel.add(addProjectButton);
-        buttonPanel.add(addGroupButton);
-        buttonPanel.add(createGroupButton);
-		
-		mainPanel.add(projectsPanel, BorderLayout.WEST);
-		mainPanel.add(groupsPanel, BorderLayout.CENTER);
-		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-		
-		add(mainPanel, BorderLayout.CENTER);
-		add(mainFrame.createLogPanel(), BorderLayout.SOUTH);
+		projectsPanel.validate();
+		showGroups(null);
 	}
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void showGroups(String projectName) {
 		groupsPanel.removeAll();
+		addGroupButton.setEnabled(false);
 		if (projectName != null) {
 			addGroupButton.setEnabled(true);
 			DefaultListModel<String> projectGroupsListModel = new DefaultListModel<String>();
+			List<String> projectGroups = new ArrayList<String>();
 			for (String group : projectData.getProjectGroups(projectName)) {
-				projectGroupsListModel.addElement(group);
+				projectGroups.add(group);
+			}
+			if (newProjects.get(projectName) != null) {
+				for (String group : newProjects.get(projectName)) {
+					if (!projectGroups.contains(group)) {
+						projectGroups.add(group);
+					}
+				}
+			}
+			Collections.sort(projectGroups);
+			if (projectGroups.size() > 0) {
+				for (String group : projectGroups) {
+					projectGroupsListModel.addElement(group);
+				}
 			}
 			projectGroupsList = new JList(projectGroupsListModel);
 			projectGroupsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -157,16 +191,65 @@ public class ProjectsTab extends MainFrameTab {
 			});
 			JScrollPane projectGroupsScrollPane = new JScrollPane(projectGroupsList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 			groupsPanel.add(projectGroupsScrollPane, BorderLayout.CENTER);
+			addGroupButton.setEnabled(true);
 		}
 		groupsPanel.validate();
 	}
 	
 	
-	private void addProject() {
-		Map<String, List<String>> project = rreManager.getProjectDefiner().getProject();
-		if (project != null) {
-			System.out.println("TEST");
+	private void addProjectGroups(String projectName) {
+		Map<String, List<String>> newProject = rreManager.getProjectDefiner().getProjectGroups(projectName);
+		if (newProject != null) {
+			for (String project : newProject.keySet()) {
+				List<String> currentGroups = projectData.getProjectGroups(project);
+				List<String> newGroups = new ArrayList<String>();
+				if (newProjects.get(project) != null) {
+					currentGroups.addAll(newProjects.get(project));
+					newGroups.addAll(newProjects.get(project));
+				}
+				for (String newGroup : newProject.get(project)) {
+					if ((!currentGroups.contains(newGroup)) && (!newGroups.contains(newGroup))) {
+						newGroups.add(newGroup);
+					}
+				} 
+				if (newGroups.size() > 0) {
+					Collections.sort(newGroups);
+					newProjects.put(project, newGroups);
+				}
+			}
 		}
+		if (newProjects.size() > 0) {
+			createNewButton.setEnabled(true);
+		}
+		if (projectName == null) {
+			showProjects();
+		}
+		else {
+			showGroups(projectName);
+		}
+	}
+	
+	
+	public List<String> getProjectNames() {
+		List<String> projectNames = new ArrayList<String>();
+		
+		if (projectData.getProjectNames() != null) {
+			projectNames.addAll(projectData.getProjectNames());
+		}
+
+		Collections.sort(projectNames);
+		
+		return projectNames;
+	}
+	
+	
+	public List<String> getGroups(String projectName) {
+		List<String> groups = new ArrayList<String>();
+		
+		groups.addAll(projectData.getProjectGroups(projectName));
+		
+		Collections.sort(groups);
+		return groups;
 	}
 
 }

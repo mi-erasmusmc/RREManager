@@ -157,7 +157,7 @@ public class SMTPMailClient {
 	    	        message.setContent(multipart);
 
 	    	        // Send message
-	    	        Transport.send(message);
+	    	        Transport.send(message, userName, password);
 	    	  
 	    	        success = true;
 	        	}

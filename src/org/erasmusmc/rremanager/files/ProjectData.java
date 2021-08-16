@@ -12,6 +12,7 @@ import org.erasmusmc.rremanager.RREManager;
 
 public class ProjectData {
 	
+	private String settingsGroup = null; 
 	private Map<String, List<String>> projects = new HashMap<String, List<String>>();
 
 	
@@ -21,6 +22,7 @@ public class ProjectData {
 	
 	
 	private void getData(String settingsGroup) {
+		this.settingsGroup = settingsGroup;
 		String projectsFileName = RREManager.getIniFile().getValue(settingsGroup,"File");
 		String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
 		File file = new File(projectsFileName);
@@ -67,6 +69,43 @@ public class ProjectData {
 			Collections.sort(sortedProjectGroups);
 		}
 		return sortedProjectGroups;
+	}
+	
+	
+	public boolean addProjects(Map<String, List<String>> newProjects) {
+		boolean success = false;
+		
+		for (String project : newProjects.keySet()) {
+			List<String> currentGroups = projects.get(project);
+			if (currentGroups == null) {
+				projects.put(project, newProjects.get(project));
+			}
+			else {
+				for (String newGroup : newProjects.get(project)) {
+					if (!projects.get(project).contains(newGroup)) {
+						projects.get(project).add(newGroup);
+					}
+				}
+				Collections.sort(projects.get(project));
+			}
+		}
+
+		/*
+		String projectsFileName = RREManager.getIniFile().getValue(settingsGroup,"File");
+		String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
+		File file = new File(projectsFileName);
+		if (file.exists() && file.canRead()) {
+			ExcelFile projectsFile = new ExcelFile(projectsFileName);
+			if (projectsFile.open()) {
+				if (projectsFile.getSheet(sheetName, true)) {
+					//TODO
+				}
+				projectsFile.close();
+			}
+		}
+		*/
+		
+		return success;
 	}
 	
 	

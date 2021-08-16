@@ -67,14 +67,14 @@
       DIM SubFolderArray, counter
       SubFolderArray = Split(strSubFolders,",")
       For counter = 0 to UBound(subFolderArray)
-	 strSubFolder = Trim(subFolderArray(counter))
+	     strSubFolder = Trim(subFolderArray(counter))
          strDataSubFolder = strProjectsFolder & strProjectName & "\" & strDataMainSub & "\" & strSubFolder
-  	 Call CreateFolder(strDataSubFolder, VERBOSE)
+  	     Call CreateFolder(strDataSubFolder, VERBOSE)
  	 
          strSubGroupName = strProjectName & " " & strSubFolder  'e.g. 'ARITMO WP5
-  	 Call CreateUserGroup(strOU,strSubGroupName, VERBOSE)
-	 ' Add WP group to project group
-  	 Call AddGrpMem(strGroupName, strSubGroupName, VERBOSE)
+  	     Call CreateUserGroup(strOU,strSubGroupName, VERBOSE)
+	     ' Add WP group to project group
+  	     Call AddGrpMem(strGroupName, strSubGroupName, VERBOSE)
 
     	 Call SetPermissions(strDataSubFolder, StrSubGroupName, "(OI)(CI)(RX)", VERBOSE)
         
