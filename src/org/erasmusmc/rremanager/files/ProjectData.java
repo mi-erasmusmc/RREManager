@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.gui.MainFrame;
+import org.erasmusmc.rremanager.utilities.ScriptUtilities;
 
 public class ProjectData {
 	
@@ -79,7 +80,19 @@ public class ProjectData {
 	public boolean addProjects(Map<String, List<String>> newProjects) {
 		boolean success = false;
 		
+		Map<String, List<String>> scriptCallParameters = new HashMap<String, List<String>>();
+		
 		for (String project : newProjects.keySet()) {
+			String key = project + "," + newProjects.get(project).get(newProjects.get(project).size() - 1);
+			String groupsParameter = "";
+			for (String newGroup : newProjects.get(project)) {
+				groupsParameter += (groupsParameter.equals("") ? "" : ",") + newGroup;
+			}
+			List<String> parameters = new ArrayList<String>();
+			parameters.add(project);
+			parameters.add(groupsParameter);
+			scriptCallParameters.put(key, parameters);
+			
 			List<String> currentGroups = projects.get(project);
 			if (currentGroups == null) {
 				projects.put(project, newProjects.get(project));
@@ -142,11 +155,38 @@ public class ProjectData {
 								}
 								else {
 									if (allTimeLogRecord != null) {
+										
 										allTimeLogRecord += "," + "Succeeded";
 										allTimeLogRecord += ",";
 										mainFrame.logLn("");
 										mainFrame.logWithTimeLn(logLine + "SUCCEEDED");
 										mainFrame.allTimeLog(allTimeLogRecord, "");
+
+										if (scriptCallParameters.containsKey(projectName + "," + group)) {
+											String groups = scriptCallParameters.get(projectName + "," + group).get(scriptCallParameters.get(projectName + "," + group).size() - 1);
+											
+											mainFrame.logLn("");
+											mainFrame.logWithTimeLn("Create project groups: " + projectName + " " + groups);
+											mainFrame.logWithTimeLn("    Script call: createProjects.vbs " + projectName + " " + groups);
+											
+											allTimeLogRecord = "Create project groups";
+											allTimeLogRecord += ",";
+											allTimeLogRecord += ",";
+											allTimeLogRecord += ",";
+											allTimeLogRecord += ",";
+											allTimeLogRecord += ",";
+											allTimeLogRecord += ",";
+											allTimeLogRecord += ",";
+											allTimeLogRecord += "," + projectName;
+											allTimeLogRecord += "," + "\"" + groups + "\"";
+											
+											//TODO ScriptUtilities.callVBS("createProjects.vbs", scriptCallParameters.get(projectName + "," + group));
+											
+											allTimeLogRecord += "," + "Done";
+											allTimeLogRecord += ",";
+											mainFrame.logWithTimeLn("  DONE");
+											mainFrame.allTimeLog(allTimeLogRecord, "\"Script call: createProjects.vbs " + projectName + " " + groups + "\"");
+										}
 									}
 									
 									success = true;
