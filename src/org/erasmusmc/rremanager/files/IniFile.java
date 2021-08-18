@@ -237,6 +237,54 @@ public class IniFile {
 	}
 	
 	
+	public List<String> getListValue(String group, String variable, String listSeparator) {
+		List<String> list = null;
+		String listString = getValue(group, variable);
+		if (listString != null) {
+			String[] listStringSplit = listString.split(listSeparator);
+			for (String listItem : listStringSplit) {
+				listItem = listItem.trim();
+				if (!listItem.equals("")) {
+					if (list == null) {
+						list = new ArrayList<String>();
+					}
+					list.add(listItem);
+				}
+			}
+		}
+		return list;
+	}
+	
+	
+	public boolean setListValue(String group, String variable, List<String> listValue, String listSeparator, List<String> comments) {
+		boolean result = false;
+		if (hasGroup(group) || addGroup(group, null)) {
+			if (!hasVariable(group, variable)) {
+				List<String> variableOrder = groupVariableOrder.get(group);
+				if (variableOrder == null) {
+					variableOrder = new ArrayList<String>();
+					groupVariableOrder.put(group, variableOrder);
+				}
+				variableOrder.add(variable);
+			}
+			Map<String, String> variableValues = iniFileMap.get(group);
+			if (variableValues == null) {
+				variableValues = new HashMap<String, String>();
+				iniFileMap.put(group, variableValues);
+			}
+			if ((listValue != null) && (listValue.size() > 0)) {
+				String value = "";
+				for (int index = 0; index < listValue.size(); index++) {
+					value = value + (index > 0 ? listSeparator : "") + listValue.get(index);
+				}
+				variableValues.put(variable, value);
+			}
+			result = setVariableComments(group, variable, comments);
+		}
+		return result;
+	}
+	
+	
 	//public List<String> getVariableComments(String group, String variable) {
 	//	return (hasGroup(group))
 	//}

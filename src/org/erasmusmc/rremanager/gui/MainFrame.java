@@ -33,10 +33,10 @@ public class MainFrame {
 	
 	private JFrame frame;
 	private JTabbedPane tabbedPane;
-	private UsersTab usersTab;
-	private UsersTab specialsTab;
-	private ProjectsTab projectsTab;
-	private LogTab logTab;
+	private UsersTab usersTab = null;
+	private UsersTab specialsTab = null;
+	private ProjectsTab projectsTab = null;
+	private LogTab logTab = null;
 	private Console console = null;
 	private String busy = null; 
 
@@ -95,15 +95,15 @@ public class MainFrame {
 		tabbedPane = new JTabbedPane();
 		RREManager.disableWhenRunning(tabbedPane);
 		
-		usersTab = new UsersTab(rreManager, this, "User Projects");
+		usersTab    = new UsersTab(rreManager, this, "User Projects");
 		specialsTab = new UsersTab(rreManager, this, "Specials");
 		projectsTab = new ProjectsTab(rreManager, this, "Projects");
-		logTab = new LogTab(rreManager, this);
+		logTab      = new LogTab(rreManager, this);
 		
-		tabbedPane.addTab("Users", usersTab);
-		tabbedPane.addTab("Specials", specialsTab);        		
-		tabbedPane.addTab("Projects", projectsTab);
-		tabbedPane.addTab("Log", logTab);
+		if (usersTab    != null) tabbedPane.addTab("Users"   , usersTab);
+		if (specialsTab != null) tabbedPane.addTab("Specials", specialsTab);        		
+		if (projectsTab != null) tabbedPane.addTab("Projects", projectsTab);
+		if (logTab      != null) tabbedPane.addTab("Log"     , logTab);
 		
         frame.add(tabbedPane, BorderLayout.CENTER);
         
@@ -199,10 +199,7 @@ public class MainFrame {
 		if (!RREManager.loggingStarted) {
 			RREManager.loggingStarted = true;
 			console.setDebugFile(RREManager.noLogging ? null : fullLogFileName);
-			String allTimeLogHeader = "Date";
-			allTimeLogHeader += "," + "Time";
-			allTimeLogHeader += "," + "Administrator";
-			allTimeLogHeader += "," + "Action";
+			String allTimeLogHeader = "Action";
 			allTimeLogHeader += "," + "Recipient";
 			allTimeLogHeader += "," + "User";
 			allTimeLogHeader += "," + "First Name";
@@ -210,12 +207,13 @@ public class MainFrame {
 			allTimeLogHeader += "," + "Password";
 			allTimeLogHeader += "," + "IP-addresses";
 			allTimeLogHeader += "," + "Approved";
+			allTimeLogHeader += "," + "Project";
+			allTimeLogHeader += "," + "Group";
 			allTimeLogHeader += "," + "Result";
 			allTimeLogHeader += "," + "Error";
 			allTimeLogHeader += "," + "Log File";
-			allTimeLogHeader += "," + "Attachments";
 			allTimeLogFile = RREManager.noLogging ? null : new File(allTimeLogFileName);
-			if (RREManager.noLogging || allTimeLogFile.exists() || allTimeLog(allTimeLogHeader)) {
+			if (RREManager.noLogging || allTimeLogFile.exists() || allTimeLog(allTimeLogHeader, "Info")) {
 				logWithTimeLn("RRE Manager v" + RREManager.version + " - " + rreManager.getAdministrator());
 				if (!RREManager.inEclipse) {
 					logLn("");
@@ -232,11 +230,20 @@ public class MainFrame {
 	}
 	
 	
-	public boolean allTimeLog(String record) {
+	public boolean allTimeLog(String record, String info) {
 		boolean success = true;
 		if (!RREManager.noLogging) {
+			if (allTimeLogFile.exists()) {
+				record = DateUtilities.getCurrentTime().replaceAll(" ", ",") + "," + rreManager.getAdministrator() + "," + record;
+				record += "," + getLogFileName();
+				record += "," + info;
+			}
+			else { // File does no exist -> write header
+				record = "Date,Time,Administrator," + record;
+				record += "," + info;
+			}
 			try {
-				FileWriter logWriter = new FileWriter(new File(allTimeLogFileName), true);
+				FileWriter logWriter = new FileWriter(allTimeLogFile, true);
 				logWriter.write(record + "\r\n");
 				logWriter.close();
 				success = true;

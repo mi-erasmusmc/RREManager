@@ -42,7 +42,7 @@ public class ProjectsTab extends MainFrameTab {
 	public ProjectsTab(RREManager rreManager, MainFrame mainFrame, String settingsGroup) {
 		super(rreManager, mainFrame);
 		
-		projectData = new ProjectData(settingsGroup);
+		projectData = new ProjectData(mainFrame, settingsGroup);
 		newProjects = new HashMap<String, List<String>>();
 		
 		setLayout(new BorderLayout());
@@ -89,8 +89,12 @@ public class ProjectsTab extends MainFrameTab {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				RREManager.disableComponents();
-				projectData.addProjects(newProjects);
-				newProjects = new HashMap<String, List<String>>();
+				if (projectData.addProjects(newProjects)) {
+					newProjects = new HashMap<String, List<String>>();
+				}
+				else {
+					mainFrame.logWithTimeLn(projectData.getError());
+				}
 				RREManager.enableComponents();
 				createNewButton.setEnabled(false);
 				showProjects();
@@ -125,7 +129,9 @@ public class ProjectsTab extends MainFrameTab {
 		}
 		if (newProjects != null) {
 			for (String projectName : newProjects.keySet()) {
-				projectNames.add(projectName);
+				if (!projectNames.contains(projectName)) {
+					projectNames.add(projectName);
+				}
 			}
 		}
 		Collections.sort(projectNames);

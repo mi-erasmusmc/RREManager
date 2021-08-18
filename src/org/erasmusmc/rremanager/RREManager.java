@@ -21,11 +21,10 @@ import org.erasmusmc.rremanager.gui.MainFrame;
 import org.erasmusmc.rremanager.gui.ProjectDefiner;
 import org.erasmusmc.rremanager.gui.PasswordManager;
 import org.erasmusmc.rremanager.smtp.SMTPMailClient;
-import org.erasmusmc.rremanager.utilities.DateUtilities;
 
 public class RREManager {
 	public static boolean inEclipse = false;
-	public static String version = "1.5";
+	public static String version = "1.6";
 	public static boolean noLogging = true;
 	public static boolean loggingStarted = false;
 	
@@ -445,7 +444,6 @@ public class RREManager {
 		recipientDescription += (recipientDescription.equals("") ? "" : (((info[UserData.LAST_NAME] == null) || info[UserData.LAST_NAME].equals("")) ? "" : " ")) + (info[UserData.LAST_NAME] == null ? "" : info[UserData.LAST_NAME]);
 		recipientDescription += (recipientDescription.equals("") ? info[UserData.EMAIL] : " (" + info[UserData.EMAIL] + ")");
 
-		allTimeLogRecord = DateUtilities.getCurrentTime().replaceAll(" ", ",") + "," + administrator + "," + allTimeLogRecord;
 		mainFrame.logLn("");
 		mainFrame.logWithTimeLn("Send " + messageType + " to " + recipientDescription + " as " + info[UserData.EMAIL_FORMAT] + " ...");
 
@@ -479,8 +477,7 @@ public class RREManager {
 			if (text != null) {
 				List<String> recipients = new ArrayList<String>();
 				recipients.add(info[UserData.EMAIL]);
-				List<String> ccRecipients = new ArrayList<String>();
-				ccRecipients.add(getIniFile().getValue("SMTP Mail Server","cc"));
+				List<String> ccRecipients = getIniFile().getListValue("SMTP Mail Server", "cc", ";");
 			
 				if (mailClient.sendMail(
 						getIniFile().getValue(messageType, "Subject"), 
@@ -493,6 +490,8 @@ public class RREManager {
 						attachments
 						)) {
 					allTimeLogRecord += "," + "Yes";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
 					allTimeLogRecord += "," + "Succeeded";
 					mainFrame.logWithTimeLn("  SUCCEEDED");
 				}
@@ -519,10 +518,8 @@ public class RREManager {
 		}
 
 		allTimeLogRecord += "," + "\"" + mailError + "\"";
-		allTimeLogRecord += "," + mainFrame.getLogFileName();
-		allTimeLogRecord += "," + "\"" + attachementsString + "\"";
 		
-		mainFrame.allTimeLog(allTimeLogRecord);
+		mainFrame.allTimeLog(allTimeLogRecord, attachementsString.equals("") ? "" : "\"Attachments: " + attachementsString + "\"");
 	}
 	
 	

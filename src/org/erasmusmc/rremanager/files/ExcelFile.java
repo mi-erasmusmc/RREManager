@@ -3,6 +3,7 @@ package org.erasmusmc.rremanager.files;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 
 public class ExcelFile {
-	ExcelFileSuperType excelFile = null;
+	private ExcelFileSuperType excelFile = null;
 	
 	
 	public ExcelFile(String fileName) {
@@ -48,6 +49,11 @@ public class ExcelFile {
 	
 	public boolean close() {
 		return excelFile != null ? excelFile.close() : false;
+	}
+	
+	
+	public boolean write() {
+		return excelFile != null ? excelFile.write() : false;
 	}
 	
 	
@@ -100,6 +106,14 @@ public class ExcelFile {
 		return excelFile != null ? excelFile.getBooleanValue(row, columnNr) : null;
 	}
 	
+	public Boolean clearSheet(String sheetName, boolean removeHeader) {
+		return excelFile != null ? excelFile.clearSheet(sheetName, removeHeader) : null;
+	}
+	
+	public Boolean addRow(String sheetName, Map<String, Object> cellValues) {
+		return excelFile != null ? excelFile.addRow(sheetName, cellValues) : null;
+	}
+	
 	
 	public List<String> getColumnNames(String sheetName) {
 		return excelFile != null ? excelFile.getColumnNames(sheetName) : null;
@@ -144,6 +158,8 @@ public class ExcelFile {
 			return result;
 		}
 		
+		abstract boolean write();
+		
 		abstract Set<String> getSheetNames();
 		
 		abstract boolean getSheet(String sheetName, boolean hasHeader);
@@ -163,6 +179,10 @@ public class ExcelFile {
 		abstract Boolean getBooleanValue(String sheetName, Row row, String columnName);
 		
 		abstract Boolean getBooleanValue(Row row, Integer columnNr);
+		
+		abstract Boolean clearSheet(String sheetName, boolean removeHeader);
+		
+		abstract Boolean addRow(String sheetName, Map<String, Object> cellValues);
 		
 		public List<String> getColumnNames(String sheetName) {
 			List<String> columNames = null;
@@ -247,6 +267,21 @@ public class ExcelFile {
 			}
 			
 			return result;
+		}
+
+		@Override
+		public boolean write() {
+			boolean success = false;
+			try {
+				FileOutputStream excelFileStream = new FileOutputStream(fileName);
+				workBook.write(excelFileStream);
+				excelFileStream.close();
+			} catch (FileNotFoundException e) {
+				success = false;
+			} catch (IOException e) {
+				success = false;
+			}
+			return success;
 		}
 
 		@Override
@@ -388,6 +423,53 @@ public class ExcelFile {
 			}
 			return value;
 		}
+
+		@Override
+		Boolean clearSheet(String sheetName, boolean removeHeader) {
+			Boolean success = false;
+			HSSFSheet sheet = sheetMap.get(sheetName); 
+			if (sheet != null) {
+				for (int rowNr = sheet.getLastRowNum(); rowNr >= (removeHeader ? 0 : 1); rowNr--) {
+					sheet.removeRow(sheet.getRow(rowNr));
+				}
+				success = true;
+			}
+			return success;
+		}
+
+		@Override
+		Boolean addRow(String sheetName, Map<String, Object> cellValues) {
+			Boolean success = false;
+			HSSFSheet sheet = sheetMap.get(sheetName);
+			if ((sheet != null) && (cellValues != null)) {
+				Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+				Map<String, Integer> columnNrs = sheetColumnNrs.get(sheetName);
+				for (String columName : columnNrs.keySet()) {
+					Cell cell = row.createCell(columnNrs.get(columName));
+					Object value = cellValues.get(columName);
+					if (value != null) {
+						if (value instanceof String) {
+							cell.setCellValue((String) value);
+						}
+						else if (value instanceof Integer) {
+							cell.setCellValue((Integer) value);
+						}
+						else if (value instanceof Double) {
+							cell.setCellValue((Double) value);
+						}
+						else if (value instanceof Boolean) {
+							cell.setCellValue((Boolean) value);
+						}
+						else {
+							success = false;
+							break;
+						}
+						success = true;
+					}
+				}
+			}
+			return success;
+		}
 	}
 	
 	
@@ -437,6 +519,22 @@ public class ExcelFile {
 			}
 			
 			return result;
+		}
+
+		@Override
+		public boolean write() {
+			boolean success = false;
+			try {
+				FileOutputStream excelFileStream = new FileOutputStream(fileName);
+				workBook.write(excelFileStream);
+				excelFileStream.close();
+				success = true;
+			} catch (FileNotFoundException e) {
+				success = false;
+			} catch (IOException e) {
+				success = false;
+			}
+			return success;
 		}
 
 		@Override
@@ -575,6 +673,53 @@ public class ExcelFile {
 				value = cell.getBooleanCellValue();
 			}
 			return value;
+		}
+
+		@Override
+		Boolean clearSheet(String sheetName, boolean removeHeader) {
+			Boolean success = false;
+			XSSFSheet sheet = sheetMap.get(sheetName); 
+			if (sheet != null) {
+				for (int rowNr = sheet.getLastRowNum(); rowNr >= (removeHeader ? 0 : 1); rowNr--) {
+					sheet.removeRow(sheet.getRow(rowNr));
+				}
+				success = true;
+			}
+			return success;
+		}
+
+		@Override
+		Boolean addRow(String sheetName, Map<String, Object> cellValues) {
+			Boolean success = false;
+			XSSFSheet sheet = sheetMap.get(sheetName);
+			if ((sheet != null) && (cellValues != null)) {
+				Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+				Map<String, Integer> columnNrs = sheetColumnNrs.get(sheetName);
+				for (String columName : columnNrs.keySet()) {
+					Cell cell = row.createCell(columnNrs.get(columName));
+					Object value = cellValues.get(columName);
+					if (value != null) {
+						if (value instanceof String) {
+							cell.setCellValue((String) value);
+						}
+						else if (value instanceof Integer) {
+							cell.setCellValue((Integer) value);
+						}
+						else if (value instanceof Double) {
+							cell.setCellValue((Double) value);
+						}
+						else if (value instanceof Boolean) {
+							cell.setCellValue((Boolean) value);
+						}
+						else {
+							success = false;
+							break;
+						}
+						success = true;
+					}
+				}
+			}
+			return success;
 		}
 	}
 }

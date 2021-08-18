@@ -43,15 +43,24 @@ public class SMTPMailClient {
 	public boolean sendMail(String subject, String html, String text, String from, List<String> recipients, List<String> ccRecipients, List<String> bccRecipients, List<String> attachments) {
 		boolean success = false;
 		error = "";
+		boolean ssl = port.equals("465") || port.equals("587"); 
 		
 		Properties properties = new Properties();
 	    properties.put("mail.smtp.auth", smtpAuthentication);
-	    properties.put("mail.smtp.starttls.enable", enableTLS);
 	    properties.put("mail.smtp.host", mailServer);
 	    properties.put("mail.smtp.port", port);
+	    if (ssl) {
+		    properties.put("mail.smtp.ssl.enable", "true");
+		    properties.put("mail.smtp.ssl.checkserveridentity", "false");
+		    properties.put("mail.smtp.ssl.trust", "*");
+		    //properties.put("mail.debug", "true");
+	    }
+	    else {
+		    properties.put("mail.smtp.starttls.enable", enableTLS);
+	    }
 
 	    // Get the Session object.
-	    Session session = Session.getInstance(
+	    Session session = Session.getDefaultInstance(
 	    								properties,
 	    								new javax.mail.Authenticator() {
 	    									protected PasswordAuthentication getPasswordAuthentication() {

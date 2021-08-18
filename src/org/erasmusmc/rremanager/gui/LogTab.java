@@ -254,6 +254,16 @@ public class LogTab extends MainFrameTab {
 		logTable.getColumnModel().getColumn(LogData.APPROVED).setMaxWidth(60);
 		logTable.getColumnModel().getColumn(LogData.APPROVED).setPreferredWidth(60);
 		
+		// Project
+		logTable.getColumnModel().getColumn(LogData.PROJECT).setMinWidth(80);
+		logTable.getColumnModel().getColumn(LogData.PROJECT).setMaxWidth(100);
+		logTable.getColumnModel().getColumn(LogData.PROJECT).setPreferredWidth(80);
+		
+		// Group
+		logTable.getColumnModel().getColumn(LogData.GROUP).setMinWidth(80);
+		logTable.getColumnModel().getColumn(LogData.GROUP).setMaxWidth(100);
+		logTable.getColumnModel().getColumn(LogData.GROUP).setPreferredWidth(80);
+		
 		// Result
 		logTable.getColumnModel().getColumn(LogData.RESULT).setMinWidth(70);
 		logTable.getColumnModel().getColumn(LogData.RESULT).setMaxWidth(70);
@@ -270,9 +280,9 @@ public class LogTab extends MainFrameTab {
 		logTable.getColumnModel().getColumn(LogData.LOG_FILE).setPreferredWidth(80);
 		
 		// Attachments
-		logTable.getColumnModel().getColumn(LogData.ATTACHMENTS).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.ATTACHMENTS).setMaxWidth(300);
-		logTable.getColumnModel().getColumn(LogData.ATTACHMENTS).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.INFO).setMinWidth(80);
+		logTable.getColumnModel().getColumn(LogData.INFO).setMaxWidth(300);
+		logTable.getColumnModel().getColumn(LogData.INFO).setPreferredWidth(80);
 */
 		RREManager.disableWhenRunning(logTable);
 		
@@ -324,6 +334,8 @@ public class LogTab extends MainFrameTab {
 				"Password",
 				"IP-addresses",
 				"Approved",
+				"Project",
+				"Group",
 				"Result"/*,
 				"Error",
 				"Log File",
