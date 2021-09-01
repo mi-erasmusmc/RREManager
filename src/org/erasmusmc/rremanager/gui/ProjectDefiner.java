@@ -141,6 +141,7 @@ public class ProjectDefiner {
 				}
 			}
 		});
+		
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(new ActionListener() {
 			

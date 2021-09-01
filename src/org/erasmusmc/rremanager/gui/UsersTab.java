@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -43,6 +44,8 @@ public class UsersTab extends MainFrameTab {
 	private JButton sendPasswordsButton;
 	private JButton sendFirewallAddRequestButton;
 	private JButton sendFirewallRemoveRequestButton;
+	private JButton addUserButton;
+	
 	private List<String[]> users = new ArrayList<String[]>();
 	private UsersTableModel usersTableModel;
 	private JTable usersTable;
@@ -277,10 +280,23 @@ public class UsersTab extends MainFrameTab {
 		});
 		RREManager.disableWhenRunning(sendFirewallRemoveRequestButton);
 		
+        addUserButton = new JButton("Add User");
+		addUserButton.setEnabled(true);
+		addUserButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addUser();
+				mainFrame.refreshLog();
+			}
+		});
+		RREManager.disableWhenRunning(addUserButton);
+		
         buttonPanel.add(sendAccountsButton);
         buttonPanel.add(sendPasswordsButton);
         buttonPanel.add(sendFirewallAddRequestButton);
         buttonPanel.add(sendFirewallRemoveRequestButton);
+        buttonPanel.add(addUserButton);
 
         JPanel usersLogPanel = new JPanel(new BorderLayout());
 		usersLogPanel.add(usersListPanel, BorderLayout.WEST);
@@ -336,6 +352,11 @@ public class UsersTab extends MainFrameTab {
 	        return getValueAt(0, columnIndex).getClass();
 	    }
 		
+	}
+	
+	
+	private void addUser() {
+		Map<String, String> user = rreManager.getUserDefiner().getUser();
 	}
 	
 	

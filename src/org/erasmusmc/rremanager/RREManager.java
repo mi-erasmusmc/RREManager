@@ -19,6 +19,7 @@ import org.erasmusmc.rremanager.gui.EmailReviewer;
 import org.erasmusmc.rremanager.gui.IPAddressSelector;
 import org.erasmusmc.rremanager.gui.MainFrame;
 import org.erasmusmc.rremanager.gui.ProjectDefiner;
+import org.erasmusmc.rremanager.gui.UserDefiner;
 import org.erasmusmc.rremanager.gui.PasswordManager;
 import org.erasmusmc.rremanager.smtp.SMTPMailClient;
 
@@ -40,6 +41,7 @@ public class RREManager {
 	private EmailReviewer emailReviewer;
 	private SMTPMailClient mailClient = null;
 	private ProjectDefiner projectDefiner = null;
+	private UserDefiner userDefiner = null;
 	private MainFrame mainFrame = null;
 	
 	private String administrator = null;
@@ -87,6 +89,7 @@ public class RREManager {
 					ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
 					emailReviewer = new EmailReviewer(mainFrame.getFrame());
 					projectDefiner = new ProjectDefiner(mainFrame.getFrame());
+					userDefiner = new UserDefiner(mainFrame.getFrame());
 				}
 				else {
 		            System.exit(0);
@@ -685,6 +688,11 @@ public class RREManager {
 	
 	public ProjectDefiner getProjectDefiner() {
 		return projectDefiner;
+	}
+	
+	
+	public UserDefiner getUserDefiner() {
+		return userDefiner;
 	}
 	
 

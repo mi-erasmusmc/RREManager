@@ -1,6 +1,7 @@
 package org.erasmusmc.rremanager.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -13,12 +14,17 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.UIManager;
 
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.files.ProjectData;
@@ -151,10 +157,61 @@ public class ProjectsTab extends MainFrameTab {
 				}
 			}
 		});
+		projectsList.setCellRenderer(new MyProjectListCellRenderer());
 		JScrollPane projectsScrollPane = new JScrollPane(projectsList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		projectsPanel.add(projectsScrollPane, BorderLayout.CENTER);
 		projectsPanel.validate();
 		showGroups(null);
+	}
+	
+	
+	@SuppressWarnings("rawtypes")
+	class MyProjectListCellRenderer extends JLabel implements ListCellRenderer {
+		private static final long serialVersionUID = 759949058974963733L;
+		
+		private List<String> projects;
+		private Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
+		
+		public MyProjectListCellRenderer() {
+			projects = projectData.getProjectNames();
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+			String s = value != null ? value.toString() : "";
+			setText(s);
+			setOpaque(true);
+			setHorizontalAlignment(LEFT);
+
+			if (isSelected)
+			  {
+			    setBackground(list.getSelectionBackground());
+			    setForeground(list.getSelectionForeground());
+			  }
+			else
+			  {
+			    setBackground(list.getBackground());
+			    setForeground(list.getForeground());
+			  }
+
+			setEnabled(list.isEnabled());
+			if ((!projects.contains(getText()) || newProjects.containsKey(getText()))) {
+				setFont(list.getFont().deriveFont(java.awt.Font.BOLD));
+			}
+			else {
+				setFont(list.getFont().deriveFont(java.awt.Font.PLAIN));
+			}
+
+			// Use focusCellHighlightBorder when renderer has focus and
+			// noFocusBorder otherwise
+
+			if (cellHasFocus)
+			  setBorder(UIManager.getBorder("List.focusCellHighlightBorder"));
+			else
+			  setBorder(noFocusBorder);
+			return this;
+		}
+		
 	}
 	
 	
@@ -195,11 +252,62 @@ public class ProjectsTab extends MainFrameTab {
 					}
 				}
 			});
+			projectGroupsList.setCellRenderer(new MyGroupListCellRenderer(projectName));
 			JScrollPane projectGroupsScrollPane = new JScrollPane(projectGroupsList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 			groupsPanel.add(projectGroupsScrollPane, BorderLayout.CENTER);
 			addGroupButton.setEnabled(true);
 		}
 		groupsPanel.validate();
+	}
+	
+	
+	@SuppressWarnings("rawtypes")
+	class MyGroupListCellRenderer extends JLabel implements ListCellRenderer {
+		private static final long serialVersionUID = 4831163291117596619L;
+		
+		private List<String> projectGroups;
+		private Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
+		
+		public MyGroupListCellRenderer(String project) {
+			projectGroups = projectData.getProjectGroups(project);
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+			String s = value != null ? value.toString() : "";
+			setText(s);
+			setOpaque(true);
+			setHorizontalAlignment(LEFT);
+
+			if (isSelected)
+			  {
+			    setBackground(list.getSelectionBackground());
+			    setForeground(list.getSelectionForeground());
+			  }
+			else
+			  {
+			    setBackground(list.getBackground());
+			    setForeground(list.getForeground());
+			  }
+
+			setEnabled(list.isEnabled());
+			if (!projectGroups.contains(getText())) {
+				setFont(list.getFont().deriveFont(java.awt.Font.BOLD));
+			}
+			else {
+				setFont(list.getFont().deriveFont(java.awt.Font.PLAIN));
+			}
+
+			// Use focusCellHighlightBorder when renderer has focus and
+			// noFocusBorder otherwise
+
+			if (cellHasFocus)
+			  setBorder(UIManager.getBorder("List.focusCellHighlightBorder"));
+			else
+			  setBorder(noFocusBorder);
+			return this;
+		}
+		
 	}
 	
 	

@@ -23,7 +23,7 @@
 Option Explicit
 
 Dim VERBOSE
-Dim Update, FTPOnly, strFirst, strLast, strMiddle, strUserName, strPW, strProjects, strGroups, strEmail
+Dim Update, FTPOnly, strFirst, strLast, strInitials, strUserName, strPW, strProjects, strGroups, strEmail
 Dim strGroupDN, objUser, objGroup, objContainer
 Dim strCN, strNTName, strContainerDN
 Dim strHomeFolder, strHomeDrive, objFSO, objShell
@@ -76,7 +76,7 @@ args = WScript.Arguments.Count
 
 If args > 5 then
   strFirst = Wscript.Arguments.Item(0)
-  strMiddle = Wscript.Arguments.Item(1)
+  strInitials = Wscript.Arguments.Item(1)
   strLast = Wscript.Arguments.Item(2)
   strUserName = Wscript.Arguments.Item(3)
   strPW = Wscript.Arguments.Item(4)
@@ -198,8 +198,8 @@ If args > 5 then
                           objUser.givenName = strFirst
                       End If
                       ' Assign values to remaining attributes.
-                      If (strMiddle <> "") Then
-                          objUser.initials = strMiddle
+                      If (strInitials <> "") Then
+                          objUser.initials = strInitials
                       End If
                       If (strLast <> "") Then
                           objUser.sn = strLast
