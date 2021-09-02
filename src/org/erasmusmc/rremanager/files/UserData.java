@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
+import org.erasmusmc.rremanager.gui.MainFrame;
 
 public class UserData {
 	public static int FIRST_NAME   =  0;
@@ -44,7 +45,9 @@ public class UserData {
 	};
 	
 
+	private MainFrame mainFrame = null;
 	private List<String[]> users = new ArrayList<String[]>();
+	private String error = null;
 	
 	
 	public static String getUserDescription(String[] user, boolean withEmail) {
@@ -57,7 +60,8 @@ public class UserData {
 	}
 	
 
-	public UserData(String settingsGroup) {
+	public UserData(MainFrame mainFrame, String settingsGroup) {
+		this.mainFrame = mainFrame;
 		getData(settingsGroup);
 	}
 	
@@ -162,5 +166,91 @@ public class UserData {
 				usersFile.close();
 			}
 		}
+	}
+	
+	
+	public boolean AddUser(String settingsGroup, String[] user) {
+		boolean success = false;
+		
+		Map<String, List<String>> scriptCallParameters = new HashMap<String, List<String>>();
+		
+		String usersFileName = RREManager.getIniFile().getValue(settingsGroup,"File");
+		String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
+		File file = new File(usersFileName);
+		if (file.exists() && file.canWrite()) {
+			ExcelFile usersFile = new ExcelFile(usersFileName);
+			if (usersFile.open()) {
+				if (usersFile.getSheet(sheetName, true)) {
+					String allTimeLogRecord = null;
+					
+					Map<String, Object> row = new HashMap<String, Object>();
+					row.put("Update"        , "");
+					row.put("Project(s)"    , user[PROJECTS]);
+					row.put("Groups"        , user[GROUPS]);
+					row.put("First Name"    , user[FIRST_NAME]);
+					row.put("Initials"      , user[INITIALS]);
+					row.put("Last Name"     , user[LAST_NAME]);
+					row.put("User Name"     , user[USER_NAME]);
+					row.put("Password"      , user[PASSWORD]);
+					row.put("Email"         , user[EMAIL]);
+					row.put("Email Format"  , user[EMAIL_FORMAT]);
+					row.put("IP-Address(es)", user[IP_ADDRESSES]);
+
+					if (!usersFile.addRow(sheetName, row)) {
+						error = "ERROR while adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + " )";
+						
+						if (allTimeLogRecord != null) {
+							allTimeLogRecord += "," + "Failed";
+							allTimeLogRecord += "," + "\"" + error + "\"";
+							mainFrame.logLn("");
+							mainFrame.logWithTimeLn(logLine + "FAILED");
+							mainFrame.allTimeLog(allTimeLogRecord, "");
+						}
+						
+						success = false; 
+					}
+					else {
+						if (allTimeLogRecord != null) {
+							
+							allTimeLogRecord += "," + "Succeeded";
+							allTimeLogRecord += ",";
+							mainFrame.logLn("");
+							mainFrame.logWithTimeLn(logLine + "SUCCEEDED");
+							mainFrame.allTimeLog(allTimeLogRecord, "");
+
+							if (scriptCallParameters.containsKey(projectName + "," + group)) {
+								String groups = scriptCallParameters.get(projectName + "," + group).get(scriptCallParameters.get(projectName + "," + group).size() - 1);
+								
+								mainFrame.logLn("");
+								mainFrame.logWithTimeLn("Create project groups: " + projectName + " " + groups);
+								mainFrame.logWithTimeLn("    Script call: createProjects.vbs " + projectName + " " + groups);
+								
+								allTimeLogRecord = "Create project groups";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += "," + projectName;
+								allTimeLogRecord += "," + "\"" + groups + "\"";
+								
+								//TODO ScriptUtilities.callVBS("createProjects.vbs", scriptCallParameters.get(projectName + "," + group));
+								
+								allTimeLogRecord += "," + "Done";
+								allTimeLogRecord += ",";
+								mainFrame.logWithTimeLn("  DONE");
+								mainFrame.allTimeLog(allTimeLogRecord, "\"Script call: createProjects.vbs " + projectName + " " + groups + "\"");
+							}
+						}
+						
+						success = true;
+					}
+				}
+			}
+		}
+		
+		return success;
 	}
 }

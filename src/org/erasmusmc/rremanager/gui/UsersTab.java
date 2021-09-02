@@ -9,8 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -36,6 +34,7 @@ import org.erasmusmc.rremanager.files.UserData;
 public class UsersTab extends MainFrameTab {
 	private static final long serialVersionUID = 8108196841438054711L;
 	
+	private String settingsGroup = null;
 	private UserData userData = null;
 	
 	private JPanel usersListPanel;
@@ -44,6 +43,7 @@ public class UsersTab extends MainFrameTab {
 	private JButton sendPasswordsButton;
 	private JButton sendFirewallAddRequestButton;
 	private JButton sendFirewallRemoveRequestButton;
+	private JButton editUserButton;
 	private JButton addUserButton;
 	
 	private List<String[]> users = new ArrayList<String[]>();
@@ -55,7 +55,8 @@ public class UsersTab extends MainFrameTab {
 	
 	public UsersTab(RREManager rreManager, MainFrame mainFrame, String settingsGroup) {
 		super(rreManager, mainFrame);
-		userData = new UserData(settingsGroup);
+		this.settingsGroup = settingsGroup;
+		userData = new UserData(mainFrame, settingsGroup);
 		users = userData.getUsersList();
 		
 		setLayout(new BorderLayout());
@@ -153,6 +154,13 @@ public class UsersTab extends MainFrameTab {
 							int realIndex = usersTable.convertRowIndexToModel(selectionIndex);
 							realSelection.add(realIndex);
 						}
+						if (selection.length == 1) {
+							editUserButton.setEnabled(true);
+						}
+						else {
+							editUserButton.setEnabled(false);
+						}
+						addUserButton.setEnabled(true);
 						showInfo(realSelection);
 					}
 					else {
@@ -160,6 +168,8 @@ public class UsersTab extends MainFrameTab {
 						sendPasswordsButton.setEnabled(false);
 						sendFirewallAddRequestButton.setEnabled(false);
 						sendFirewallRemoveRequestButton.setEnabled(false);
+						editUserButton.setEnabled(false);
+						addUserButton.setEnabled(true);
 					}
 					selectedUsers = new int[selection.length];
 					for (int nr = 0; nr < selection.length; nr++) {
@@ -280,6 +290,18 @@ public class UsersTab extends MainFrameTab {
 		});
 		RREManager.disableWhenRunning(sendFirewallRemoveRequestButton);
 		
+        editUserButton = new JButton("Edit User");
+        editUserButton.setEnabled(false);
+        editUserButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				editUser(selectedUsers, userData);
+				mainFrame.refreshLog();
+			}
+		});
+		RREManager.disableWhenRunning(editUserButton);
+		
         addUserButton = new JButton("Add User");
 		addUserButton.setEnabled(true);
 		addUserButton.addActionListener(new ActionListener() {
@@ -296,6 +318,7 @@ public class UsersTab extends MainFrameTab {
         buttonPanel.add(sendPasswordsButton);
         buttonPanel.add(sendFirewallAddRequestButton);
         buttonPanel.add(sendFirewallRemoveRequestButton);
+        buttonPanel.add(editUserButton);
         buttonPanel.add(addUserButton);
 
         JPanel usersLogPanel = new JPanel(new BorderLayout());
@@ -355,8 +378,20 @@ public class UsersTab extends MainFrameTab {
 	}
 	
 	
+	private void editUser(int[] selectedUsers, UserData userData) {
+		String[] user = null;
+		if ((selectedUsers != null) && (selectedUsers.length == 1)) {
+			user = userData.getUser(selectedUsers[0]);
+			user = rreManager.getUserDefiner().getUser(user, mainFrame.getProjectsTab().getProjectData());
+		}
+	}
+	
+	
 	private void addUser() {
-		Map<String, String> user = rreManager.getUserDefiner().getUser();
+		String[] user = rreManager.getUserDefiner().getUser(null, mainFrame.getProjectsTab().getProjectData());
+		if (user != null) {
+			userData.AddUser(settingsGroup, user);
+		}
 	}
 	
 	

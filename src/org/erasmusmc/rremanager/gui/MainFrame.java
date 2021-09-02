@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.utilities.DateUtilities;
 
@@ -278,6 +279,11 @@ public class MainFrame {
 	
 	public String getAllTimeLogFileName() {
 		return allTimeLogFileName;
+	}
+	
+	
+	public ProjectsTab getProjectsTab() {
+		return projectsTab;
 	}
 
 }

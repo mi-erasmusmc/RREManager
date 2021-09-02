@@ -300,7 +300,6 @@ public class ProjectsTab extends MainFrameTab {
 
 			// Use focusCellHighlightBorder when renderer has focus and
 			// noFocusBorder otherwise
-
 			if (cellHasFocus)
 			  setBorder(UIManager.getBorder("List.focusCellHighlightBorder"));
 			else
@@ -341,6 +340,11 @@ public class ProjectsTab extends MainFrameTab {
 		else {
 			showGroups(projectName);
 		}
+	}
+	
+	
+	public ProjectData getProjectData() {
+		return projectData;
 	}
 	
 	
