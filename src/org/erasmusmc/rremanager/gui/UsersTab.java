@@ -8,10 +8,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -34,11 +38,23 @@ import org.erasmusmc.rremanager.files.UserData;
 public class UsersTab extends MainFrameTab {
 	private static final long serialVersionUID = 8108196841438054711L;
 	
-	private String settingsGroup = null;
+	private Set<String> mandatoryEmailTypes = new HashSet<String>() {
+		private static final long serialVersionUID = 1L;
+		{
+			add("RDP Account Mail");
+			add("FTP-Only Account Mail");
+			add("Password Mail");
+			add("Firewall Add Mail");
+			add("Firewall Remove Mail");
+		}
+	};
+	
 	private UserData userData = null;
 	
 	private JPanel usersListPanel;
 	private JPanel detailsPanel;
+	private JComboBox<String> messageTypeComboBox;
+	private JButton sendButton;
 	private JButton sendAccountsButton;
 	private JButton sendPasswordsButton;
 	private JButton sendFirewallAddRequestButton;
@@ -55,7 +71,6 @@ public class UsersTab extends MainFrameTab {
 	
 	public UsersTab(RREManager rreManager, MainFrame mainFrame, String settingsGroup) {
 		super(rreManager, mainFrame);
-		this.settingsGroup = settingsGroup;
 		userData = new UserData(mainFrame, settingsGroup);
 		users = userData.getUsersList();
 		
@@ -145,10 +160,7 @@ public class UsersTab extends MainFrameTab {
 				if (!e.getValueIsAdjusting()) {
 					int[] selection = usersTable.getSelectedRows();
 					if (selection.length > 0) {
-						sendAccountsButton.setEnabled(true);
-						sendPasswordsButton.setEnabled(true);
-						sendFirewallAddRequestButton.setEnabled(true);
-						sendFirewallRemoveRequestButton.setEnabled(true);
+						messageTypeComboBox.setEnabled(true);
 						List<Integer> realSelection = new ArrayList<Integer>();
 						for (int selectionIndex : selection) {
 							int realIndex = usersTable.convertRowIndexToModel(selectionIndex);
@@ -164,10 +176,8 @@ public class UsersTab extends MainFrameTab {
 						showInfo(realSelection);
 					}
 					else {
-						sendAccountsButton.setEnabled(false);
-						sendPasswordsButton.setEnabled(false);
-						sendFirewallAddRequestButton.setEnabled(false);
-						sendFirewallRemoveRequestButton.setEnabled(false);
+						messageTypeComboBox.setEnabled(false);
+						sendButton.setEnabled(false);
 						editUserButton.setEnabled(false);
 						addUserButton.setEnabled(true);
 					}
@@ -230,65 +240,77 @@ public class UsersTab extends MainFrameTab {
         usersListPanel.add(usersListScrollPane, BorderLayout.CENTER);
         
         detailsPanel = new JPanel(new BorderLayout());
-                
+
+        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        
-        sendAccountsButton = new JButton("Send Accounts");
-		sendAccountsButton.setEnabled(false);
-		sendAccountsButton.addActionListener(new ActionListener() {
+        JPanel mailingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        mailingPanel.setBorder(BorderFactory.createTitledBorder("Mailings"));
+        JLabel messageTypeLabel = new JLabel("Message type:");
+		messageTypeComboBox = new JComboBox<String>();
+		messageTypeComboBox.addItem("");
+		messageTypeComboBox.addItem("Account Mail");
+		messageTypeComboBox.addItem("Password Mail");
+		messageTypeComboBox.addItem("Firewall Add Mail");
+		messageTypeComboBox.addItem("Firewall Remove Mail");
+		for (String group : RREManager.getIniFile().getGroups()) {
+			if (RREManager.getIniFile().hasVariable(group, "Subject")) {
+				if (!mandatoryEmailTypes.contains(group)) {
+					messageTypeComboBox.addItem(group);
+				}
+			}
+		}
+		messageTypeComboBox.setEnabled(false);
+		messageTypeComboBox.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (((String) messageTypeComboBox.getSelectedItem()).equals("")) {
+					sendButton.setEnabled(false);
+				}
+				else {
+					sendButton.setEnabled(true);
+				}
+			}
+			
+		});
+        sendButton = new JButton("Send");
+        sendButton.setEnabled(false);
+        sendButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				RREManager.disableComponents();
-				rreManager.sendAccountInformation(selectedUsers, userData);
-				RREManager.enableComponents();
-				mainFrame.refreshLog();
+				String messageType = (String) messageTypeComboBox.getSelectedItem();
+				if (!messageType.equals("")) {
+					RREManager.disableComponents();
+					if (messageType.equals("Account Mail")) {
+						rreManager.sendAccountInformation(selectedUsers, userData);
+					}
+					else if (messageType.equals("Password Mail")) {
+						rreManager.sendPasswords(selectedUsers, userData);
+					}
+					else if (messageType.equals("Firewall Add Mail")) {
+						rreManager.sendFirewallAddRequest(selectedUsers, userData);
+					}
+					else if (messageType.equals("Firewall Remove Mail")) {
+						rreManager.sendFirewallRemoveRequest(selectedUsers, userData);
+					}
+					else {
+						rreManager.sendOtherMail(messageType, selectedUsers, userData);
+					}
+					RREManager.enableComponents();
+					mainFrame.refreshLog();
+				}
 			}
 		});
-		RREManager.disableWhenRunning(sendAccountsButton);
+		RREManager.disableWhenRunning(sendButton);
+		mailingPanel.add(messageTypeLabel);
+		mailingPanel.add(messageTypeComboBox);
+		mailingPanel.add(sendButton);
 		
-        sendPasswordsButton = new JButton("Send Passwords");
-		sendPasswordsButton.setEnabled(false);
-		sendPasswordsButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				RREManager.disableComponents();
-				rreManager.sendPasswords(selectedUsers, userData);
-				RREManager.enableComponents();
-				mainFrame.refreshLog();
-			}
-		});
-		RREManager.disableWhenRunning(sendPasswordsButton);
+		actionsPanel.add(mailingPanel);
 		
-        sendFirewallAddRequestButton = new JButton("Firewall Add Request");
-		sendFirewallAddRequestButton.setEnabled(false);
-		sendFirewallAddRequestButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				RREManager.disableComponents();
-				rreManager.sendFirewallAddRequest(selectedUsers, userData);
-				RREManager.enableComponents();
-				mainFrame.refreshLog();
-			}
-		});
-		RREManager.disableWhenRunning(sendFirewallAddRequestButton);
-		
-        sendFirewallRemoveRequestButton = new JButton("Firewall Remove Request");
-		sendFirewallRemoveRequestButton.setEnabled(false);
-		sendFirewallRemoveRequestButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				RREManager.disableComponents();
-				rreManager.sendFirewallRemoveRequest(selectedUsers, userData);
-				RREManager.enableComponents();
-				mainFrame.refreshLog();
-			}
-		});
-		RREManager.disableWhenRunning(sendFirewallRemoveRequestButton);
+		JPanel userManagementPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		userManagementPanel.setBorder(BorderFactory.createTitledBorder("User Management"));
 		
         editUserButton = new JButton("Edit User");
         editUserButton.setEnabled(false);
@@ -314,17 +336,15 @@ public class UsersTab extends MainFrameTab {
 		});
 		RREManager.disableWhenRunning(addUserButton);
 		
-        buttonPanel.add(sendAccountsButton);
-        buttonPanel.add(sendPasswordsButton);
-        buttonPanel.add(sendFirewallAddRequestButton);
-        buttonPanel.add(sendFirewallRemoveRequestButton);
-        buttonPanel.add(editUserButton);
-        buttonPanel.add(addUserButton);
+		userManagementPanel.add(editUserButton);
+		userManagementPanel.add(addUserButton);
+		
+		actionsPanel.add(userManagementPanel);
 
         JPanel usersLogPanel = new JPanel(new BorderLayout());
 		usersLogPanel.add(usersListPanel, BorderLayout.WEST);
 		usersLogPanel.add(detailsPanel, BorderLayout.CENTER);
-		usersLogPanel.add(buttonPanel, BorderLayout.SOUTH);
+		usersLogPanel.add(actionsPanel, BorderLayout.SOUTH);
         
 		add(searchPanel, BorderLayout.NORTH);
 		add(usersLogPanel, BorderLayout.CENTER);
@@ -390,7 +410,7 @@ public class UsersTab extends MainFrameTab {
 	private void addUser() {
 		String[] user = rreManager.getUserDefiner().getUser(null, mainFrame.getProjectsTab().getProjectData());
 		if (user != null) {
-			userData.AddUser(settingsGroup, user);
+			//userData.AddUser(settingsGroup, user);
 		}
 	}
 	

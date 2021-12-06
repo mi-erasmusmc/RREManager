@@ -168,7 +168,7 @@ public class UserData {
 		}
 	}
 	
-	
+	/*
 	public boolean AddUser(String settingsGroup, String[] user) {
 		boolean success = false;
 		
@@ -253,4 +253,5 @@ public class UserData {
 		
 		return success;
 	}
+*/
 }

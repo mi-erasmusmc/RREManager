@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 import org.erasmusmc.rremanager.files.IniFile;
 import org.erasmusmc.rremanager.files.UserData;
 import org.erasmusmc.rremanager.gui.AdministratorSelector;
-import org.erasmusmc.rremanager.gui.EmailReviewer;
+import org.erasmusmc.rremanager.gui.EmailEditor;
 import org.erasmusmc.rremanager.gui.IPAddressSelector;
 import org.erasmusmc.rremanager.gui.MainFrame;
 import org.erasmusmc.rremanager.gui.ProjectDefiner;
@@ -25,7 +25,7 @@ import org.erasmusmc.rremanager.smtp.SMTPMailClient;
 
 public class RREManager {
 	public static boolean inEclipse = false;
-	public static String version = "1.6";
+	public static String version = "1.7";
 	public static boolean noLogging = true;
 	public static boolean loggingStarted = false;
 	
@@ -38,13 +38,15 @@ public class RREManager {
 	private AdministratorSelector administratorSelector;
 	private PasswordManager passwordManager;
 	private IPAddressSelector ipAddressSelector;
-	private EmailReviewer emailReviewer;
+	private EmailEditor emailReviewer;
 	private SMTPMailClient mailClient = null;
 	private ProjectDefiner projectDefiner = null;
 	private UserDefiner userDefiner = null;
 	private MainFrame mainFrame = null;
 	
 	private String administrator = null;
+	private String approvedEmailText = null;
+	private String approvedSubject = null;
 	
 	
 	public static IniFile getIniFile() {
@@ -79,15 +81,14 @@ public class RREManager {
 		if (setCurrentPath()) {
 			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
-				mainFrame = new MainFrame(this);
-
-				administratorSelector = new AdministratorSelector(mainFrame.getFrame());
+				administratorSelector = new AdministratorSelector(null);
 				administrator = administratorSelector.getAdministrator();
 				if (administrator != null) {
+					mainFrame = new MainFrame(this);
 					mainFrame.setTitle(administrator);
 					passwordManager = new PasswordManager(mainFrame.getFrame());
 					ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
-					emailReviewer = new EmailReviewer(mainFrame.getFrame());
+					emailReviewer = new EmailEditor(mainFrame.getFrame());
 					projectDefiner = new ProjectDefiner(mainFrame.getFrame());
 					userDefiner = new UserDefiner(mainFrame.getFrame());
 				}
@@ -146,8 +147,9 @@ public class RREManager {
 							allTimeLogRecord += "," + user[UserData.LAST_NAME];
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
 							
-							mail(messageType, user, attachments, allTimeLogRecord);
+							mail(messageType, user, attachments, null, allTimeLogRecord, false, false);
 						}
 						else {
 							mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
@@ -169,8 +171,9 @@ public class RREManager {
 								allTimeLogRecord += "," + user[UserData.LAST_NAME];
 								allTimeLogRecord += ",";
 								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
 								
-								mail(messageType, user, attachments, allTimeLogRecord);
+								mail(messageType, user, attachments, null, allTimeLogRecord, false, false);
 							}
 							else {
 								mainFrame.logWithTimeLn("ERROR: No multiOTP pdf file found!");
@@ -212,10 +215,11 @@ public class RREManager {
 								allTimeLogRecord += "," + user[UserData.USER_NAME];
 								allTimeLogRecord += "," + user[UserData.FIRST_NAME];
 								allTimeLogRecord += "," + user[UserData.LAST_NAME];
+								allTimeLogRecord += ",";
 								allTimeLogRecord += "," + user[UserData.PASSWORD];
 								allTimeLogRecord += ",";
 								
-								mail(messageType, user, attachments, allTimeLogRecord);
+								mail(messageType, user, attachments, null, allTimeLogRecord, false, false);
 							}
 							else {
 								mainFrame.logWithTimeLn("ERROR: No password found!");
@@ -297,9 +301,10 @@ public class RREManager {
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
 							allTimeLogRecord += "," + "\"" + ipAddressString + "\"";
 							
-							mail(messageType, info, attachments, allTimeLogRecord);
+							mail(messageType, info, attachments, null, allTimeLogRecord, false, false);
 						}
 					}
 				}
@@ -403,9 +408,10 @@ public class RREManager {
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
+							allTimeLogRecord += ",";
 							allTimeLogRecord += "," + "\"" + ipAddressString + "\"";
 							
-							mail(messageType, info, attachments, allTimeLogRecord);
+							mail(messageType, info, attachments, null, allTimeLogRecord, false, false);
 						}
 					}
 					
@@ -413,6 +419,75 @@ public class RREManager {
 				else {
 					mainFrame.logWithTimeLn("ERROR: No message format specified for " + messageType);
 					JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message format specified for " + messageType, "No message format", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+		else {
+			mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
+			JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message definition for " + messageType, "No message", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	
+	public void sendOtherMail(String messageType, int[] selectedUsers, UserData userData) {
+		if (getIniFile().hasGroup(messageType)) {
+			if (!getIniFile().hasVariable(messageType, "Text_1")) {
+				mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
+				JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message definition for " + messageType, "No message", JOptionPane.ERROR_MESSAGE);
+			}
+			else {
+				String type = getIniFile().getValue(messageType, "Type").toUpperCase();
+				if (getMailClient()) {
+					if (type.equals("SINGLE")) {
+						//TODO
+						for (int userNr : selectedUsers) {
+							String[] user = userData.getUser(userNr);
+							if (user != null) {
+								String allTimeLogRecord = "Send " + messageType;
+								allTimeLogRecord += "," + user[UserData.EMAIL];
+								allTimeLogRecord += "," + user[UserData.USER_NAME];
+								allTimeLogRecord += "," + user[UserData.FIRST_NAME];
+								allTimeLogRecord += "," + user[UserData.LAST_NAME];
+								allTimeLogRecord += ",";
+								allTimeLogRecord += "," + user[UserData.PASSWORD];
+								allTimeLogRecord += ",";
+								
+								mail(messageType, user, null, null, allTimeLogRecord, true, false);
+							}
+						}
+					}
+					else {
+						String[] info = new String[UserData.OBJECT_SIZE];
+						info[UserData.EMAIL] = getIniFile().getValue("SMTP Mail Server", "From");
+						info[UserData.EMAIL_FORMAT] = "HTML";
+						List<String[]> bccList = new ArrayList<String[]>();
+						String bccString = "";
+						for (int userNr : selectedUsers) {
+							String[] bcc = userData.getUser(userNr);
+							if ((bcc != null) && (bcc[UserData.EMAIL] != null) && (!bcc[UserData.EMAIL].trim().equals(""))) {
+								bccList.add(bcc);
+								bccString += (bccString.equals("") ? "" : ";") + bcc[UserData.EMAIL].trim();
+							}
+						}
+						if (bccList.size() > 0) {
+							if (approveEmail(getEmailText(messageType, info), info, getIniFile().getValue(messageType, "Subject"), true)) {
+								String allTimeLogRecord = "Send " + messageType;
+								allTimeLogRecord += "," + info[UserData.EMAIL];
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								allTimeLogRecord += "," + bccString;
+								allTimeLogRecord += ",";
+								allTimeLogRecord += ",";
+								
+								mail(messageType, info, null, bccList, allTimeLogRecord, false, true);
+							}
+						}
+						else {
+							mainFrame.logWithTimeLn("ERROR: No recipients with email address found.");
+							JOptionPane.showMessageDialog(mainFrame.getFrame(), "No recipients with email address found", "No recipients", JOptionPane.ERROR_MESSAGE);
+						}
+					}
 				}
 			}
 		}
@@ -442,13 +517,26 @@ public class RREManager {
 	}
 	
 	
-	private void mail(String messageType, String[] info, List<String> attachments, String allTimeLogRecord) {
+	private void mail(String messageType, String[] info, List<String> attachments, List<String[]> bcc, String allTimeLogRecord, boolean editable, boolean approved) {
 		String recipientDescription = info[UserData.FIRST_NAME] == null ? "" : info[UserData.FIRST_NAME];
 		recipientDescription += (recipientDescription.equals("") ? "" : (((info[UserData.LAST_NAME] == null) || info[UserData.LAST_NAME].equals("")) ? "" : " ")) + (info[UserData.LAST_NAME] == null ? "" : info[UserData.LAST_NAME]);
 		recipientDescription += (recipientDescription.equals("") ? info[UserData.EMAIL] : " (" + info[UserData.EMAIL] + ")");
 
 		mainFrame.logLn("");
 		mainFrame.logWithTimeLn("Send " + messageType + " to " + recipientDescription + " as " + info[UserData.EMAIL_FORMAT] + " ...");
+		List<String> bccRecipients = null;
+		if (bcc != null) {
+			String bccString = "";
+			bccRecipients = new ArrayList<String>();
+			for (String[] bccRecipient : bcc) {
+				bccRecipients.add(bccRecipient[UserData.EMAIL]);
+				String bccRecipientDescription = bccRecipient[UserData.FIRST_NAME] == null ? "" : bccRecipient[UserData.FIRST_NAME];
+				bccRecipientDescription += (bccRecipientDescription.equals("") ? "" : (((bccRecipient[UserData.LAST_NAME] == null) || bccRecipient[UserData.LAST_NAME].equals("")) ? "" : " ")) + (bccRecipient[UserData.LAST_NAME] == null ? "" : bccRecipient[UserData.LAST_NAME]);
+				bccRecipientDescription += (bccRecipientDescription.equals("") ? bccRecipient[UserData.EMAIL] : " (" + bccRecipient[UserData.EMAIL] + ")"); 
+				bccString += (bccString.equals("") ? "" : "; ") + bccRecipientDescription;
+			}
+			mainFrame.logWithTimeLn("  Bcc:" + bccString);
+		}
 
 		if (messageType.startsWith("Firewall") && (!info[UserData.IP_ADDRESSES].equals(""))) {
 			int ipNr = 0;
@@ -462,34 +550,34 @@ public class RREManager {
 
 		String attachementsString = "";
 		String unreadableAttachments = "";
-		for (int attachentNr = 0; attachentNr < attachments.size(); attachentNr++) {
-			attachementsString += (attachementsString.equals("") ? "" : ",") + attachments.get(attachentNr);
-			File attachementFile = new File(attachments.get(attachentNr));
-			boolean unreadable = false;
-			if (!attachementFile.canRead()) {
-				unreadableAttachments += (unreadableAttachments.equals("") ? "" : " ") + Integer.toString(attachentNr + 1);
-				unreadable = true;
+		if (attachments != null) {
+			for (int attachentNr = 0; attachentNr < attachments.size(); attachentNr++) {
+				attachementsString += (attachementsString.equals("") ? "" : ",") + attachments.get(attachentNr);
+				File attachementFile = new File(attachments.get(attachentNr));
+				boolean unreadable = false;
+				if (!attachementFile.canRead()) {
+					unreadableAttachments += (unreadableAttachments.equals("") ? "" : " ") + Integer.toString(attachentNr + 1);
+					unreadable = true;
+				}
+				mainFrame.logWithTimeLn((attachentNr == 0 ? "    Attachments: " : "                 ") + attachments.get(attachentNr) + (unreadable ? " UNREADABLE" : ""));
 			}
-			mainFrame.logWithTimeLn((attachentNr == 0 ? "    Attachments: " : "                 ") + attachments.get(attachentNr) + (unreadable ? " UNREADABLE" : ""));
 		}
 
 		String mailError = "";
 		if (unreadableAttachments.equals("")) {
-			String text = approveEmail(getEmailText(messageType, info), info, getIniFile().getValue(messageType, "Subject"));
-			
-			if (text != null) {
+			if (approved || approveEmail(getEmailText(messageType, info), info, getIniFile().getValue(messageType, "Subject"), editable)) {
 				List<String> recipients = new ArrayList<String>();
 				recipients.add(info[UserData.EMAIL]);
-				List<String> ccRecipients = getIniFile().getListValue("SMTP Mail Server", "cc", ";");
+				List<String> ccRecipients = getIniFile().getListValue("SMTP Mail Server", "CC", ";");
 			
 				if (mailClient.sendMail(
-						getIniFile().getValue(messageType, "Subject"), 
-						info[UserData.EMAIL_FORMAT].equals("HTML") ? text : null,
-						info[UserData.EMAIL_FORMAT].equals("TEXT") ? text : null, 
-						getIniFile().getValue("SMTP Mail Server","from"), 
+						approvedSubject, 
+						info[UserData.EMAIL_FORMAT].equals("HTML") ? approvedEmailText : null,
+						info[UserData.EMAIL_FORMAT].equals("TEXT") ? approvedEmailText : null, 
+						getIniFile().getValue("SMTP Mail Server","From"), 
 						recipients, 
 						ccRecipients, 
-						null, 
+						bccRecipients, 
 						attachments
 						)) {
 					allTimeLogRecord += "," + "Yes";
@@ -650,13 +738,20 @@ public class RREManager {
 	}
 	
 	
-	private String approveEmail(String emailText, String[] user, String subject) {
-		emailReviewer.reviewEmail(emailText, user[UserData.EMAIL_FORMAT], user, subject);
+	private boolean approveEmail(String emailText, String[] user, String subject, boolean editable) {
+		boolean approved = false;
+		emailReviewer.editEmail(emailText, user[UserData.EMAIL_FORMAT], user, subject, editable);
 		if (!emailReviewer.isApproved()) {
-			emailText = null;
+			approvedEmailText = null;
+			approvedSubject = null;
 			mailClient.setError("Rejected by user.");
 		}
-		return emailText;
+		else {
+			approvedEmailText = emailReviewer.getApprovedText();
+			approvedSubject = emailReviewer.getApprovedSubject();
+			approved = true;
+		}
+		return approved;
 	}
 	
 	

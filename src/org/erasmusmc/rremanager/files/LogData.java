@@ -14,16 +14,17 @@ public class LogData {
 	public static int USER          =  5;
 	public static int FIRST_NAME    =  6;
 	public static int LAST_NAME     =  7;
-	public static int PASSWORD      =  8;
-	public static int IP_ADDRESSES  =  9;
-	public static int APPROVED      = 10;
-	public static int PROJECT       = 11;
-	public static int GROUP         = 12;
-	public static int RESULT        = 13;
-	public static int ERROR         = 14;
-	public static int LOG_FILE      = 15;
-	public static int INFO          = 16;
-	public static int OBJECT_SIZE   = 17;
+	public static int BCC           =  8;
+	public static int PASSWORD      =  9;
+	public static int IP_ADDRESSES  = 10;
+	public static int APPROVED      = 11;
+	public static int PROJECT       = 12;
+	public static int GROUP         = 13;
+	public static int RESULT        = 14;
+	public static int ERROR         = 15;
+	public static int LOG_FILE      = 16;
+	public static int INFO          = 17;
+	public static int OBJECT_SIZE   = 18;
 	
 
 	private String allTimeLogFileName = null;
@@ -61,6 +62,7 @@ public class LogData {
 					record[USER]          = row.get("User"         , true);
 					record[FIRST_NAME]    = row.get("First Name"   , true);
 					record[LAST_NAME]     = row.get("Last Name"    , true);
+					record[BCC]           = row.get("BCC"          , true);
 					record[PASSWORD]      = row.get("Password"     , true);
 					record[IP_ADDRESSES]  = row.get("IP-addresses" , true);
 					record[APPROVED]      = row.get("Approved"     , true);

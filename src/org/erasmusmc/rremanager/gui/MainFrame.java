@@ -99,7 +99,7 @@ public class MainFrame {
 		usersTab    = new UsersTab(rreManager, this, "User Projects");
 		specialsTab = new UsersTab(rreManager, this, "Specials");
 		projectsTab = new ProjectsTab(rreManager, this, "Projects");
-		logTab      = new LogTab(rreManager, this);
+		logTab      = RREManager.noLogging ? null : new LogTab(rreManager, this);
 		
 		if (usersTab    != null) tabbedPane.addTab("Users"   , usersTab);
 		if (specialsTab != null) tabbedPane.addTab("Specials", specialsTab);        		
@@ -117,7 +117,9 @@ public class MainFrame {
 	
 	
 	public void refreshLog() {
-		logTab.refresh();
+		if (logTab != null) {
+			logTab.refresh();
+		}
 	}
 	
 	
@@ -205,6 +207,7 @@ public class MainFrame {
 			allTimeLogHeader += "," + "User";
 			allTimeLogHeader += "," + "First Name";
 			allTimeLogHeader += "," + "Last Name";
+			allTimeLogHeader += "," + "BCC";
 			allTimeLogHeader += "," + "Password";
 			allTimeLogHeader += "," + "IP-addresses";
 			allTimeLogHeader += "," + "Approved";

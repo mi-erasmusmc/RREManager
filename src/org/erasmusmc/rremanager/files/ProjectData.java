@@ -10,7 +10,6 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.gui.MainFrame;
-import org.erasmusmc.rremanager.utilities.ScriptUtilities;
 
 public class ProjectData {
 	

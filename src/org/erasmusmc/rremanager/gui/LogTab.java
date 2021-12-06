@@ -239,6 +239,11 @@ public class LogTab extends MainFrameTab {
 		logTable.getColumnModel().getColumn(LogData.LAST_NAME).setMaxWidth(150);
 		logTable.getColumnModel().getColumn(LogData.LAST_NAME).setPreferredWidth(80);
 		
+		// BCC
+		logTable.getColumnModel().getColumn(LogData.BCC).setMinWidth(75);
+		logTable.getColumnModel().getColumn(LogData.BCC).setMaxWidth(150);
+		logTable.getColumnModel().getColumn(LogData.BCC).setPreferredWidth(75);
+		
 		// Password
 		logTable.getColumnModel().getColumn(LogData.PASSWORD).setMinWidth(80);
 		logTable.getColumnModel().getColumn(LogData.PASSWORD).setMaxWidth(100);
@@ -331,6 +336,7 @@ public class LogTab extends MainFrameTab {
 				"User",
 				"First Name",
 				"Last Name",
+				"BCC",
 				"Password",
 				"IP-addresses",
 				"Approved",
