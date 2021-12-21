@@ -1,10 +1,17 @@
 package org.erasmusmc.rremanager.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -17,8 +24,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
 
 import org.erasmusmc.rremanager.files.UserData;
 
@@ -32,17 +43,27 @@ public class EmailEditor {
 	private boolean approved = false;
 	private String approvedText = null;
 	private String approvedSubject = null;
+	private String orgSubject = null;
+	private String orgEmailText = null;
 	
 	
-	public EmailEditor(JFrame paremtFrame) {
-		this.parentFrame = paremtFrame;
+	public EmailEditor(JFrame parentFrame) {
+		this.parentFrame = parentFrame;
 	}
 	
 	
 	public void editEmail(String emailText, String emailFormat, String[] user, String subject, boolean editable) {
+		final int variablesPanelMinWidth = 500;
+		final int variableLabelWidth = 100;
+		final int variableHeight = 10;
+		final int multiLineVariableLines = 20;
+		
 		approved = false;
 		approvedText = null;
-		Dimension emailEditorDialogSize = new Dimension(800, 800);
+		orgSubject = subject;
+		orgEmailText = emailText;
+		
+		Dimension emailEditorDialogSize = new Dimension(600 + variablesPanelMinWidth + 30, 800);
 		JDialog emailEditorDialog = new JDialog(parentFrame, true);
 		emailEditorDialog.setTitle("Email Reviewer");
 		emailEditorDialog.setLayout(new BorderLayout());
@@ -73,7 +94,8 @@ public class EmailEditor {
 		
 
 		if (!emailFormat.equals("TEXT")) {
-			previewPanel = new JPanel(new BorderLayout());emailHTMLField = new JEditorPane();
+			previewPanel = new JPanel(new BorderLayout());
+			emailHTMLField = new JEditorPane();
 	        emailHTMLField.setEditable(false);
 	        emailHTMLField.setContentType("text/html");
 	        emailHTMLField.setText(emailText);
@@ -137,7 +159,111 @@ public class EmailEditor {
 		buttonPanel.add(approveButton);
 		buttonPanel.add(rejectButton);
 
+		JPanel variablesPanel = new JPanel(new BorderLayout());
+		variablesPanel.setBorder(BorderFactory.createTitledBorder("Variables"));
+		
+		JPanel variablesScrollPanel = new JPanel(new BorderLayout());
+		JPanel currentParentPanel = variablesScrollPanel;
+		JPanel nextParentPanel = null;
+		List<String> variables = findNotSetVariables(subject + emailText);
+		Map<String, String> variableValueMap = new HashMap<String, String>();
+		Map<JTextComponent, String> fieldVariableMap = new HashMap<JTextComponent, String>();
+		Map<String, JTextComponent> variableFieldMap = new HashMap<String, JTextComponent>();
+		for (String variable : variables) {
+			variableValueMap.put(variable, null);
+			JPanel variablePanel = new JPanel();
+			variablePanel.setLayout(new BoxLayout(variablePanel, BoxLayout.X_AXIS));
+			
+			JLabel variableLabel = new JLabel(variable);
+			variableLabel.setMinimumSize(new Dimension(variableLabelWidth, variableHeight));
+			variableLabel.setMaximumSize(new Dimension(variableLabelWidth, variableHeight));
+			variableLabel.setPreferredSize(new Dimension(variableLabelWidth, variableHeight));
+			JTextComponent variableValueField = null;
+			if (variable.startsWith("M:")) {
+				variableValueField = new JTextArea(10, 50);
+				variableValueField.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
+				int textAreaHeight = Math.floorDiv(multiLineVariableLines * 33, 2);
+				variableValueField.setMinimumSize(new Dimension(variablesPanelMinWidth - variableLabelWidth, textAreaHeight));
+				variableValueField.setPreferredSize(new Dimension(variablesPanelMinWidth - variableLabelWidth, textAreaHeight));
+
+				JPanel variableLabelPanel = new JPanel(new BorderLayout());
+				variableLabelPanel.add(variableLabel);
+				variableLabelPanel.setMinimumSize(new Dimension(variableLabelWidth, textAreaHeight));
+				variableLabelPanel.setMaximumSize(new Dimension(variableLabelWidth, textAreaHeight));
+				variableLabelPanel.setPreferredSize(new Dimension(variableLabelWidth, textAreaHeight));
+				variableLabelPanel.add(variableLabel, BorderLayout.NORTH);
+				variablePanel.add(variableLabelPanel);
+				
+				JPanel variableValueFieldPanel = new JPanel(new BorderLayout()); 
+				variableValueFieldPanel.add(variableValueField);
+				variableValueFieldPanel.setMinimumSize(new Dimension(variablesPanelMinWidth - variableLabelWidth, textAreaHeight));
+				variableValueFieldPanel.setPreferredSize(new Dimension(variablesPanelMinWidth - variableLabelWidth, textAreaHeight));
+				variableValueFieldPanel.add(variableValueField, BorderLayout.NORTH);
+				variablePanel.add(variableValueFieldPanel);
+				
+				variablePanel.setMinimumSize(new Dimension(variablesPanelMinWidth - variableLabelWidth, textAreaHeight));
+				variablePanel.setPreferredSize(new Dimension(variablesPanelMinWidth - variableLabelWidth, textAreaHeight));
+			}
+			else {
+				variableValueField = new JTextField(50);
+				variableValueField.setMinimumSize(new Dimension(variablesPanelMinWidth - variableLabelWidth, variableHeight));
+				variableValueField.setPreferredSize(new Dimension(variablesPanelMinWidth - variableLabelWidth, variableHeight));
+				
+				variablePanel.add(variableLabel);
+				variablePanel.add(variableValueField);
+				
+				variablePanel.setMinimumSize(new Dimension(variablesPanelMinWidth, variableHeight));
+				variablePanel.setPreferredSize(new Dimension(variablesPanelMinWidth, variableHeight));
+			}
+			
+			fieldVariableMap.put(variableValueField, variable);
+			variableFieldMap.put(variable, variableValueField);
+			variableValueField.getDocument().addDocumentListener(new DocumentListener() {
+				
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					filter();
+				}
+				
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					filter();
+				}
+				
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					filter();
+				}
+				
+				private void filter() {
+	                String text = variableFieldMap.get(variable).getText();
+	                if (text.length() == 0) {
+	                	text = null;
+	                }
+                    if ((text != null) && variable.startsWith("M:") && emailFormat.equals("HTML")) {
+                    	String[] textSplit = text.split("\n");
+                    	text = String.join("<br>", textSplit);
+                    }
+                    variableValueMap.put(variable, text);
+                    subjectRow.setText(replaceVariables(orgSubject, variableValueMap));
+                    emailTextField.setText(replaceVariables(orgEmailText, variableValueMap));
+            		if (!emailFormat.equals("TEXT")) {
+				        emailHTMLField.setText(emailTextField.getText());
+            		}
+	             }
+			});
+			
+			nextParentPanel = new JPanel(new BorderLayout());
+			currentParentPanel.add(variablePanel, BorderLayout.NORTH);
+			currentParentPanel.add(nextParentPanel, BorderLayout.CENTER);
+			currentParentPanel = nextParentPanel;			
+		}
+		
+        JScrollPane variablesScrollPane = new JScrollPane(variablesScrollPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        variablesPanel.add(variablesScrollPane, BorderLayout.CENTER);
+		
         emailEditorDialog.add(toPanel, BorderLayout.CENTER);
+        emailEditorDialog.add(variablesPanel, BorderLayout.EAST);
 		emailEditorDialog.add(buttonPanel, BorderLayout.SOUTH);
 		
 		emailEditorDialog.pack();
@@ -146,6 +272,44 @@ public class EmailEditor {
 		emailReviewScrollPane.getViewport().setViewPosition( new Point(0, 0) );
 		
 		emailEditorDialog.setVisible(true);
+	}
+	
+	
+	private List<String> findNotSetVariables(String text) {
+		List<String> notSetVariables = new ArrayList<String>();
+		
+		String currentVariable = null;
+		for (int charNr = 0; charNr < text.length(); charNr++) {
+			String currentCharacter = text.substring(charNr, charNr + 1); 
+			if (currentVariable == null) {
+				if (currentCharacter.equals("[")) {
+					currentVariable = "";
+				}
+			}
+			else {
+				if (currentCharacter.equals("]")) {
+					if (!notSetVariables.contains(currentVariable)) {
+						notSetVariables.add(currentVariable);
+					}
+					currentVariable = null;
+				}
+				else {
+					currentVariable += currentCharacter; 
+				}
+			}
+		}
+		return notSetVariables;
+	}
+	
+	
+	private String replaceVariables(String text, Map<String, String> variableValues) {
+		for (String variable : variableValues.keySet()) {
+			String value = variableValues.get(variable);
+			if (value != null) {
+				text = text.replaceAll("\\[" + variable + "\\]", value);
+			}
+		}
+		return text;
 	}
 	
 	
@@ -200,6 +364,11 @@ public class EmailEditor {
 		
 		public String getInfo() {
 			return infoField.getText().trim();
+		}
+		
+		
+		public void setText(String text) {
+			infoField.setText(text);
 		}
 	}
 

@@ -470,7 +470,7 @@ public class RREManager {
 							}
 						}
 						if (bccList.size() > 0) {
-							if (approveEmail(getEmailText(messageType, info), info, getIniFile().getValue(messageType, "Subject"), true)) {
+							if (approveEmail(getEmailText(messageType, info), info, getIniFile().getValue(messageType, "Subject"), false)) {
 								String allTimeLogRecord = "Send " + messageType;
 								allTimeLogRecord += "," + info[UserData.EMAIL];
 								allTimeLogRecord += ",";
@@ -480,7 +480,7 @@ public class RREManager {
 								allTimeLogRecord += ",";
 								allTimeLogRecord += ",";
 								
-								mail(messageType, info, null, bccList, allTimeLogRecord, false, true);
+								mail(messageType, info, null, bccList, allTimeLogRecord, false, false);
 							}
 						}
 						else {
