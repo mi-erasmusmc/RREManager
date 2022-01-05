@@ -11,6 +11,10 @@
 
 ' Note that the project main folder needs to be present with the correct permissions (D:\Projects\)
 
+' Arguments:
+'   project name
+'   project subfolders (comma-separated)
+
   Dim strSubFolders,strMainGroup, strOU, strProjectsFolder, strDataMainSub, strGroupName, strProjectName, strShareMainSub
   Dim strDataSUbFolder, strSubFolder, strSubGroupName, strDataFolder, strShareFolder
 
@@ -32,7 +36,7 @@
   end If
 
   If args < 2 then
-    strSubFolders = inputbox("Enter any subfolders (comma-seperated) or press enter")
+    strSubFolders = inputbox("Enter any subfolders (comma-separated) or press enter")
   else
     strSubFolders = Wscript.Arguments.Item(1)
   end If
@@ -67,16 +71,16 @@
       DIM SubFolderArray, counter
       SubFolderArray = Split(strSubFolders,",")
       For counter = 0 to UBound(subFolderArray)
-	     strSubFolder = Trim(subFolderArray(counter))
+         strSubFolder = Trim(subFolderArray(counter))
          strDataSubFolder = strProjectsFolder & strProjectName & "\" & strDataMainSub & "\" & strSubFolder
-  	     Call CreateFolder(strDataSubFolder, VERBOSE)
+         Call CreateFolder(strDataSubFolder, VERBOSE)
  	 
          strSubGroupName = strProjectName & " " & strSubFolder  'e.g. 'ARITMO WP5
-  	     Call CreateUserGroup(strOU,strSubGroupName, VERBOSE)
-	     ' Add WP group to project group
-  	     Call AddGrpMem(strGroupName, strSubGroupName, VERBOSE)
+         Call CreateUserGroup(strOU,strSubGroupName, VERBOSE)
+         ' Add WP group to project group
+         Call AddGrpMem(strGroupName, strSubGroupName, VERBOSE)
 
-    	 Call SetPermissions(strDataSubFolder, StrSubGroupName, "(OI)(CI)(RX)", VERBOSE)
+         Call SetPermissions(strDataSubFolder, StrSubGroupName, "(OI)(CI)(RX)", VERBOSE)
         
          ' Create Date Share on this level
          Call createShare(strProjectName & "-" & strSubFolder & "-Data",strDataSubFolder, VERBOSE)

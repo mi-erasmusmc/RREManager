@@ -18,7 +18,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
+import org.apache.commons.io.FileUtils;
 import org.erasmusmc.rremanager.RREManager;
+import org.erasmusmc.rremanager.changelog.AddProjectLogEntry;
+import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
+import org.erasmusmc.rremanager.changelog.LogEntry;
+import org.erasmusmc.rremanager.changelog.ModifyUserLogEntry;
+import org.erasmusmc.rremanager.files.ProjectData;
+import org.erasmusmc.rremanager.files.UserData;
 import org.erasmusmc.rremanager.utilities.DateUtilities;
 
 
@@ -73,6 +80,23 @@ public class MainFrame {
 		    @Override
 		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
 		    	String busy = isBusy();
+		    	if (busy == null) {
+		    		if (RREManager.changeLog.hasChanges()) {
+		    			if (runScripts()) {
+			    			backupDataFile();
+		    			}
+		    			else {
+		    				if (restoreDataFile()) {
+		    					JOptionPane.showMessageDialog(null, "Script Error!\\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+		    				}
+		    				else {
+		    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+		    				}
+		    			}
+		    		}
+		            System.exit(0);
+		    	}
+		    	/*
 		        if (
 		        		(busy == null) ||
 		        		(JOptionPane.showConfirmDialog(
@@ -83,6 +107,7 @@ public class MainFrame {
 		        ) {
 		            System.exit(0);
 		        }
+		        */
 		    }
 		});
 		
@@ -145,6 +170,94 @@ public class MainFrame {
         logPanel.add(consoleScrollPane, BorderLayout.CENTER);
         
 		return logPanel;
+	}
+	
+	
+	private void backupDataFile() {
+		String dataFileName = RREManager.getIniFile().getValue("General","DataFile");
+		String backupFileName = getNextFileName(dataFileName);
+		if (backupFileName != null) {
+			File dataFile = new File(dataFileName);
+			File backupFile = new File(backupFileName);
+			try {
+				FileUtils.copyFile(dataFile, backupFile);
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "Cannot create backup file!\nCreate it manually.", "RREManager Backup Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+	
+	
+	private boolean restoreDataFile() {
+		boolean success = false;
+		
+		String dataFileName = RREManager.getIniFile().getValue("General","DataFile");
+		String errorFileName = getNextFileName(dataFileName);
+		
+		if (errorFileName != null) {
+			String baseFileName = errorFileName.substring(0, errorFileName.lastIndexOf("."));
+			String extension = errorFileName.substring(errorFileName.lastIndexOf("."));
+			errorFileName = baseFileName + " ERROR" + extension;
+			try {
+				File dataFile = new File(dataFileName);
+				File errorFile = new File(errorFileName);
+				FileUtils.copyFile(dataFile, errorFile);
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "Cannot create error file!", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		
+		String restoreFileName = getLastFileName(dataFileName);
+		if (restoreFileName != null) {
+			try {
+				File dataFile = new File(dataFileName);
+				File restoreFile = new File(restoreFileName);
+				FileUtils.copyFile(restoreFile, dataFile);
+				success = true;
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "Cannot restore original file!", "RREManager Restore Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		
+		return success;
+	}
+	
+	
+	private String getNextFileName(String fileName) {
+		String nextFileName = null;
+
+		String date = DateUtilities.getCurrentDate();
+		String baseFileName = fileName.substring(0, fileName.lastIndexOf("."));
+		String extension = fileName.substring(fileName.lastIndexOf("."));
+
+		boolean found = false;
+		for (Integer versionNr = 1; versionNr < 100; versionNr++) {
+			String versionNrString = ("00" + versionNr).substring(versionNr.toString().length());
+			nextFileName = baseFileName + " " + date + " " + versionNrString + extension;
+			File nextFile = new File(nextFileName);
+			if (!nextFile.exists()) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			JOptionPane.showMessageDialog(null, "Cannot create new version of file '" + fileName + "'.", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
+			nextFileName = null;
+		}
+		
+		return nextFileName;
+	}
+	
+	
+	private String getLastFileName(String fileName) {
+		String lastFileName = null;
+
+		String date = DateUtilities.getCurrentDate();
+		String baseFileName = fileName.substring(0, fileName.lastIndexOf(" "));
+		baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf(" "));
+		//TODO read file from directory filtered by baseFileName and sort them. Get the last one.
+		
+		return lastFileName;
 	}
 	
 	
@@ -287,6 +400,31 @@ public class MainFrame {
 	
 	public ProjectsTab getProjectsTab() {
 		return projectsTab;
+	}
+	
+	
+	private boolean runScripts() {
+		boolean success = false;
+
+		logWithTimeLn("Running scripts");
+		UserData userData = new UserData(this, "User Projects");
+		ProjectData projectData = new ProjectData(this, "Projects");
+		for (LogEntry logEntry : RREManager.changeLog.getLogEntries()) {
+			if (logEntry.isAddProjectLogEntry()) {
+				logWithTimeLn("Create project " + ((AddProjectLogEntry) logEntry).getProject() + " " + ((AddProjectLogEntry) logEntry).getSubFolders());
+				//TODO
+			}
+			else if (logEntry.isModifyUserLogEntry()) {
+				logWithTimeLn("Modify user " + ((ModifyUserLogEntry) logEntry).getUserName());
+				//TODO
+			}
+			else if (logEntry.isAddUserLogEntry()) {
+				logWithTimeLn("Add user " + ((AddUserLogEntry) logEntry).getUserName());
+				//TODO
+			}
+		}
+		
+		return success;
 	}
 
 }

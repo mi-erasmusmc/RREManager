@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
+import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
 
 public class UserData {
@@ -46,6 +47,7 @@ public class UserData {
 	
 
 	private MainFrame mainFrame = null;
+	private String settingsGroup = null;
 	private List<String[]> users = new ArrayList<String[]>();
 	private String error = null;
 	
@@ -62,7 +64,8 @@ public class UserData {
 
 	public UserData(MainFrame mainFrame, String settingsGroup) {
 		this.mainFrame = mainFrame;
-		getData(settingsGroup);
+		this.settingsGroup = settingsGroup;
+		getData();
 	}
 	
 	
@@ -107,8 +110,9 @@ public class UserData {
 	}
 	
 	
-	private void getData(String settingsGroup) {
-		String usersFileName = RREManager.getIniFile().getValue(settingsGroup,"File");
+	private void getData() {
+		users.clear();
+		String usersFileName = RREManager.getIniFile().getValue("General","DataFile");
 		String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
 		File file = new File(usersFileName);
 		if (file.exists() && file.canRead()) {
@@ -168,20 +172,30 @@ public class UserData {
 		}
 	}
 	
-	/*
-	public boolean AddUser(String settingsGroup, String[] user) {
+	
+	public boolean AddUser(String[] user) {
 		boolean success = false;
 		
 		Map<String, List<String>> scriptCallParameters = new HashMap<String, List<String>>();
 		
-		String usersFileName = RREManager.getIniFile().getValue(settingsGroup,"File");
+		String usersFileName = RREManager.getIniFile().getValue("General","DataFile");
 		String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
 		File file = new File(usersFileName);
 		if (file.exists() && file.canWrite()) {
 			ExcelFile usersFile = new ExcelFile(usersFileName);
 			if (usersFile.open()) {
 				if (usersFile.getSheet(sheetName, true)) {
-					String allTimeLogRecord = null;
+					String allTimeLogRecord = "Add User";
+					allTimeLogRecord += "," + "\"" + user[EMAIL] + "\"";
+					allTimeLogRecord += "," + "\"" + user[USER_NAME] + "\"";
+					allTimeLogRecord += "," + "\"" + user[FIRST_NAME] + "\"";
+					allTimeLogRecord += "," + "\"" + user[LAST_NAME] + "\"";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += "," + "\"" + user[PASSWORD] + "\"";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += "," + "Yes";
+					allTimeLogRecord += "," + "\"" + user[PROJECTS] + "\"";
+					allTimeLogRecord += "," + "\"" + user[GROUPS] + "\"";
 					
 					Map<String, Object> row = new HashMap<String, Object>();
 					row.put("Update"        , "");
@@ -196,28 +210,16 @@ public class UserData {
 					row.put("Email Format"  , user[EMAIL_FORMAT]);
 					row.put("IP-Address(es)", user[IP_ADDRESSES]);
 
-					if (!usersFile.addRow(sheetName, row)) {
-						error = "ERROR while adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + " )";
+					if (usersFile.addRow(sheetName, row) && usersFile.write()) {
+						RREManager.changeLog.addLogEntry(new AddUserLogEntry(user[USER_NAME]));
+						allTimeLogRecord += "," + "Succeeded";
+						allTimeLogRecord += ",";
+						mainFrame.logLn("");
+						mainFrame.logWithTimeLn("Adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")" + "SUCCEEDED");
+						mainFrame.allTimeLog(allTimeLogRecord, "");
 						
 						if (allTimeLogRecord != null) {
-							allTimeLogRecord += "," + "Failed";
-							allTimeLogRecord += "," + "\"" + error + "\"";
-							mainFrame.logLn("");
-							mainFrame.logWithTimeLn(logLine + "FAILED");
-							mainFrame.allTimeLog(allTimeLogRecord, "");
-						}
-						
-						success = false; 
-					}
-					else {
-						if (allTimeLogRecord != null) {
-							
-							allTimeLogRecord += "," + "Succeeded";
-							allTimeLogRecord += ",";
-							mainFrame.logLn("");
-							mainFrame.logWithTimeLn(logLine + "SUCCEEDED");
-							mainFrame.allTimeLog(allTimeLogRecord, "");
-
+/*
 							if (scriptCallParameters.containsKey(projectName + "," + group)) {
 								String groups = scriptCallParameters.get(projectName + "," + group).get(scriptCallParameters.get(projectName + "," + group).size() - 1);
 								
@@ -243,9 +245,23 @@ public class UserData {
 								mainFrame.logWithTimeLn("  DONE");
 								mainFrame.allTimeLog(allTimeLogRecord, "\"Script call: createProjects.vbs " + projectName + " " + groups + "\"");
 							}
+*/
 						}
 						
+						getData();
+						
 						success = true;
+					}
+					else {
+						error = "ERROR while adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")";
+
+						allTimeLogRecord += "," + "Failed";
+						allTimeLogRecord += "," + "\"" + error + "\"";
+						mainFrame.logLn("");
+						mainFrame.logWithTimeLn("Adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")" + "FAILED");
+						mainFrame.allTimeLog(allTimeLogRecord, "");
+						
+						success = false;
 					}
 				}
 			}
@@ -253,5 +269,5 @@ public class UserData {
 		
 		return success;
 	}
-*/
+
 }

@@ -78,7 +78,7 @@ public class AdministratorSelector {
 			Collections.sort(administratorsList);
 			
 			if (administratorsList.size() > 1) {
-				Dimension dimension = new Dimension(300, 150);
+				Dimension dimension = new Dimension(350, 150);
 				JDialog administratorSelectorDialog = new JDialog(parentFrame, true);
 				administratorSelectorDialog.setTitle("Select yourself");
 				administratorSelectorDialog.setLayout(new BorderLayout());
@@ -127,6 +127,8 @@ public class AdministratorSelector {
 									.addComponent(passwordField)
 									)
 						);
+				
+				layout.linkSize(administratorComboBox, passwordField);
 				
 				JPanel buttonPanel = new JPanel();
 				JButton okButton = new JButton("OK");

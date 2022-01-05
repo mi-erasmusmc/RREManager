@@ -21,6 +21,11 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.PlainDocument;
 
 public class ProjectDefiner {
 	private static int LABELWIDTH    = 80;
@@ -83,6 +88,8 @@ public class ProjectDefiner {
 		JLabel nameLabel = new JLabel("Project name:");
 		nameLabel.setPreferredSize(new Dimension(LABELWIDTH, ROWHEIGHT));
 		JTextField nameField = new JTextField(20);
+		((PlainDocument) nameField.getDocument()).setDocumentFilter(new ProjectFolderNameFilter(nameField, false));
+		
 		if (projectName != null) {
 			nameField.setText(projectName);
 			nameField.setEnabled(false);
@@ -94,6 +101,7 @@ public class ProjectDefiner {
 		JLabel groupsLabel = new JLabel("Groups:");
 		groupsLabel.setPreferredSize(new Dimension(LABELWIDTH, ROWHEIGHT));
 		JTextField groupsField = new JTextField(20);
+		((PlainDocument) groupsField.getDocument()).setDocumentFilter(new ProjectFolderNameFilter(groupsField, true));
 		groupsPanel.add(groupsLabel);
 		groupsPanel.add(groupsField);
 		
@@ -165,5 +173,64 @@ public class ProjectDefiner {
 		rootPane.setDefaultButton(okButton);
 		
 		projectDialog.setVisible(true);
+	}
+	
+	
+	private class ProjectFolderNameFilter extends DocumentFilter {
+		private String allowedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_";
+		private JTextField field;
+		
+		public ProjectFolderNameFilter(JTextField field, boolean includeComma) {
+			this.field = field;
+			allowedCharacters += (includeComma ? "," : "");
+		}
+		
+		@Override
+		public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+			Document doc = field.getDocument();
+			StringBuilder sb = new StringBuilder();
+			sb.append(doc.getText(0, doc.getLength()));
+			sb.insert(offset, string);
+		
+			if (test(sb)) {
+				super.insertString(fb, offset, string.toUpperCase(), attr);
+			}
+		}
+		
+		@Override
+		public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attr) throws BadLocationException {
+			Document doc = field.getDocument();
+			StringBuilder sb = new StringBuilder();
+			sb.append(doc.getText(0, doc.getLength()));
+			sb.replace(offset, offset + length, text);
+		
+			if (sb.toString().equals("") || test(sb)) {
+				super.replace(fb, offset, length, text.toUpperCase(), attr);
+			}
+		}
+		
+		@Override
+		public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+			Document doc = field.getDocument();
+			StringBuilder sb = new StringBuilder();
+			sb.append(doc.getText(0, doc.getLength()));
+			sb.delete(offset, offset + length);
+		
+			if (sb.toString().equals("") || test(sb)) {
+				super.remove(fb, offset, length);
+			}
+		}
+		
+		private boolean test(StringBuilder sb) {
+			boolean ok = true;
+			String sbString = sb.toString().toUpperCase();
+			for (int charNr = 0; charNr < sbString.length(); charNr++) {
+				if (!allowedCharacters.contains(sbString.substring(charNr, charNr + 1))) {
+					ok = false;
+					break;
+				}
+			}
+			return ok;
+		}
 	}
 }

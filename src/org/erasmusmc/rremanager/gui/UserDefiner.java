@@ -9,7 +9,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
@@ -342,10 +344,13 @@ public class UserDefiner {
 					user[UserData.GROUPS]       = "";
 					if (!ftpOnlyField.isSelected()) {
 						if (selectedGroups.size() > 0) {
+							Set<String> selectedProjects = new HashSet<String>();
 							for (String projectGroup : selectedGroups) {
-								String project = projectGroup.split(",")[0];
-								user[UserData.PROJECTS] += (user[UserData.PROJECTS].equals("") ? "" : ",") + project;
-								user[UserData.GROUPS]   += (user[UserData.GROUPS].equals("") ? "" : ",") + projectGroup;
+								String project = projectGroup.split(" ")[0];
+								if (selectedProjects.add(project)) {
+									user[UserData.PROJECTS] += (user[UserData.PROJECTS].equals("") ? "" : ",") + project;
+								}
+								user[UserData.GROUPS] += (user[UserData.GROUPS].equals("") ? "" : ",") + projectGroup;
 							}
 						}
 					}

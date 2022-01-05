@@ -20,6 +20,17 @@
 ' you agree that the copyright owner above has no warranty, obligations,
 ' or liability for such use.
 
+' Arguments:
+'   first name
+'   initial
+'   last name
+'   username
+'   password
+'   email address
+'   projects
+'   groups
+'   update flag (1 = update)
+
 Option Explicit
 
 Dim VERBOSE
@@ -35,8 +46,8 @@ Dim strUserOU, strGroupOU, strGroup, strUser
 Dim objRootLDAP
 
 multiOTPGroup = "MultiOTP Users"
-FolderScript = "F:\Administration\Scripts\createFolders.vbs"
-FTPOnlyFolderScript = "F:\Administration\Scripts\createFTPOnlyFolders.vbs"
+FolderScript = "createFolders.vbs"
+FTPOnlyFolderScript = "createFTPOnlyFolders.vbs"
 
 
 ' Constants for the NameTranslate object.
@@ -62,16 +73,6 @@ strNetBIOSDomain = objTrans.Get(ADS_NAME_TYPE_NT4)
 ' Remove trailing backslash.
 strNetBIOSdomain = Left(strNetBIOSDomain, Len(strNetBIOSDomain) - 1)
 
-' Arguments:
-'   first name
-'   initial
-'   last name
-'   username
-'   password
-'   email address
-'   projects
-'   groups
-'   update flag (1 = update)
 args = WScript.Arguments.Count
 
 If args > 5 then

@@ -1,6 +1,7 @@
 package org.erasmusmc.rremanager;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +13,8 @@ import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FileUtils;
+import org.erasmusmc.rremanager.changelog.ChangeLog;
 import org.erasmusmc.rremanager.files.IniFile;
 import org.erasmusmc.rremanager.files.UserData;
 import org.erasmusmc.rremanager.gui.AdministratorSelector;
@@ -22,12 +25,14 @@ import org.erasmusmc.rremanager.gui.ProjectDefiner;
 import org.erasmusmc.rremanager.gui.UserDefiner;
 import org.erasmusmc.rremanager.gui.PasswordManager;
 import org.erasmusmc.rremanager.smtp.SMTPMailClient;
+import org.erasmusmc.rremanager.utilities.DateUtilities;
 
 public class RREManager {
 	public static boolean inEclipse = false;
 	public static String version = "1.7";
 	public static boolean noLogging = true;
 	public static boolean loggingStarted = false;
+	public static ChangeLog changeLog = new ChangeLog();
 	
 	private static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	private static Map<JComponent, Boolean> componentsStatusBeforeRun = new HashMap<JComponent, Boolean>();
@@ -141,10 +146,10 @@ public class RREManager {
 							attachments.addAll(getAdditionalAttachments(messageType));
 
 							String allTimeLogRecord = "Send FTP-Only Account";
-							allTimeLogRecord += "," + user[UserData.EMAIL];
-							allTimeLogRecord += "," + user[UserData.USER_NAME];
-							allTimeLogRecord += "," + user[UserData.FIRST_NAME];
-							allTimeLogRecord += "," + user[UserData.LAST_NAME];
+							allTimeLogRecord += "," + "\"" + user[UserData.EMAIL] + "\"";
+							allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
+							allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
+							allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
@@ -165,10 +170,10 @@ public class RREManager {
 								attachments.addAll(getAdditionalAttachments(messageType));
 								
 								String allTimeLogRecord = "Send RDP Account";
-								allTimeLogRecord += "," + user[UserData.EMAIL];
-								allTimeLogRecord += "," + user[UserData.USER_NAME];
-								allTimeLogRecord += "," + user[UserData.FIRST_NAME];
-								allTimeLogRecord += "," + user[UserData.LAST_NAME];
+								allTimeLogRecord += "," + "\"" + user[UserData.EMAIL] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
 								allTimeLogRecord += ",";
 								allTimeLogRecord += ",";
 								allTimeLogRecord += ",";
@@ -211,12 +216,12 @@ public class RREManager {
 								attachments.addAll(getAdditionalAttachments(messageType));
 								
 								String allTimeLogRecord = "Send Password";
-								allTimeLogRecord += "," + user[UserData.EMAIL];
-								allTimeLogRecord += "," + user[UserData.USER_NAME];
-								allTimeLogRecord += "," + user[UserData.FIRST_NAME];
-								allTimeLogRecord += "," + user[UserData.LAST_NAME];
+								allTimeLogRecord += "," + "\"" + user[UserData.EMAIL] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
 								allTimeLogRecord += ",";
-								allTimeLogRecord += "," + user[UserData.PASSWORD];
+								allTimeLogRecord += "," + "\"" + user[UserData.PASSWORD] + "\"";
 								allTimeLogRecord += ",";
 								
 								mail(messageType, user, attachments, null, allTimeLogRecord, false, false);
@@ -296,7 +301,7 @@ public class RREManager {
 							attachments.addAll(getAdditionalAttachments(messageType));
 							
 							String allTimeLogRecord = "Send Firewall Add Request";
-							allTimeLogRecord += "," + getIniFile().getValue(messageType, "Email");
+							allTimeLogRecord += "," + "\"" + getIniFile().getValue(messageType, "Email") + "\"";
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
@@ -403,7 +408,7 @@ public class RREManager {
 							attachments.addAll(getAdditionalAttachments(messageType));
 							
 							String allTimeLogRecord = "Send Firewall Remove Request";
-							allTimeLogRecord += "," + getIniFile().getValue(messageType, "Email");
+							allTimeLogRecord += "," + "\"" + getIniFile().getValue(messageType, "Email") + "\"";
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
 							allTimeLogRecord += ",";
@@ -444,12 +449,12 @@ public class RREManager {
 							String[] user = userData.getUser(userNr);
 							if (user != null) {
 								String allTimeLogRecord = "Send " + messageType;
-								allTimeLogRecord += "," + user[UserData.EMAIL];
-								allTimeLogRecord += "," + user[UserData.USER_NAME];
-								allTimeLogRecord += "," + user[UserData.FIRST_NAME];
-								allTimeLogRecord += "," + user[UserData.LAST_NAME];
+								allTimeLogRecord += "," + "\"" + user[UserData.EMAIL] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
+								allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
 								allTimeLogRecord += ",";
-								allTimeLogRecord += "," + user[UserData.PASSWORD];
+								allTimeLogRecord += "," + "\"" + user[UserData.PASSWORD] + "\"";
 								allTimeLogRecord += ",";
 								
 								mail(messageType, user, null, null, allTimeLogRecord, true, false);
@@ -472,11 +477,11 @@ public class RREManager {
 						if (bccList.size() > 0) {
 							if (approveEmail(getEmailText(messageType, info), info, getIniFile().getValue(messageType, "Subject"), false)) {
 								String allTimeLogRecord = "Send " + messageType;
-								allTimeLogRecord += "," + info[UserData.EMAIL];
+								allTimeLogRecord += "," + "\"" + info[UserData.EMAIL] + "\"";
 								allTimeLogRecord += ",";
 								allTimeLogRecord += ",";
 								allTimeLogRecord += ",";
-								allTimeLogRecord += "," + bccString;
+								allTimeLogRecord += "," + "\"" + bccString + "\"";
 								allTimeLogRecord += ",";
 								allTimeLogRecord += ",";
 								

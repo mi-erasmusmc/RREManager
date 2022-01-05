@@ -55,10 +55,6 @@ public class UsersTab extends MainFrameTab {
 	private JPanel detailsPanel;
 	private JComboBox<String> messageTypeComboBox;
 	private JButton sendButton;
-	private JButton sendAccountsButton;
-	private JButton sendPasswordsButton;
-	private JButton sendFirewallAddRequestButton;
-	private JButton sendFirewallRemoveRequestButton;
 	private JButton editUserButton;
 	private JButton addUserButton;
 	
@@ -410,7 +406,7 @@ public class UsersTab extends MainFrameTab {
 	private void addUser() {
 		String[] user = rreManager.getUserDefiner().getUser(null, mainFrame.getProjectsTab().getProjectData());
 		if (user != null) {
-			//userData.AddUser(settingsGroup, user);
+			userData.AddUser(user);
 		}
 	}
 	
