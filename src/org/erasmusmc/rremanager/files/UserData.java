@@ -215,7 +215,7 @@ public class UserData {
 						allTimeLogRecord += "," + "Succeeded";
 						allTimeLogRecord += ",";
 						mainFrame.logLn("");
-						mainFrame.logWithTimeLn("Adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")" + "SUCCEEDED");
+						mainFrame.logWithTimeLn("Adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ") " + "SUCCEEDED");
 						mainFrame.allTimeLog(allTimeLogRecord, "");
 						
 						if (allTimeLogRecord != null) {

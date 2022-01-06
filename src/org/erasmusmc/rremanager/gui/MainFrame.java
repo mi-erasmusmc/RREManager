@@ -9,6 +9,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -192,12 +196,9 @@ public class MainFrame {
 		boolean success = false;
 		
 		String dataFileName = RREManager.getIniFile().getValue("General","DataFile");
-		String errorFileName = getNextFileName(dataFileName);
+		String errorFileName = getNextErrorFileName(dataFileName);
 		
 		if (errorFileName != null) {
-			String baseFileName = errorFileName.substring(0, errorFileName.lastIndexOf("."));
-			String extension = errorFileName.substring(errorFileName.lastIndexOf("."));
-			errorFileName = baseFileName + " ERROR" + extension;
 			try {
 				File dataFile = new File(dataFileName);
 				File errorFile = new File(errorFileName);
@@ -249,13 +250,54 @@ public class MainFrame {
 	}
 	
 	
-	private String getLastFileName(String fileName) {
-		String lastFileName = null;
+	private String getNextErrorFileName(String fileName) {
+		String nextErrorFileName = null;
 
 		String date = DateUtilities.getCurrentDate();
-		String baseFileName = fileName.substring(0, fileName.lastIndexOf(" "));
-		baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf(" "));
-		//TODO read file from directory filtered by baseFileName and sort them. Get the last one.
+		String baseFileName = fileName.substring(0, fileName.lastIndexOf("."));
+		String extension = fileName.substring(fileName.lastIndexOf("."));
+
+		boolean found = false;
+		for (Integer versionNr = 1; versionNr < 100; versionNr++) {
+			String versionNrString = ("00" + versionNr).substring(versionNr.toString().length());
+			nextErrorFileName = baseFileName + " " + date + " " + versionNrString + " ERROR" + extension;
+			File nextFile = new File(nextErrorFileName);
+			if (!nextFile.exists()) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			JOptionPane.showMessageDialog(null, "Cannot create new version of file '" + fileName + "'.", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
+			nextErrorFileName = null;
+		}
+		
+		return nextErrorFileName;
+	}
+	
+	
+	private String getLastFileName(String dataFileName) {
+		String lastFileName = null;
+
+		String baseFileName = dataFileName.substring(dataFileName.lastIndexOf(File.separator) + 1);
+		baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf("."));
+		String extension = dataFileName.substring(dataFileName.lastIndexOf("."));
+		
+		String folderName = dataFileName.substring(0, dataFileName.lastIndexOf(File.separator));
+		File folder = new File(folderName);
+		String[] fileFolderList = folder.list();
+		List<String> dataFileNamesList = new ArrayList<String>();
+		for (String fileFolderName : fileFolderList) {
+			File fileFolder = new File(fileFolderName);
+			if (fileFolder.isFile() && fileFolderName.endsWith(extension) && fileFolderName.startsWith(baseFileName)) {
+				dataFileNamesList.add(fileFolderName);
+			}
+		}
+		
+		if (dataFileNamesList.size() > 0) {
+			Collections.sort(dataFileNamesList);
+			lastFileName = dataFileNamesList.get(dataFileNamesList.size() - 1);
+		}
 		
 		return lastFileName;
 	}
