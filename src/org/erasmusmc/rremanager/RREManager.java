@@ -28,12 +28,12 @@ import org.erasmusmc.rremanager.smtp.SMTPMailClient;
 import org.erasmusmc.rremanager.utilities.DateUtilities;
 
 public class RREManager {
-	public static boolean inEclipse = false;
 	public static String version = "1.7";
-	public static boolean noLogging = true;
+	public static boolean noLogging = false;
 	public static boolean loggingStarted = false;
 	public static ChangeLog changeLog = new ChangeLog();
-	
+
+	private static boolean error = false;
 	private static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	private static Map<JComponent, Boolean> componentsStatusBeforeRun = new HashMap<JComponent, Boolean>();
 	
@@ -81,8 +81,6 @@ public class RREManager {
 	
 	
 	public RREManager(Map<String, String> parameters) {
-		noLogging = parameters.keySet().contains("nologging");
-		inEclipse = ((System.getProperty("runInEclipse") != null) && System.getProperty("runInEclipse").equalsIgnoreCase("true"));
 		if (setCurrentPath()) {
 			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
@@ -105,6 +103,16 @@ public class RREManager {
 				JOptionPane.showMessageDialog(null, iniFile.getError(), "RREManager Error", JOptionPane.ERROR_MESSAGE);
 			}			
 		}
+	}
+	
+	
+	public void raiseErrorFlag() {
+		error = true;
+	}
+	
+	
+	public boolean errorOccurred() {
+		return error;
 	}
 	
 	

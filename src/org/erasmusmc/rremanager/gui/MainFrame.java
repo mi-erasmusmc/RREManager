@@ -77,6 +77,11 @@ public class MainFrame {
 	}
 	
 	
+	public RREManager getRREManager() {
+		return rreManager;
+	}
+	
+	
 	private void createInterface() {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -85,18 +90,28 @@ public class MainFrame {
 		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
 		    	String busy = isBusy();
 		    	if (busy == null) {
-		    		if (RREManager.changeLog.hasChanges()) {
-		    			if (runScripts()) {
-			    			backupDataFile();
-		    			}
-		    			else {
-		    				if (restoreDataFile()) {
-		    					JOptionPane.showMessageDialog(null, "Script Error!\\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
-		    				}
-		    				else {
-		    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
-		    				}
-		    			}
+		    		if (rreManager.errorOccurred()) {
+	    				if (restoreDataFile()) {
+	    					JOptionPane.showMessageDialog(null, "Errors Occurred!\\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+	    				}
+	    				else {
+	    					JOptionPane.showMessageDialog(null, "Errors Occurred!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+	    				}
+		    		}
+		    		else {
+			    		if (RREManager.changeLog.hasChanges()) {
+			    			if (runScripts()) {
+				    			backupDataFile();
+			    			}
+			    			else {
+			    				if (restoreDataFile()) {
+			    					JOptionPane.showMessageDialog(null, "Script Error!\\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+			    				}
+			    				else {
+			    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+			    				}
+			    			}
+			    		}
 		    		}
 		            System.exit(0);
 		    	}
@@ -139,9 +154,7 @@ public class MainFrame {
         
         frame.setVisible(true);
 
-		if (!RREManager.inEclipse) {
-	        setLogFile();
-		}
+        setLogFile();
 	}
 	
 	
@@ -185,7 +198,58 @@ public class MainFrame {
 			File backupFile = new File(backupFileName);
 			try {
 				FileUtils.copyFile(dataFile, backupFile);
-			} catch (IOException e) {
+				String allTimeLogRecord = "Create backup";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Succeeded";
+				allTimeLogRecord += ",";
+				logWithTimeLn("Created backup of " + dataFileName + " in " + backupFileName);
+				allTimeLog(allTimeLogRecord, backupFileName);
+			} catch (IOException copyException) {
+				String allTimeLogRecord = "Create backup";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Failed";
+				allTimeLogRecord += "," + "Copy failed";
+				logWithTimeLn("FAILED to create backup of '" + dataFileName + "' in '" + backupFileName + "'");
+				allTimeLog(allTimeLogRecord, backupFileName);
+
+				allTimeLogRecord = "Delete failed backup";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				String logLn = "Deleted backup file '" + dataFileName + "'";
+				try {
+					backupFile.delete();
+					allTimeLogRecord += "," + "Succeeded";
+					allTimeLogRecord += ",";
+				} catch (SecurityException securityException) {
+					allTimeLogRecord += "," + "Failed";
+					allTimeLogRecord += "," + "Delete failed";
+					logLn = "FAILED to delete backup file '" + dataFileName + "'";
+				}
+				logWithTimeLn(logLn);
+				allTimeLog(allTimeLogRecord, backupFileName);
 				JOptionPane.showMessageDialog(null, "Cannot create backup file!\nCreate it manually.", "RREManager Backup Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
@@ -203,7 +267,35 @@ public class MainFrame {
 				File dataFile = new File(dataFileName);
 				File errorFile = new File(errorFileName);
 				FileUtils.copyFile(dataFile, errorFile);
+				String allTimeLogRecord = "Create error file";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Succeeded";
+				allTimeLogRecord += ",";
+				logWithTimeLn("Created error file " + errorFileName + " from " + dataFileName);
+				allTimeLog(allTimeLogRecord, errorFileName);
 			} catch (IOException e) {
+				String allTimeLogRecord = "Create error file";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Failed";
+				allTimeLogRecord += ",";
+				logWithTimeLn("FAILED to create error file " + errorFileName + " from " + dataFileName);
+				allTimeLog(allTimeLogRecord, errorFileName);
 				JOptionPane.showMessageDialog(null, "Cannot create error file!", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
@@ -214,8 +306,36 @@ public class MainFrame {
 				File dataFile = new File(dataFileName);
 				File restoreFile = new File(restoreFileName);
 				FileUtils.copyFile(restoreFile, dataFile);
+				String allTimeLogRecord = "Restore backup";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Succeeded";
+				allTimeLogRecord += ",";
+				logWithTimeLn("Restored backup of " + dataFileName + " from " + restoreFileName);
+				allTimeLog(allTimeLogRecord, restoreFileName);
 				success = true;
 			} catch (IOException e) {
+				String allTimeLogRecord = "Restore backup";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Failed";
+				allTimeLogRecord += ",";
+				logWithTimeLn("FAILED to restorer backup of " + dataFileName + " from " + restoreFileName);
+				allTimeLog(allTimeLogRecord, restoreFileName);
 				JOptionPane.showMessageDialog(null, "Cannot restore original file!", "RREManager Restore Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
@@ -374,15 +494,13 @@ public class MainFrame {
 			allTimeLogFile = RREManager.noLogging ? null : new File(allTimeLogFileName);
 			if (RREManager.noLogging || allTimeLogFile.exists() || allTimeLog(allTimeLogHeader, "Info")) {
 				logWithTimeLn("RRE Manager v" + RREManager.version + " - " + rreManager.getAdministrator());
-				if (!RREManager.inEclipse) {
-					logLn("");
-					logLn("");
-					logLn(RREManager.getIniFile().getFileName() + ":");
-					logLn("--------------------------------------------------------------------------------------");
-					RREManager.getIniFile().writeFile(System.out);
-					logLn("--------------------------------------------------------------------------------------");
-					logLn("");
-				}
+				logLn("");
+				logLn("");
+				logLn(RREManager.getIniFile().getFileName() + ":");
+				logLn("--------------------------------------------------------------------------------------");
+				RREManager.getIniFile().writeFile(System.out);
+				logLn("--------------------------------------------------------------------------------------");
+				logLn("");
 			}
 		}
 		System.out.println(logText);
@@ -395,7 +513,7 @@ public class MainFrame {
 			if (allTimeLogFile.exists()) {
 				record = DateUtilities.getCurrentTime().replaceAll(" ", ",") + "," + rreManager.getAdministrator() + "," + record;
 				record += "," + getLogFileName();
-				record += "," + info;
+				record += "," + "\"" + info + "\"";
 			}
 			else { // File does no exist -> write header
 				record = "Date,Time,Administrator," + record;
@@ -448,22 +566,25 @@ public class MainFrame {
 	private boolean runScripts() {
 		boolean success = false;
 
-		logWithTimeLn("Running scripts");
-		UserData userData = new UserData(this, "User Projects");
-		ProjectData projectData = new ProjectData(this, "Projects");
-		for (LogEntry logEntry : RREManager.changeLog.getLogEntries()) {
-			if (logEntry.isAddProjectLogEntry()) {
-				logWithTimeLn("Create project " + ((AddProjectLogEntry) logEntry).getProject() + " " + ((AddProjectLogEntry) logEntry).getSubFolders());
-				//TODO
+		if (JOptionPane.showConfirmDialog(frame, "Do you want apply the changes to the server?", "Apply changes?", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
+			logWithTimeLn("Running scripts");
+			UserData userData = new UserData(this, "User Projects");
+			ProjectData projectData = new ProjectData(this, "Projects");
+			for (LogEntry logEntry : RREManager.changeLog.getLogEntries()) {
+				if (logEntry.isAddProjectLogEntry()) {
+					logWithTimeLn("  Create project " + ((AddProjectLogEntry) logEntry).getProject() + " " + ((AddProjectLogEntry) logEntry).getSubFolders());
+					//TODO
+				}
+				else if (logEntry.isModifyUserLogEntry()) {
+					logWithTimeLn("  Modify user " + ((ModifyUserLogEntry) logEntry).getUserName());
+					//TODO
+				}
+				else if (logEntry.isAddUserLogEntry()) {
+					logWithTimeLn("  Add user " + ((AddUserLogEntry) logEntry).getUserName());
+					//TODO
+				}
 			}
-			else if (logEntry.isModifyUserLogEntry()) {
-				logWithTimeLn("Modify user " + ((ModifyUserLogEntry) logEntry).getUserName());
-				//TODO
-			}
-			else if (logEntry.isAddUserLogEntry()) {
-				logWithTimeLn("Add user " + ((AddUserLogEntry) logEntry).getUserName());
-				//TODO
-			}
+			logWithTimeLn("Running scripts finished " + (success ? "successfully" : "with errors"));
 		}
 		
 		return success;

@@ -10,10 +10,12 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.changelog.AddProjectLogEntry;
+import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
 
 public class ProjectData {
 	
+	private RREManager rreManager = null;
 	private String settingsGroup = null;
 	private MainFrame mainFrame = null;
 	private Map<String, List<String>> projects = new HashMap<String, List<String>>();
@@ -81,14 +83,6 @@ public class ProjectData {
 		boolean success = false;
 		
 		for (String project : newProjects.keySet()) {
-			String groupsParameter = "";
-			for (String newGroup : newProjects.get(project)) {
-				groupsParameter += (groupsParameter.equals("") ? "" : ",") + newGroup;
-			}
-			List<String> parameters = new ArrayList<String>();
-			parameters.add(project);
-			parameters.add(groupsParameter);
-			
 			List<String> currentGroups = projects.get(project);
 			if (currentGroups == null) {
 				projects.put(project, newProjects.get(project));
@@ -195,6 +189,20 @@ public class ProjectData {
 					}
 				}
 			}
+		}
+		
+		if (success) {
+			for (String project : newProjects.keySet()) {
+				String groups = "";
+				for (String newGroup : newProjects.get(project)) {
+					groups += (groups.equals("") ? "" : ",") + newGroup;
+				}
+				
+				RREManager.changeLog.addLogEntry(new AddProjectLogEntry(project, groups));
+			}
+		}
+		else {
+			mainFrame.getRREManager().raiseErrorFlag();
 		}
 		
 		return success;
