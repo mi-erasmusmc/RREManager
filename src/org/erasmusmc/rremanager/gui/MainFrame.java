@@ -92,7 +92,7 @@ public class MainFrame {
 		    	if (busy == null) {
 		    		if (rreManager.errorOccurred()) {
 	    				if (restoreDataFile()) {
-	    					JOptionPane.showMessageDialog(null, "Errors Occurred!\\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+	    					JOptionPane.showMessageDialog(null, "Errors Occurred!\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
 	    				}
 	    				else {
 	    					JOptionPane.showMessageDialog(null, "Errors Occurred!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
@@ -105,7 +105,7 @@ public class MainFrame {
 			    			}
 			    			else {
 			    				if (restoreDataFile()) {
-			    					JOptionPane.showMessageDialog(null, "Script Error!\\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+			    					JOptionPane.showMessageDialog(null, "Script Error!\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
 			    				}
 			    				else {
 			    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
@@ -208,6 +208,7 @@ public class MainFrame {
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
 				allTimeLogRecord += "," + "Succeeded";
 				allTimeLogRecord += ",";
 				logWithTimeLn("Created backup of " + dataFileName + " in " + backupFileName);
@@ -223,12 +224,14 @@ public class MainFrame {
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
 				allTimeLogRecord += "," + "Failed";
 				allTimeLogRecord += "," + "Copy failed";
 				logWithTimeLn("FAILED to create backup of '" + dataFileName + "' in '" + backupFileName + "'");
 				allTimeLog(allTimeLogRecord, backupFileName);
 
 				allTimeLogRecord = "Delete failed backup";
+				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
@@ -260,7 +263,7 @@ public class MainFrame {
 		boolean success = false;
 		
 		String dataFileName = RREManager.getIniFile().getValue("General","DataFile");
-		String errorFileName = getNextErrorFileName(dataFileName);
+		String errorFileName = getNextErrorFileName(getNextFileName(dataFileName));
 		
 		if (errorFileName != null) {
 			try {
@@ -268,6 +271,7 @@ public class MainFrame {
 				File errorFile = new File(errorFileName);
 				FileUtils.copyFile(dataFile, errorFile);
 				String allTimeLogRecord = "Create error file";
+				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
@@ -292,8 +296,9 @@ public class MainFrame {
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
-				allTimeLogRecord += "," + "Failed";
 				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Failed";
+				allTimeLogRecord += "," + "Copy failed";
 				logWithTimeLn("FAILED to create error file " + errorFileName + " from " + dataFileName);
 				allTimeLog(allTimeLogRecord, errorFileName);
 				JOptionPane.showMessageDialog(null, "Cannot create error file!", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
@@ -307,6 +312,7 @@ public class MainFrame {
 				File restoreFile = new File(restoreFileName);
 				FileUtils.copyFile(restoreFile, dataFile);
 				String allTimeLogRecord = "Restore backup";
+				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
@@ -332,8 +338,9 @@ public class MainFrame {
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
 				allTimeLogRecord += ",";
-				allTimeLogRecord += "," + "Failed";
 				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Failed";
+				allTimeLogRecord += "," + "Copy failed";
 				logWithTimeLn("FAILED to restorer backup of " + dataFileName + " from " + restoreFileName);
 				allTimeLog(allTimeLogRecord, restoreFileName);
 				JOptionPane.showMessageDialog(null, "Cannot restore original file!", "RREManager Restore Error", JOptionPane.ERROR_MESSAGE);
@@ -370,17 +377,16 @@ public class MainFrame {
 	}
 	
 	
-	private String getNextErrorFileName(String fileName) {
+	private String getNextErrorFileName(String dataFileName) {
 		String nextErrorFileName = null;
 
-		String date = DateUtilities.getCurrentDate();
-		String baseFileName = fileName.substring(0, fileName.lastIndexOf("."));
-		String extension = fileName.substring(fileName.lastIndexOf("."));
+		String baseFileName = dataFileName.substring(0, dataFileName.lastIndexOf("."));
+		String extension = dataFileName.substring(dataFileName.lastIndexOf("."));
 
 		boolean found = false;
 		for (Integer versionNr = 1; versionNr < 100; versionNr++) {
 			String versionNrString = ("00" + versionNr).substring(versionNr.toString().length());
-			nextErrorFileName = baseFileName + " " + date + " " + versionNrString + " ERROR" + extension;
+			nextErrorFileName = baseFileName + " ERROR " + versionNrString + extension;
 			File nextFile = new File(nextErrorFileName);
 			if (!nextFile.exists()) {
 				found = true;
@@ -388,7 +394,7 @@ public class MainFrame {
 			}
 		}
 		if (!found) {
-			JOptionPane.showMessageDialog(null, "Cannot create new version of file '" + fileName + "'.", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Cannot create new version of file '" + dataFileName + "'.", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
 			nextErrorFileName = null;
 		}
 		
@@ -400,7 +406,7 @@ public class MainFrame {
 		String lastFileName = null;
 
 		String baseFileName = dataFileName.substring(dataFileName.lastIndexOf(File.separator) + 1);
-		baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf("."));
+		baseFileName = baseFileName.substring(0, baseFileName.lastIndexOf(".")) + " ";
 		String extension = dataFileName.substring(dataFileName.lastIndexOf("."));
 		
 		String folderName = dataFileName.substring(0, dataFileName.lastIndexOf(File.separator));
@@ -409,7 +415,7 @@ public class MainFrame {
 		List<String> dataFileNamesList = new ArrayList<String>();
 		for (String fileFolderName : fileFolderList) {
 			File fileFolder = new File(fileFolderName);
-			if (fileFolder.isFile() && fileFolderName.endsWith(extension) && fileFolderName.startsWith(baseFileName)) {
+			if (fileFolder.isFile() && fileFolderName.endsWith(extension) && fileFolderName.startsWith(baseFileName) && (!fileFolderName.contains("ERROR"))) {
 				dataFileNamesList.add(fileFolderName);
 			}
 		}
@@ -564,7 +570,7 @@ public class MainFrame {
 	
 	
 	private boolean runScripts() {
-		boolean success = false;
+		boolean success = true;
 
 		if (JOptionPane.showConfirmDialog(frame, "Do you want apply the changes to the server?", "Apply changes?", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
 			logWithTimeLn("Running scripts");
@@ -584,7 +590,13 @@ public class MainFrame {
 					//TODO
 				}
 			}
-			logWithTimeLn("Running scripts finished " + (success ? "successfully" : "with errors"));
+			if (success) {
+				logWithTimeLn("Running scripts finished successfully");
+			}
+			else {
+				logWithTimeLn("Running scripts finished with errors");
+				logWithTimeLn("CHECK ACTIVE DIRECTORY STATUS!");
+			}
 		}
 		
 		return success;

@@ -122,6 +122,7 @@ public class ProjectData {
 									allTimeLogRecord += ",";
 									allTimeLogRecord += ",";
 									allTimeLogRecord += ",";
+									allTimeLogRecord += ",";
 									allTimeLogRecord += "," + projectName;
 									allTimeLogRecord += "," + group;
 								}
