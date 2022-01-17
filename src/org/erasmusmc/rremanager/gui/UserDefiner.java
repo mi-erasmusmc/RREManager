@@ -328,7 +328,22 @@ public class UserDefiner {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!userNameField.getText().trim().equals("")) {
+				if (firstNameField.getText().trim().equals("")) {
+					JOptionPane.showMessageDialog(parentFrame, "No first name specified!", "user Error", JOptionPane.ERROR_MESSAGE);
+				}
+				else if (lastNameField.getText().trim().equals("")) {
+					JOptionPane.showMessageDialog(parentFrame, "No last name specified!", "user Error", JOptionPane.ERROR_MESSAGE);
+				}
+				else if (initialsField.getText().trim().equals("")) {
+					JOptionPane.showMessageDialog(parentFrame, "No initials specified!", "user Error", JOptionPane.ERROR_MESSAGE);
+				}
+				else if (userNameField.getText().trim().equals("")) {
+					JOptionPane.showMessageDialog(parentFrame, "No user name specified!", "user Error", JOptionPane.ERROR_MESSAGE);
+				}
+				else if (!isEmailAddress(emailAddressField.getText().trim())) {
+					JOptionPane.showMessageDialog(parentFrame, "No valid email address specified!", "user Error", JOptionPane.ERROR_MESSAGE);
+				}
+				else {
 					if (user == null) {
 						user = new String[UserData.OBJECT_SIZE];
 					}
@@ -355,9 +370,6 @@ public class UserDefiner {
 						}
 					}
 					userDialog.dispose();
-				}
-				else {
-					JOptionPane.showMessageDialog(parentFrame, "No user name specified!", "user Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -387,18 +399,35 @@ public class UserDefiner {
 		showGroups(selectedGroups);
 		
 		if (user != null) {
-			firstNameField.setEditable(false);
-			initialsField.setEditable(false);
-			lastNameField.setEditable(false);
+			//firstNameField.setEditable(false);
+			//initialsField.setEditable(false);
+			//lastNameField.setEditable(false);
 			userNameField.setEditable(false);
 			passwordField.setEditable(false);
-			emailAddressField.setEditable(false);
+			//emailAddressField.setEditable(false);
 			if (!originalFTPOnly) {
 				ftpOnlyField.setEnabled(false);
 			}
 		}
 		
 		userDialog.setVisible(true);
+	}
+	
+	
+	private boolean isEmailAddress(String text) {
+		boolean isEmailAddress = true;
+		
+		if (
+				(!text.contains("@")) ||
+				(text.substring(0, text.indexOf("@")).length() == 0) ||
+				(text.length() <= (text.indexOf("@") + 2)) ||
+				(text.substring(text.indexOf("@") + 1).contains("@")) ||
+				(!text.substring(text.indexOf("@") + 2).contains("."))
+			) {
+			isEmailAddress = false;
+		}
+		
+		return isEmailAddress;
 	}
 	
 	

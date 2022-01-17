@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
+import org.erasmusmc.rremanager.changelog.ModifyUserLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
 
 public class UserData {
@@ -49,7 +51,6 @@ public class UserData {
 	private MainFrame mainFrame = null;
 	private String settingsGroup = null;
 	private List<String[]> users = new ArrayList<String[]>();
-	private String error = null;
 	
 	
 	public static String getUserDescription(String[] user, boolean withEmail) {
@@ -78,6 +79,17 @@ public class UserData {
 		String[] user = null;
 		if ((userNr >= 0) && (userNr < users.size())) {
 			user = users.get(userNr);
+		}
+		return user;
+	}
+	
+	
+	public String[] getUser(String userName) {
+		String[] user = null;
+		for (int userNr = 0; userNr < users.size(); userNr++) {
+			if (users.get(userNr)[USER_NAME].equals(userName)) {
+				user = users.get(userNr);
+			}
 		}
 		return user;
 	}
@@ -173,99 +185,188 @@ public class UserData {
 	}
 	
 	
-	public boolean AddUser(String[] user) {
+	public boolean addUser(String[] user) {
 		boolean success = false;
-		
-		Map<String, List<String>> scriptCallParameters = new HashMap<String, List<String>>();
+		String error = null;
 		
 		String usersFileName = RREManager.getIniFile().getValue("General","DataFile");
 		String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
 		File file = new File(usersFileName);
-		if (file.exists() && file.canWrite()) {
-			ExcelFile usersFile = new ExcelFile(usersFileName);
-			if (usersFile.open()) {
-				if (usersFile.getSheet(sheetName, true)) {
-					String allTimeLogRecord = "Add User";
-					allTimeLogRecord += "," + "\"" + user[EMAIL] + "\"";
-					allTimeLogRecord += "," + "\"" + user[USER_NAME] + "\"";
-					allTimeLogRecord += "," + "\"" + user[FIRST_NAME] + "\"";
-					allTimeLogRecord += "," + "\"" + user[LAST_NAME] + "\"";
-					allTimeLogRecord += ",";
-					allTimeLogRecord += "," + "\"" + user[PASSWORD] + "\"";
-					allTimeLogRecord += ",";
-					allTimeLogRecord += "," + "Yes";
-					allTimeLogRecord += "," + "\"" + user[PROJECTS] + "\"";
-					allTimeLogRecord += "," + "\"" + user[GROUPS] + "\"";
-					
-					Map<String, Object> row = new HashMap<String, Object>();
-					row.put("Update"        , "");
-					row.put("Project(s)"    , user[PROJECTS]);
-					row.put("Groups"        , user[GROUPS]);
-					row.put("First Name"    , user[FIRST_NAME]);
-					row.put("Initials"      , user[INITIALS]);
-					row.put("Last Name"     , user[LAST_NAME]);
-					row.put("User Name"     , user[USER_NAME]);
-					row.put("Password"      , user[PASSWORD]);
-					row.put("Email"         , user[EMAIL]);
-					row.put("Email Format"  , user[EMAIL_FORMAT]);
-					row.put("IP-Address(es)", user[IP_ADDRESSES]);
+		if (file.exists()) {
+			if (file.canWrite()) {
+				ExcelFile usersFile = new ExcelFile(usersFileName);
+				if (usersFile.open()) {
+					if (usersFile.getSheet(sheetName, true)) {
+						
+						Map<String, Object> row = new HashMap<String, Object>();
+						
+						row.put("Update"        , "");
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"Projects Column")    , user[PROJECTS]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"Groups Column")      , user[GROUPS]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"First Name Column")  , user[FIRST_NAME]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"Initials Column")    , user[INITIALS]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"Last Name Column")   , user[LAST_NAME]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"User Name Column")   , user[USER_NAME]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"Password Column")    , user[PASSWORD]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"Email Column")       , user[EMAIL]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"Email Format Column"), user[EMAIL_FORMAT]);
+						row.put(RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column"), user[IP_ADDRESSES]);
 
-					if (usersFile.addRow(sheetName, row) && usersFile.write()) {
-						RREManager.changeLog.addLogEntry(new AddUserLogEntry(user[USER_NAME]));
-						allTimeLogRecord += "," + "Succeeded";
-						allTimeLogRecord += ",";
-						mainFrame.logLn("");
-						mainFrame.logWithTimeLn("Adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ") " + "SUCCEEDED");
-						mainFrame.allTimeLog(allTimeLogRecord, "");
-						
-						if (allTimeLogRecord != null) {
-/*
-							if (scriptCallParameters.containsKey(projectName + "," + group)) {
-								String groups = scriptCallParameters.get(projectName + "," + group).get(scriptCallParameters.get(projectName + "," + group).size() - 1);
-								
-								mainFrame.logLn("");
-								mainFrame.logWithTimeLn("Create project groups: " + projectName + " " + groups);
-								mainFrame.logWithTimeLn("    Script call: createProjects.vbs " + projectName + " " + groups);
-								
-								allTimeLogRecord = "Create project groups";
-								allTimeLogRecord += ",";
-								allTimeLogRecord += ",";
-								allTimeLogRecord += ",";
-								allTimeLogRecord += ",";
-								allTimeLogRecord += ",";
-								allTimeLogRecord += ",";
-								allTimeLogRecord += ",";
-								allTimeLogRecord += "," + projectName;
-								allTimeLogRecord += "," + "\"" + groups + "\"";
-								
-								//TODO ScriptUtilities.callVBS("createProjects.vbs", scriptCallParameters.get(projectName + "," + group));
-								
-								allTimeLogRecord += "," + "Done";
-								allTimeLogRecord += ",";
-								mainFrame.logWithTimeLn("  DONE");
-								mainFrame.allTimeLog(allTimeLogRecord, "\"Script call: createProjects.vbs " + projectName + " " + groups + "\"");
-							}
-*/
+						if (usersFile.addRow(sheetName, row) && usersFile.write()) {
+							RREManager.changeLog.addLogEntry(new AddUserLogEntry(user[USER_NAME]));
+							getData();
+							success = true;
 						}
-						
-						getData();
-						
-						success = true;
+						else {
+							error = "ERROR while adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")";
+							success = false;
+						}
 					}
 					else {
-						error = "ERROR while adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")";
-
-						allTimeLogRecord += "," + "Failed";
-						allTimeLogRecord += "," + "\"" + error + "\"";
-						mainFrame.logLn("");
-						mainFrame.logWithTimeLn("Adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")" + "FAILED");
-						mainFrame.allTimeLog(allTimeLogRecord, "");
-						
+						error = "ERROR sheet '" + sheetName + "' not found in users file '" + usersFileName + "'";
 						success = false;
 					}
 				}
+				else {
+					error = "ERROR cannot open users file '" + usersFileName + "'";
+					success = false;
+				}
+			}
+			else {
+				error = "ERROR cannot write users file '" + usersFileName + "'";
+				success = false;
 			}
 		}
+		else {
+			error = "ERROR cannot find users file '" + usersFileName + "'";
+			success = false;
+		}
+
+		String allTimeLogRecord = "Add User";
+		allTimeLogRecord += "," + "\"" + user[EMAIL] + "\"";
+		allTimeLogRecord += "," + "\"" + user[USER_NAME] + "\"";
+		allTimeLogRecord += "," + "\"" + user[FIRST_NAME] + "\"";
+		allTimeLogRecord += "," + "\"" + user[LAST_NAME] + "\"";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "\"" + user[PASSWORD] + "\"";
+		allTimeLogRecord += "," + "\"" + user[IP_ADDRESSES] + "\"";
+		allTimeLogRecord += "," + "Yes";
+		allTimeLogRecord += "," + "\"" + user[PROJECTS] + "\"";
+		allTimeLogRecord += "," + "\"" + user[GROUPS] + "\"";
+		
+		String logLn = "Adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ") ";
+		
+		if (success) {
+			allTimeLogRecord += "," + "Succeeded";
+			allTimeLogRecord += ",";
+			mainFrame.allTimeLog(allTimeLogRecord, "");
+			
+			mainFrame.logWithTimeLn(logLn + "SUCCEEDED");
+		}
+		else {
+			allTimeLogRecord += "," + "Failed";
+			allTimeLogRecord += "," + "\"" + error + "\"";
+			
+			mainFrame.logWithTimeLn(logLn + "FAILED");
+			mainFrame.logWithTimeLn(logLn + "  " + error);
+		}
+		
+		return success;
+	}
+	
+	
+	public boolean modifyUser(String[] user, String[] modifiedUser) {
+		boolean success = true;
+		String error = null;
+		
+		if (
+				(!user[FIRST_NAME].equals(modifiedUser[FIRST_NAME])) ||
+				(!user[INITIALS].equals(modifiedUser[INITIALS])) ||
+				(!user[LAST_NAME].equals(modifiedUser[LAST_NAME])) ||
+				(!user[EMAIL].equals(modifiedUser[EMAIL])) ||
+				(!user[EMAIL_FORMAT].equals(modifiedUser[EMAIL_FORMAT])) ||
+				(!user[IP_ADDRESSES].equals(modifiedUser[IP_ADDRESSES])) ||
+				(!user[PROJECTS].equals(modifiedUser[PROJECTS])) ||
+				(!user[GROUPS].equals(modifiedUser[GROUPS]))
+			) {
+			
+			String usersFileName = RREManager.getIniFile().getValue("General","DataFile");
+			String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
+			File file = new File(usersFileName);
+			if (file.exists()) {
+				if (file.canWrite()) {
+					ExcelFile usersFile = new ExcelFile(usersFileName);
+					if (usersFile.open()) {
+						if (usersFile.getSheet(sheetName, true)) {
+							while (usersFile.hasNext(sheetName)) {
+								Row row = usersFile.getNext(sheetName);
+
+								String userName = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"User Name Column"));
+								
+								if (userName.equals(user[USER_NAME])) {
+									Cell projectsCell    = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Projects Column")));
+									Cell groupsCell      = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Groups Column")));
+									Cell firstNameCell   = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"First Name Column")));
+									Cell initialsCell    = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Initials Column")));
+									Cell lastNameCell    = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Last Name Column")));
+									Cell emailCell       = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Email Column")));
+									Cell emailFormatCell = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Email Format Column")));
+									Cell ipAdressesCell  = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column")));
+									
+									if (projectsCell    == null) projectsCell    = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Projects Column")));
+									if (groupsCell      == null) groupsCell      = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Groups Column")));
+									if (firstNameCell   == null) firstNameCell   = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"First Name Column")));
+									if (initialsCell    == null) initialsCell    = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Initials Column")));
+									if (lastNameCell    == null) lastNameCell    = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Last Name Column")));
+									if (emailCell       == null) emailCell       = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Email Column")));
+									if (emailFormatCell == null) emailFormatCell = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Email Format Column")));
+									if (ipAdressesCell  == null) ipAdressesCell  = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column")));
+									
+									projectsCell.setCellValue(modifiedUser[PROJECTS]);
+									groupsCell.setCellValue(modifiedUser[GROUPS]);
+									firstNameCell.setCellValue(modifiedUser[FIRST_NAME]);
+									initialsCell.setCellValue(modifiedUser[INITIALS]);
+									lastNameCell.setCellValue(modifiedUser[LAST_NAME]);
+									emailCell.setCellValue(modifiedUser[EMAIL]);
+									emailFormatCell.setCellValue(modifiedUser[EMAIL_FORMAT]);
+									ipAdressesCell.setCellValue(modifiedUser[IP_ADDRESSES]);
+
+									if (usersFile.write()) {
+										RREManager.changeLog.addLogEntry(new ModifyUserLogEntry(user[USER_NAME]));
+										getData();
+										success = true;
+									}
+									else {
+										error = "ERROR while updating user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")";
+										success = false;
+									}
+									break;
+								}
+							}
+							usersFile.close();
+						}
+						else {
+							error = "ERROR sheet '" + sheetName + "' not found in users file '" + usersFileName + "'";
+							success = false;
+						}
+					}
+					else {
+						error = "ERROR cannot open users file '" + usersFileName + "'";
+						success = false;
+					}
+				}
+				else {
+					error = "ERROR cannot write users file '" + usersFileName + "'";
+					success = false;
+				}
+			}
+			else {
+				error = "ERROR cannot find users file '" + usersFileName + "'";
+				success = false;
+			}
+		}
+		
+		//TODO
 		
 		return success;
 	}

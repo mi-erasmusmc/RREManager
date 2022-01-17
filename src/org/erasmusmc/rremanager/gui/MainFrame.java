@@ -28,9 +28,9 @@ import org.erasmusmc.rremanager.changelog.AddProjectLogEntry;
 import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
 import org.erasmusmc.rremanager.changelog.LogEntry;
 import org.erasmusmc.rremanager.changelog.ModifyUserLogEntry;
-import org.erasmusmc.rremanager.files.ProjectData;
 import org.erasmusmc.rremanager.files.UserData;
 import org.erasmusmc.rremanager.utilities.DateUtilities;
+import org.erasmusmc.rremanager.utilities.ScriptUtilities;
 
 
 public class MainFrame {
@@ -91,7 +91,7 @@ public class MainFrame {
 		    	String busy = isBusy();
 		    	if (busy == null) {
 		    		if (rreManager.errorOccurred()) {
-	    				if (restoreDataFile()) {
+	    				if (restoreDataFile(true)) {
 	    					JOptionPane.showMessageDialog(null, "Errors Occurred!\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
 	    				}
 	    				else {
@@ -100,15 +100,25 @@ public class MainFrame {
 		    		}
 		    		else {
 			    		if (RREManager.changeLog.hasChanges()) {
-			    			if (runScripts()) {
-				    			backupDataFile();
+			    			if (JOptionPane.showConfirmDialog(frame, "Do you want apply the changes to the server?", "Apply changes?", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
+				    			if (runScripts()) {
+					    			backupDataFile();
+				    			}
+				    			else {
+				    				if (restoreDataFile(true)) {
+				    					JOptionPane.showMessageDialog(null, "Script Error!\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+				    				}
+				    				else {
+				    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+				    				}
+				    			}
 			    			}
 			    			else {
-			    				if (restoreDataFile()) {
-			    					JOptionPane.showMessageDialog(null, "Script Error!\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+			    				if (restoreDataFile(false)) {
+			    					JOptionPane.showMessageDialog(null, "Restored original data file!", "RREManager Restore", JOptionPane.INFORMATION_MESSAGE);
 			    				}
 			    				else {
-			    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+			    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!", "RREManager Restore Error", JOptionPane.ERROR_MESSAGE);
 			    				}
 			    			}
 			    		}
@@ -259,49 +269,52 @@ public class MainFrame {
 	}
 	
 	
-	private boolean restoreDataFile() {
+	private boolean restoreDataFile(boolean createErrorFile) {
 		boolean success = false;
 		
 		String dataFileName = RREManager.getIniFile().getValue("General","DataFile");
-		String errorFileName = getNextErrorFileName(getNextFileName(dataFileName));
 		
-		if (errorFileName != null) {
-			try {
-				File dataFile = new File(dataFileName);
-				File errorFile = new File(errorFileName);
-				FileUtils.copyFile(dataFile, errorFile);
-				String allTimeLogRecord = "Create error file";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += "," + "Succeeded";
-				allTimeLogRecord += ",";
-				logWithTimeLn("Created error file " + errorFileName + " from " + dataFileName);
-				allTimeLog(allTimeLogRecord, errorFileName);
-			} catch (IOException e) {
-				String allTimeLogRecord = "Create error file";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += "," + "Failed";
-				allTimeLogRecord += "," + "Copy failed";
-				logWithTimeLn("FAILED to create error file " + errorFileName + " from " + dataFileName);
-				allTimeLog(allTimeLogRecord, errorFileName);
-				JOptionPane.showMessageDialog(null, "Cannot create error file!", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
+		if (createErrorFile) {
+			String errorFileName = getNextErrorFileName(getNextFileName(dataFileName));
+			
+			if (errorFileName != null) {
+				try {
+					File dataFile = new File(dataFileName);
+					File errorFile = new File(errorFileName);
+					FileUtils.copyFile(dataFile, errorFile);
+					String allTimeLogRecord = "Create error file";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += "," + "Succeeded";
+					allTimeLogRecord += ",";
+					logWithTimeLn("Created error file " + errorFileName + " from " + dataFileName);
+					allTimeLog(allTimeLogRecord, errorFileName);
+				} catch (IOException e) {
+					String allTimeLogRecord = "Create error file";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += "," + "Failed";
+					allTimeLogRecord += "," + "Copy failed";
+					logWithTimeLn("FAILED to create error file " + errorFileName + " from " + dataFileName);
+					allTimeLog(allTimeLogRecord, errorFileName);
+					JOptionPane.showMessageDialog(null, "Cannot create error file!", "RREManager File Error", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 		
@@ -572,31 +585,135 @@ public class MainFrame {
 	private boolean runScripts() {
 		boolean success = true;
 
-		if (JOptionPane.showConfirmDialog(frame, "Do you want apply the changes to the server?", "Apply changes?", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
-			logWithTimeLn("Running scripts");
-			UserData userData = new UserData(this, "User Projects");
-			ProjectData projectData = new ProjectData(this, "Projects");
-			for (LogEntry logEntry : RREManager.changeLog.getLogEntries()) {
-				if (logEntry.isAddProjectLogEntry()) {
-					logWithTimeLn("  Create project " + ((AddProjectLogEntry) logEntry).getProject() + " " + ((AddProjectLogEntry) logEntry).getSubFolders());
-					//TODO
+		logWithTimeLn("Running scripts");
+		UserData userData = new UserData(this, "User Projects");
+		for (LogEntry logEntry : RREManager.changeLog.getLogEntries()) {
+			String allTimeLogRecord = "";
+			
+			String action = "<UNKNOWN>";
+			List<String> parameters = new ArrayList<String>();
+			String script = null;
+			if (logEntry.isAddProjectLogEntry()) {
+				action = "Create Project";
+				parameters.add(((AddProjectLogEntry) logEntry).getProject());
+				parameters.add(((AddProjectLogEntry) logEntry).getSubFolders());
+				script = "createProject.vbs";
+
+				allTimeLogRecord += "Run " + action + " Script";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Yes";
+				allTimeLogRecord += "," + "\"" + ((AddProjectLogEntry) logEntry).getProject() + "\"";
+				allTimeLogRecord += "," + "\"" + ((AddProjectLogEntry) logEntry).getSubFolders() + "\"";
+			}
+			else if (logEntry.isModifyUserLogEntry()) {
+				String userName = ((ModifyUserLogEntry) logEntry).getUserName();
+				String[] user = userData.getUser(userName);
+				if (user != null) {
+					action = "Modify User";
+					parameters.add(user[UserData.FIRST_NAME]);
+					parameters.add(user[UserData.INITIALS]);
+					parameters.add(user[UserData.LAST_NAME]);
+					parameters.add(user[UserData.USER_NAME]);
+					parameters.add(user[UserData.PASSWORD]);
+					parameters.add(user[UserData.EMAIL]);
+					parameters.add(user[UserData.PROJECTS]);
+					parameters.add(user[UserData.GROUPS]);
+					parameters.add("1"); // Update Flag
+					script = "createUserProjects.vbs";
+
+					allTimeLogRecord += "Run " + action + " Script";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
+					allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
+					allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += "," + "\"" + user[UserData.PASSWORD] + "\"";
+					allTimeLogRecord += "," + "\"" + user[UserData.IP_ADDRESSES] + "\"";
+					allTimeLogRecord += "," + "Yes";
+					allTimeLogRecord += "," + "\"" + user[UserData.PROJECTS] + "\"";
+					allTimeLogRecord += "," + "\"" + user[UserData.GROUPS] + "\"";
 				}
-				else if (logEntry.isModifyUserLogEntry()) {
-					logWithTimeLn("  Modify user " + ((ModifyUserLogEntry) logEntry).getUserName());
-					//TODO
+				else {
+					logWithTimeLn("  " + action + " " + ((ModifyUserLogEntry) logEntry).getUserName() + "FAILED: User does not exist.");
 				}
-				else if (logEntry.isAddUserLogEntry()) {
-					logWithTimeLn("  Add user " + ((AddUserLogEntry) logEntry).getUserName());
-					//TODO
+			}
+			else if (logEntry.isAddUserLogEntry()) {
+				String userName = ((AddUserLogEntry) logEntry).getUserName();
+				String[] user = userData.getUser(userName);
+				if (user != null) {
+					action = "Add User";
+					parameters.add(user[UserData.FIRST_NAME]);
+					parameters.add(user[UserData.INITIALS]);
+					parameters.add(user[UserData.LAST_NAME]);
+					parameters.add(user[UserData.USER_NAME]);
+					parameters.add(user[UserData.PASSWORD]);
+					parameters.add(user[UserData.EMAIL]);
+					parameters.add(user[UserData.PROJECTS]);
+					parameters.add(user[UserData.GROUPS]);
+					parameters.add("1"); // Update Flag
+					script = "createUserProjects.vbs";
+
+					allTimeLogRecord += "Run " + action + " Script";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
+					allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
+					allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += "," + "\"" + user[UserData.PASSWORD] + "\"";
+					allTimeLogRecord += "," + "\"" + user[UserData.IP_ADDRESSES] + "\"";
+					allTimeLogRecord += "," + "Yes";
+					allTimeLogRecord += "," + "\"" + user[UserData.PROJECTS] + "\"";
+					allTimeLogRecord += "," + "\"" + user[UserData.GROUPS] + "\"";
 				}
+				else {
+					logWithTimeLn("  " + action + " " + ((AddUserLogEntry) logEntry).getUserName() + "FAILED: User does not exist.");
+				}
+			}
+			String logLine = "  " + action;
+			String paramatersLogLn = "";
+			for (String parameter : parameters) {
+				paramatersLogLn += " " + parameter;
+			}
+			logWithTimeLn(logLine + paramatersLogLn);
+			if (RREManager.test) {
+				parameters.add(0, action);
+				script = "testScript.vbs";
 			}
 			if (success) {
-				logWithTimeLn("Running scripts finished successfully");
+				if (script != null) {
+					logWithTime("    " + script + paramatersLogLn);
+					if (ScriptUtilities.callVBS(script, parameters)) {
+						allTimeLogRecord += "," + "Succeeded";
+						allTimeLogRecord += ",";
+						allTimeLog(allTimeLogRecord, script);
+						logLn(" SUCCEEDED");
+					}
+					else {
+						allTimeLogRecord += "," + "Failed";
+						allTimeLogRecord += ",";
+						allTimeLog(allTimeLogRecord, script);
+						logLn(" FAILED");
+						success = false;
+						break;
+					}
+				}
+				else {
+					logWithTimeLn("    No script specified.");
+				}
 			}
-			else {
-				logWithTimeLn("Running scripts finished with errors");
-				logWithTimeLn("CHECK ACTIVE DIRECTORY STATUS!");
-			}
+		}
+		if (success) {
+			logWithTimeLn("Running scripts finished successfully");
+		}
+		else {
+			logWithTimeLn("Running scripts finished with errors");
+			logWithTimeLn("CHECK ACTIVE DIRECTORY STATUS!");
 		}
 		
 		return success;

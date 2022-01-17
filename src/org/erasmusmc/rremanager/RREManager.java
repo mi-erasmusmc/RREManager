@@ -1,7 +1,6 @@
 package org.erasmusmc.rremanager;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
-import org.apache.commons.io.FileUtils;
 import org.erasmusmc.rremanager.changelog.ChangeLog;
 import org.erasmusmc.rremanager.files.IniFile;
 import org.erasmusmc.rremanager.files.UserData;
@@ -25,10 +23,10 @@ import org.erasmusmc.rremanager.gui.ProjectDefiner;
 import org.erasmusmc.rremanager.gui.UserDefiner;
 import org.erasmusmc.rremanager.gui.PasswordManager;
 import org.erasmusmc.rremanager.smtp.SMTPMailClient;
-import org.erasmusmc.rremanager.utilities.DateUtilities;
 
 public class RREManager {
 	public static String version = "1.7";
+	public static boolean test = true;
 	public static boolean noLogging = false;
 	public static boolean loggingStarted = false;
 	public static ChangeLog changeLog = new ChangeLog();

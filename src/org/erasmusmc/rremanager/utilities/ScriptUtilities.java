@@ -29,7 +29,7 @@ public class ScriptUtilities {
 			String argumentsString = "";
 			if (arguments != null) {
 				for (String argument : arguments) {
-					argumentsString += " & chr(34) & \"" + argument + "\" & chr(34)";
+					argumentsString += " & \" \" & chr(34) & \"" + argument + "\" & chr(34)";
 				}
 			} 
 			

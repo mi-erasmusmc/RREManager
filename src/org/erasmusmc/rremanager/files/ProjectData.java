@@ -10,12 +10,10 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.changelog.AddProjectLogEntry;
-import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
 
 public class ProjectData {
 	
-	private RREManager rreManager = null;
 	private String settingsGroup = null;
 	private MainFrame mainFrame = null;
 	private Map<String, List<String>> projects = new HashMap<String, List<String>>();

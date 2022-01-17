@@ -49,6 +49,7 @@ public class UsersTab extends MainFrameTab {
 		}
 	};
 	
+	private String settingsGroup = null;
 	private UserData userData = null;
 	
 	private JPanel usersListPanel;
@@ -67,6 +68,13 @@ public class UsersTab extends MainFrameTab {
 	
 	public UsersTab(RREManager rreManager, MainFrame mainFrame, String settingsGroup) {
 		super(rreManager, mainFrame);
+		this.settingsGroup = settingsGroup;
+		update();
+	}
+	
+	
+	public void update() {
+		removeAll();
 		userData = new UserData(mainFrame, settingsGroup);
 		users = userData.getUsersList();
 		
@@ -398,7 +406,15 @@ public class UsersTab extends MainFrameTab {
 		String[] user = null;
 		if ((selectedUsers != null) && (selectedUsers.length == 1)) {
 			user = userData.getUser(selectedUsers[0]);
-			user = rreManager.getUserDefiner().getUser(user, mainFrame.getProjectsTab().getProjectData());
+			String[] modifiedUser = new String[user.length];
+			for (int i = 0; i < user.length; i++) {
+				modifiedUser[i] = user[i];
+			}
+			modifiedUser = rreManager.getUserDefiner().getUser(modifiedUser, mainFrame.getProjectsTab().getProjectData());
+			if (modifiedUser != null) {
+				userData.modifyUser(user, modifiedUser);
+				update();
+			}
 		}
 	}
 	
@@ -406,7 +422,8 @@ public class UsersTab extends MainFrameTab {
 	private void addUser() {
 		String[] user = rreManager.getUserDefiner().getUser(null, mainFrame.getProjectsTab().getProjectData());
 		if (user != null) {
-			userData.AddUser(user);
+			userData.addUser(user);
+			update();
 		}
 	}
 	
