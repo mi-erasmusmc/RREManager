@@ -24,16 +24,18 @@
 '   first name
 '   initial
 '   last name
-'   username
+'   user name
 '   password
 '   email address
 '   projects
 '   groups
 '   update flag (1 = update)
+'   log file path
+'   log file indent
 
 Option Explicit
 
-Dim VERBOSE
+Dim VERBOSE, LOG, logFileName, logFileIndent, objLogFile
 Dim Update, FTPOnly, strFirst, strLast, strInitials, strUserName, strPW, strProjects, strGroups, strEmail
 Dim strGroupDN, objUser, objGroup, objContainer
 Dim strCN, strNTName, strContainerDN
@@ -73,9 +75,12 @@ strNetBIOSDomain = objTrans.Get(ADS_NAME_TYPE_NT4)
 ' Remove trailing backslash.
 strNetBIOSdomain = Left(strNetBIOSDomain, Len(strNetBIOSDomain) - 1)
 
+LOG = False
 args = WScript.Arguments.Count
 
-If args > 5 then
+If args == 11 then
+  logFileName = Wscript.Arguments.Item(args - 2)
+  logFileIndent = Wscript.Arguments.Item(args - 1)
   strFirst = Wscript.Arguments.Item(0)
   strInitials = Wscript.Arguments.Item(1)
   strLast = Wscript.Arguments.Item(2)
@@ -85,6 +90,25 @@ If args > 5 then
   strProjects = Wscript.Arguments.Item(6)
   strGroups = Wscript.Arguments.Item(7)
   strUpdate = Wscript.Arguments.Item(8)
+  
+  ' Open log file
+  If (StrComp(logFileName, "") != 0) Then
+    LOG = True
+    Set objLogFile = CreateObject("Scripting.FileSystemObject").OpenTextFile(logFileName,8,false)
+  
+    ' Log script parameters
+    objLogFile.WriteLine(logFileIndent & "createUserProjects.vbs")
+    objLogFile.WriteLine(logFileIndent & "  First Name   : " & strFirst)
+    objLogFile.WriteLine(logFileIndent & "  Initial      : " & strInitials)
+    objLogFile.WriteLine(logFileIndent & "  Last Name    : " & strLast)
+    objLogFile.WriteLine(logFileIndent & "  User Name    : " & strUserName)
+    objLogFile.WriteLine(logFileIndent & "  Password     : " & strPW)
+    objLogFile.WriteLine(logFileIndent & "  Email Address: " & strEmail)
+    objLogFile.WriteLine(logFileIndent & "  Projects     : " & strProjects)
+    objLogFile.WriteLine(logFileIndent & "  Groups       : " & strGroups)
+    objLogFile.WriteLine(logFileIndent & "  Update       : " & strUpdate)
+    objLogFile.WriteLine("")
+  EndIf
   
   DIM ProjectsArray
   ProjectsArray = Split(strProjects,",")
@@ -111,11 +135,20 @@ If args > 5 then
     ' Show some info to the user
     objExplorer.document.write "<p><font color=black>-----------------------------------------------------------------<br>"
     objExplorer.document.write "Adding FTP only user: " & strCN & "</p>" 
-        
     objExplorer.document.write "<font color=green>Creating folders for FTP<br>"
+    
+    If (LOG = True) Then
+      objLogFile.WriteLine(logFileIndent & "-----------------------------------------------------------------")
+      objLogFile.WriteLine(logFileIndent & "Adding FTP only user: " & strCN)
+      objLogFile.WriteLine(logFileIndent & "Creating folders for FTP")
+    EndIf
+    
     objShell.run chr(34) & FTPOnlyFolderScript & chr(34) & " " & chr(34) & strNTName & chr(34) & " " & VERBOSE,1,true
-        
+    
     objExplorer.document.write "<p><font color=black>-----------------------------------------------------------------</p><br>"
+    If (LOG = True) Then
+      objLogFile.WriteLine(logFileIndent & "-----------------------------------------------------------------")
+    EndIf
   Else
   	' Researcher
       strCN = strFirst & " " & strLast
@@ -132,13 +165,20 @@ If args > 5 then
     
       ' Show some info to the user
       objExplorer.document.write "<p><font color=black>-----------------------------------------------------------------<br>"
-      objExplorer.document.write "Adding user: " & strCN & "</p>" 
+      objExplorer.document.write "Adding user: " & strCN & "</p>"
+      If (LOG = True) Then
+        objLogFile.WriteLine(logFileIndent & "-----------------------------------------------------------------")
+        objLogFile.WriteLine(logFileIndent & "Adding user: " & strCN)
+      EndIf
     
       ' Is this a new user?
          
       If Not DoesExist( strDNSDomain, strNTName ) OR Update Then
           If Update Then
   	        objExplorer.document.write "<font color=red>Only Adding missing projects and groups for user: " & strNTName & "<br>"
+  	        If (LOG = True) Then
+              objLogFile.WriteLine(logFileIndent & "Only Adding missing projects and groups for user: " & strNTName)
+            EndIf 
           End If
           ' If this container is different from the previous, bind to
           ' the container the user object will be created in.
@@ -150,6 +190,10 @@ If args > 5 then
                   On Error GoTo 0
                   Wscript.Echo "Unable to bind to container: " & strContainerDN
                   Wscript.Echo "Unable to create user with NT name: " & strNTName
+  	              If (LOG = True) Then
+                    objLogFile.WriteLine(logFileIndent & "Unable to bind to container: " & strContainerDN)
+                    objLogFile.WriteLine(logFileIndent & "Unable to create user with NT name: " & strNTName)
+  	              EndIf
                   ' Flag that container not bound.
                   strPreviousDN = ""
   	              noError = 0	
@@ -172,6 +216,9 @@ If args > 5 then
               If (Err.Number <> 0) Then
                   On Error GoTo 0
                   Wscript.Echo "Unable to create user with cn: " & strCN
+  	              If (LOG = True) Then
+                    objLogFile.WriteLine(logFileIndent & "Unable to create user with cn: " & strCN)
+                  EndIf
     
               Else
                   ' Assign mandatory attributes and save user object.
@@ -184,13 +231,22 @@ If args > 5 then
                   If (Err.Number <> 0) Then
                       On Error GoTo 0
                       objExplorer.document.write "<font color=red>Unable to create user with NT name: " & strNTName & "<br>"
+  	                  If (LOG = True) Then
+                        objLogFile.WriteLine(logFileIndent & "Unable to create user with NT name: " & strNTName)
+  	                  EndIf
                   Else
                       ' Set password for user.
                       objUser.SetPassword strPW
                       objExplorer.document.write "<font color=green>password for user " & strNTName & " " & strPW & "<br>"
+  	                  If (LOG = True) Then
+                         objLogFile.WriteLine(logFileIndent & "password for user " & strNTName & " " & strPW)
+  	                  EndIf
                       If (Err.Number <> 0) Then
-                          On Error GoTo 0
-                          objExplorer.document.write "<font color=red>Unable to set password for user " & strNTName & "<br>"
+                         On Error GoTo 0
+                         objExplorer.document.write "<font color=red>Unable to set password for user " & strNTName & "<br>"
+  	                     If (LOG = True) Then
+                           objLogFile.WriteLine(logFileIndent & "Unable to set password for user " & strNTName)
+                         EndIf
                       End If
                       On Error GoTo 0
                       ' Enable the user account.
@@ -230,6 +286,9 @@ If args > 5 then
                       If (Err.Number <> 0) Then
                         On Error GoTo 0
                         objExplorer.document.write "<font color=red>Unable to set attributes for user with NT name: " & strNTName & "<br>"
+  	                    If (LOG = True) Then
+                          objLogFile.WriteLine(logFileIndent & "Unable to set attributes for user with NT name: " & strNTName)
+                        EndIf
                       End If
                       On Error GoTo 0
                       ' Create home folder.
@@ -240,6 +299,9 @@ If args > 5 then
                               If (Err.Number <> 0) Then
                                   On Error GoTo 0
                                   objExplorer.document.write "<font color=red>Unable to create home folder: " & strHomeFolder & "<br>"
+  	                              If (LOG = True) Then
+                                    objLogFile.WriteLine(logFileIndent & "Unable to create home folder: " & strHomeFolder)
+                                  EndIf
                               End If
                               On Error GoTo 0
                           End If
@@ -248,6 +310,9 @@ If args > 5 then
                               intRunError = objShell.Run("%COMSPEC% /c Echo Y| cacls " & strHomeFolder & " /T /E /C /G " & strNetBIOSDomain & "\" & strNTName & ":F", 2, True)
                               If (intRunError <> 0) Then
                                   objExplorer.document.write "<font color=red>Error assigning permissions for user " & strNTName & " to home folder " & strHomeFolder & "<br>"
+  	                              If (LOG = True) Then
+                                    objLogFile.WriteLine(logFileIndent & "Error assigning permissions for user " & strNTName & " to home folder " & strHomeFolder)
+                                  EndIf
                               End If
                           End If
                       End If
@@ -270,6 +335,9 @@ If args > 5 then
                               If (Err.Number <> 0) Then
                                   On Error GoTo 0
                                   objExplorer.document.write "<font color=red>Unable to bind to group " & strGroupDN & "<br>"
+  	                              If (LOG = True) Then
+                                    objLogFile.WriteLine(logFileIndent & "Unable to bind to group " & strGroupDN)
+                                  EndIf
                               Else
                                   On Error GoTo 0
                                   strGroupDN = objTrans.Get(ADS_NAME_TYPE_1779)
@@ -286,6 +354,9 @@ If args > 5 then
                               If (Err.Number <> 0) Then
                                   On Error GoTo 0
                                   objExplorer.document.write "<font color=red>user " & strNTName & " already added to group " & strGroupDN  & "? (skipped)<br>"
+  	                              If (LOG = True) Then
+                                    objLogFile.WriteLine(logFileIndent & "user " & strNTName & " already added to group " & strGroupDN  & "? (skipped)")
+                                  EndIf
                               End If
                           End If
                           On Error GoTo 0
@@ -295,6 +366,9 @@ If args > 5 then
                       If Update Then
                          VERBOSE = -1 ' No messages about existing directories
                          objExplorer.document.write "<font color=Red>User folders will only be created for new projects <br>"
+  	                     If (LOG = True) Then
+                           objLogFile.WriteLine(logFileIndent & "User folders will only be created for new projects")
+                         EndIf
                       Else
                          VERBOSE = 0 ' Only messages about existing directories
                       End If
@@ -302,16 +376,25 @@ If args > 5 then
                       For counter = 0 to UBound(ProjectsArray)
                         If NOT Update Then
                           objExplorer.document.write "<font color=green>Creating folders for project: " & ProjectsArray(counter) & "<br>"
+  	                      If (LOG = True) Then
+                            objLogFile.WriteLine(logFileIndent & "Creating folders for project: " & ProjectsArray(counter))
+                          EndIf
                         End If
                         strProjectName = Replace(ProjectsArray(counter)," ","")
                         objShell.run chr(34) & FolderScript & chr(34) & " " & chr(34) & strNTName & chr(34) & " " & chr(34) & strProjectName & chr(34) & " " & chr(34) & strProjectName & " Researchers" & chr(34) & " " & VERBOSE & " D",1,true
                         objExplorer.document.write "<font color=green>User folders have been created. <br>"
+  	                    If (LOG = True) Then
+                          objLogFile.WriteLine(logFileIndent & "User folders have been created.")
+                        EndIf
                       Next
                   End If
               End If
           End If
       Else
           objExplorer.document.write "<font color=orange>Skipped, already exists! <br>"
+  	      If (LOG = True) Then
+            objLogFile.WriteLine(logFileIndent & "Skipped, already exists!")
+          EndIf
       End If ' User exists?
         
       ' Add the user to the multiOTPGroup in AD Users
@@ -332,10 +415,21 @@ If args > 5 then
       If (Err.Number <> 0) Then
         on Error Goto 0
   	    objExplorer.document.write "<font color=orange>" & strCN & " already member of group " & multiOTPGroup & "? (Skipped)<br>"
+  	    If (LOG = True) Then
+          objLogFile.WriteLine(logFileIndent & strCN & " already member of group " & multiOTPGroup & "? (Skipped)")
+  	    EndIf
       Else
    	    objExplorer.document.write "<font color=green>" & strCN & " added to group " & multiOTPGroup & "<br>"
+  	    If (LOG = True) Then
+          objLogFile.WriteLine(logFileIndent & strCN & " added to group " & multiOTPGroup)
+   	    EndIf
       End If
         
       objExplorer.document.write "<p><font color=black>-----------------------------------------------------------------</p><br>"
   End If
+
+  If (LOG = True) Then
+    objLogFile.Close
+    set objLogFile = Nothing
+  EndIf
 End If

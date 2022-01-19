@@ -12,6 +12,16 @@
 
 ' Note that the project folder, share, and data directories need to be present with the correct permissions
 
+' Arguments:
+'   user name
+'   project name
+'   project group
+'   verbose flag
+'   drive name Projects folder
+'   log file path
+'   log file indent
+
+  Dim LOG, logFileName, logFileIndent, objLogFile
   Dim strSharedDirectory, strDataOutDirectory, strUserName, strGroupName, strProjectName, strUserDirectory
 
   Dim objNetwork 
@@ -22,7 +32,7 @@
   strUpLoadFtpDirectory = "e:\ftp\upload\"
   strUserDirectory = "e:\users\"
 
-
+  LOG = False
   args = WScript.Arguments.Count
 
   If args < 1 then
@@ -55,6 +65,33 @@
   else
     strDriveName = Wscript.Arguments.Item(4)
   end If
+
+  If args < 6 then
+    logFileName = ""
+  else
+    logFileName = Wscript.Arguments.Item(5)
+  end If
+
+  If args < 7 then
+    logFileIndent = ""
+  else
+    logFileIndent = Wscript.Arguments.Item(6)
+  end If
+  
+  ' Open log file
+  If (StrComp(logFileName, "") != 0) Then
+    LOG = True
+    Set objLogFile = CreateObject("Scripting.FileSystemObject").OpenTextFile(logFileName,8,false)
+  
+    ' Log script parameters
+    objLogFile.WriteLine(logFileIndent & "createFolders.vbs")
+    objLogFile.WriteLine(logFileIndent & "  User Name    : " & strUserName)
+    objLogFile.WriteLine(logFileIndent & "  Project Name : " & strProjectName)
+    objLogFile.WriteLine(logFileIndent & "  Group Name   : " & strGroupName)
+    objLogFile.WriteLine(logFileIndent & "  Verbose      : " & VERBOSE)
+    objLogFile.WriteLine(logFileIndent & "  Drive Name   : " & strDriveName)
+    objLogFile.WriteLine("")
+  EndIf
 
   strSharedDirectory = strDriveName & ":\projects\"
   ' WScript.Echo "project folder: " &  strSharedDirectory
@@ -97,12 +134,15 @@
 
 
 
-Private Sub CreateFolder (strDirectory, VERBOSE)
+Private Sub CreateFolder (strDirectory, VERBOSE, objLogFile, logFileIndent, LOG)
  ' Create FileSystemObject. So we can apply .createFolder method
  Dim objFSO, objFolder, DEBUG
 
  If VERBOSE=1 Then
       WScript.Echo "Creating " & strDirectory
+      If (LOG = True) Then
+        objLogFile.WriteLine(logFileIndent & "Creating " & strDirectory)
+      EndIf
  End If
  Set objFSO = CreateObject("Scripting.FileSystemObject")
  If objFSO.FolderExists(strDirectory) Then
@@ -119,7 +159,7 @@ Private Sub CreateFolder (strDirectory, VERBOSE)
 
 end Sub
 
-Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE)
+Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE, objLogFile, logFileIndent, LOG)
 ' sets the permissions for a user or group
 
  Dim intRunError, objShell, objFSO, DEBUG
@@ -133,11 +173,16 @@ Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE)
 
 
    If intRunError <> 0 Then
-   Wscript.Echo "Error assigning permissions for user " _
-     & strUserName & " to folder " & strDirectory
+   Wscript.Echo "Error assigning permissions for user " & strUserName & " to folder " & strDirectory
+   If (LOG = True) Then
+     objLogFile.WriteLine(logFileIndent & "Error assigning permissions for user " & strUserName & " to folder " & strDirectory)
+   EndIf
    Else
      if (VERBOSE="1") Then
        WScript.Echo strPermissions & " permissions set for " & strDirectory & " for " & strName
+       If (LOG = True) Then
+         objLogFile.WriteLine(logFileIndent & strPermissions & " permissions set for " & strDirectory & " for " & strName)
+       EndIf
      End If
    End If
  End If

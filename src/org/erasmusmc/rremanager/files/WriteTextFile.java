@@ -16,59 +16,38 @@
 package org.erasmusmc.rremanager.files;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 
 public class WriteTextFile {
-  
-  public WriteTextFile(String filename){
-    FileOutputStream stream;
-    try {
-      stream = new FileOutputStream(filename);
-      bufferedWrite = new BufferedWriter( new OutputStreamWriter(stream, "ISO-8859-1"),10000);      
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (UnsupportedEncodingException e) {
-      System.err.println("Computer does not support ISO-8859-1 encoding");
-      e.printStackTrace();
-    }
-  }
-  
-  public void writeln(String string){
-    try {
-      bufferedWrite.write(string);
-      bufferedWrite.newLine();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-  
-  public void writeln(int integer){
-  	writeln(Integer.toString(integer));
-  }
-  
-  public void writeln(Object object){
-  	writeln(object.toString());
-  }
-  
-  public void flush(){
-    try {
-      bufferedWrite.flush();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-  
-  public void close() {
-    try {
-      bufferedWrite.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-  
-  private BufferedWriter bufferedWrite;
+	private String fileName = null; 
+
+	public WriteTextFile(String fileName){
+		this.fileName = fileName;
+	}
+
+	public void writeln(String string){
+		if (fileName != null) {
+			try {
+				FileWriter fileWriter = new FileWriter(new File(fileName), true);
+				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+				bufferedWriter.write(string);
+				bufferedWriter.newLine();
+				bufferedWriter.flush();
+				bufferedWriter.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void writeln(int integer){
+		writeln(Integer.toString(integer));
+	}
+
+	public void writeln(Object object){
+		writeln(object.toString());
+	}
 }

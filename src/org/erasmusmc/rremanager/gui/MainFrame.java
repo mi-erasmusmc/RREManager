@@ -656,7 +656,7 @@ public class MainFrame {
 					parameters.add(user[UserData.EMAIL]);
 					parameters.add(user[UserData.PROJECTS]);
 					parameters.add(user[UserData.GROUPS]);
-					parameters.add("1"); // Update Flag
+					parameters.add("0"); // Update Flag
 					script = "createUserProjects.vbs";
 
 					allTimeLogRecord += "Run " + action + " Script";
@@ -675,37 +675,39 @@ public class MainFrame {
 					logWithTimeLn("  " + action + " " + ((AddUserLogEntry) logEntry).getUserName() + "FAILED: User does not exist.");
 				}
 			}
+
+			parameters.add(fullLogFileName);
 			String logLine = "  " + action;
 			String paramatersLogLn = "";
 			for (String parameter : parameters) {
-				paramatersLogLn += " " + parameter;
+				paramatersLogLn += " \"" + parameter + "\"";
 			}
 			logWithTimeLn(logLine + paramatersLogLn);
+			
 			if (RREManager.test) {
 				parameters.add(0, action);
 				script = "testScript.vbs";
 			}
-			if (success) {
-				if (script != null) {
-					logWithTime("    " + script + paramatersLogLn);
-					if (ScriptUtilities.callVBS(script, parameters)) {
-						allTimeLogRecord += "," + "Succeeded";
-						allTimeLogRecord += ",";
-						allTimeLog(allTimeLogRecord, script);
-						logLn(" SUCCEEDED");
-					}
-					else {
-						allTimeLogRecord += "," + "Failed";
-						allTimeLogRecord += ",";
-						allTimeLog(allTimeLogRecord, script);
-						logLn(" FAILED");
-						success = false;
-						break;
-					}
+			
+			if (script != null) {
+				logWithTimeLn("    " + script + paramatersLogLn);
+				if (ScriptUtilities.callVBS(script, parameters)) {
+					allTimeLogRecord += "," + "Succeeded";
+					allTimeLogRecord += ",";
+					allTimeLog(allTimeLogRecord, script);
+					logWithTimeLn("  SUCCEEDED");
 				}
 				else {
-					logWithTimeLn("    No script specified.");
+					allTimeLogRecord += "," + "Failed";
+					allTimeLogRecord += ",";
+					allTimeLog(allTimeLogRecord, script);
+					logWithTimeLn("  FAILED");
+					success = false;
+					break;
 				}
+			}
+			else {
+				logWithTimeLn("    No script specified.");
 			}
 		}
 		if (success) {

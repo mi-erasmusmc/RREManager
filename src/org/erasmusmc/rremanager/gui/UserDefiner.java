@@ -175,8 +175,8 @@ public class UserDefiner {
 			
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				showGroups(availableGroups);
-				showGroups(selectedGroups);
+				showGroups(availableGroups, false);
+				showGroups(selectedGroups, true);
 			}
 		});
 		JLabel projectGroupsLabel = new JLabel("Project groups:");
@@ -203,8 +203,8 @@ public class UserDefiner {
 						availableGroups.remove(group);
 					}
 				}
-				showGroups(availableGroups);
-				showGroups(selectedGroups);
+				showGroups(availableGroups, false);
+				showGroups(selectedGroups, true);
 			}
 		});
 		
@@ -222,8 +222,8 @@ public class UserDefiner {
 						selectedGroups.remove(group);
 					}
 				}
-				showGroups(availableGroups);
-				showGroups(selectedGroups);
+				showGroups(availableGroups, false);
+				showGroups(selectedGroups, true);
 			}
 		});
 
@@ -395,8 +395,8 @@ public class UserDefiner {
 		rootPane.setDefaultButton(okButton);
 		
 		ftpOnlyField.setSelected(ftpOnly);
-		showGroups(availableGroups);
-		showGroups(selectedGroups);
+		showGroups(availableGroups, false);
+		showGroups(selectedGroups, true);
 		
 		if (user != null) {
 			//firstNameField.setEditable(false);
@@ -432,7 +432,7 @@ public class UserDefiner {
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void showGroups(List<String> groupNamesList) {
+	private void showGroups(List<String> groupNamesList, boolean markNew) {
 		JPanel groupsPanel = null;
 		JLabel groupsPanelLabel = null;
 		if (groupNamesList == selectedGroups) {
@@ -452,7 +452,7 @@ public class UserDefiner {
 		JList groupsList = new JList(projectsListModel);
 		groupsList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		groupsList.setLayoutOrientation(JList.VERTICAL);
-		groupsList.setCellRenderer(new MyGroupListCellRenderer());
+		groupsList.setCellRenderer(new MyGroupListCellRenderer(markNew));
 		groupsList.addListSelectionListener(new ListSelectionListener() {
 			
 			@Override
@@ -491,7 +491,13 @@ public class UserDefiner {
 	class MyGroupListCellRenderer extends JLabel implements ListCellRenderer {
 		private static final long serialVersionUID = 759949058974963733L;
 		
+		private boolean markNew = false;
 		private Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
+		
+		public MyGroupListCellRenderer(boolean markNew) {
+			super();
+			this.markNew = markNew;
+		}
 
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -512,7 +518,7 @@ public class UserDefiner {
 			  }
 
 			setEnabled(list.isEnabled());
-			if (originalSelectedGroups.contains(getText())) {
+			if (markNew && (!originalSelectedGroups.contains(getText()))) {
 				setFont(list.getFont().deriveFont(java.awt.Font.BOLD));
 			}
 			else {

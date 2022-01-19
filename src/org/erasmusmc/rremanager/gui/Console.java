@@ -71,10 +71,7 @@ public class Console extends OutputStream {
 	}
 	
 	public void closeDebugFile() {
-		if (debug != null) {
-			debug.close();
-			debug = null;
-		}
+		debug = null;
 	}
 	
 	public void clear() {
@@ -107,7 +104,6 @@ public class Console extends OutputStream {
 					line = line.substring(0, line.length() - 2);
 				}
 				debug.writeln(line);
-				debug.flush();
 			}
 			buffer = new StringBuffer();
 		}

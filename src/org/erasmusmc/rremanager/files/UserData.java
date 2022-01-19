@@ -364,9 +364,36 @@ public class UserData {
 				error = "ERROR cannot find users file '" + usersFileName + "'";
 				success = false;
 			}
+
+			String allTimeLogRecord = "Modify User";
+			allTimeLogRecord += "," + "\"" + user[EMAIL] + "\"";
+			allTimeLogRecord += "," + "\"" + user[USER_NAME] + "\"";
+			allTimeLogRecord += "," + "\"" + user[FIRST_NAME] + "\"";
+			allTimeLogRecord += "," + "\"" + user[LAST_NAME] + "\"";
+			allTimeLogRecord += ",";
+			allTimeLogRecord += "," + "\"" + user[PASSWORD] + "\"";
+			allTimeLogRecord += "," + "\"" + user[IP_ADDRESSES] + "\"";
+			allTimeLogRecord += "," + "Yes";
+			allTimeLogRecord += "," + "\"" + user[PROJECTS] + "\"";
+			allTimeLogRecord += "," + "\"" + user[GROUPS] + "\"";
+			
+			String logLn = "Modifying user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ") ";
+			
+			if (success) {
+				allTimeLogRecord += "," + "Succeeded";
+				allTimeLogRecord += ",";
+				mainFrame.allTimeLog(allTimeLogRecord, "");
+				
+				mainFrame.logWithTimeLn(logLn + "SUCCEEDED");
+			}
+			else {
+				allTimeLogRecord += "," + "Failed";
+				allTimeLogRecord += "," + "\"" + error + "\"";
+				
+				mainFrame.logWithTimeLn(logLn + "FAILED");
+				mainFrame.logWithTimeLn(logLn + "  " + error);
+			}
 		}
-		
-		//TODO
 		
 		return success;
 	}

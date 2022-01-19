@@ -69,12 +69,7 @@ public class UsersTab extends MainFrameTab {
 	public UsersTab(RREManager rreManager, MainFrame mainFrame, String settingsGroup) {
 		super(rreManager, mainFrame);
 		this.settingsGroup = settingsGroup;
-		update();
-	}
-	
-	
-	public void update() {
-		removeAll();
+
 		userData = new UserData(mainFrame, settingsGroup);
 		users = userData.getUsersList();
 		
@@ -164,20 +159,7 @@ public class UsersTab extends MainFrameTab {
 				if (!e.getValueIsAdjusting()) {
 					int[] selection = usersTable.getSelectedRows();
 					if (selection.length > 0) {
-						messageTypeComboBox.setEnabled(true);
-						List<Integer> realSelection = new ArrayList<Integer>();
-						for (int selectionIndex : selection) {
-							int realIndex = usersTable.convertRowIndexToModel(selectionIndex);
-							realSelection.add(realIndex);
-						}
-						if (selection.length == 1) {
-							editUserButton.setEnabled(true);
-						}
-						else {
-							editUserButton.setEnabled(false);
-						}
-						addUserButton.setEnabled(true);
-						showInfo(realSelection);
+						showSelection();
 					}
 					else {
 						messageTypeComboBox.setEnabled(false);
@@ -356,6 +338,14 @@ public class UsersTab extends MainFrameTab {
 	}
 	
 	
+	public void update() {
+		userData = new UserData(mainFrame, settingsGroup);
+		users = userData.getUsersList();
+		showSelection();
+		repaint();
+	}
+	
+	
 	private class UsersTableModel extends AbstractTableModel {
 		private static final long serialVersionUID = -2026827800711156459L;
 		
@@ -425,6 +415,25 @@ public class UsersTab extends MainFrameTab {
 			userData.addUser(user);
 			update();
 		}
+	}
+	
+	
+	private void showSelection() {
+		int[] selection = usersTable.getSelectedRows();
+		messageTypeComboBox.setEnabled(true);
+		List<Integer> realSelection = new ArrayList<Integer>();
+		for (int selectionIndex : selection) {
+			int realIndex = usersTable.convertRowIndexToModel(selectionIndex);
+			realSelection.add(realIndex);
+		}
+		if (selection.length == 1) {
+			editUserButton.setEnabled(true);
+		}
+		else {
+			editUserButton.setEnabled(false);
+		}
+		addUserButton.setEnabled(true);
+		showInfo(realSelection);
 	}
 	
 	

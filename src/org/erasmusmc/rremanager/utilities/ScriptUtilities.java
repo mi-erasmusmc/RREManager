@@ -59,6 +59,9 @@ public class ScriptUtilities {
 		if (scriptPath != null) {
 			(new File(scriptPath)).delete();
 		}
+		if (workPath != null) {
+			(new File(workPath + getSemaphoreName())).delete();
+		}
 		
 		return result;
 	}
