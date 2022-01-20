@@ -13,33 +13,44 @@
 
 ' Arguments:
 '   project name
-'   project subfolders (comma-separated)
+'   project sub folders (comma-separated)
+'   log file path
+'   log file indent
 
-  Dim strSubFolders,strMainGroup, strOU, strProjectsFolder, strDataMainSub, strGroupName, strProjectName, strShareMainSub
-  Dim strDataSUbFolder, strSubFolder, strSubGroupName, strDataFolder, strShareFolder
+Dim VERBOSE, logFileName, logFileIndent, objLogFile, objExplorer
+Dim strSubFolders,strMainGroup, strOU, strProjectsFolder, strDataMainSub, strGroupName, strProjectName, strShareMainSub
+Dim strDataSUbFolder, strSubFolder, strSubGroupName, strDataFolder, strShareFolder
 
-  Dim objNetwork 
-  Set objNetwork = WScript.CreateObject("WScript.Network")
-  strProjectsFolder = "D:\Projects\" 
-  strDataMainSub = "Data"
-  strShareMainSub = "Share"
-  strOU = "Researchers"
-  strMainGroup = "All Researchers"
+strProjectsFolder = "D:\Projects\" 
+strDataMainSub = "Data"
+strShareMainSub = "Share"
+strOU = "Researchers"
+strMainGroup = "All Researchers"
 
-  VERBOSE = 0
-  args = WScript.Arguments.Count
+' Create log in internet explorer
+Set objExplorer = createobject("internetexplorer.application")
+If IsObject(objExplorer) Then
+  objExplorer.navigate2 "about:blank" : objExplorer.width = 700 : objExplorer.height = 600 : objExplorer.toolbar = false : objExplorer.menubar = false : objExplorer.statusbar = false : objExplorer.visible = True
+  objExplorer.document.title = "Please be patient.... "
+End If
 
-  If args < 1 then
-    strProjectName = inputbox("Enter the projectname")
-  else
-    strProjectName = Wscript.Arguments.Item(0)
-  end If
+Call Log("<font color=green>Creating project!<font color=black><br>")
 
-  If args < 2 then
-    strSubFolders = inputbox("Enter any subfolders (comma-separated) or press enter")
-  else
-    strSubFolders = Wscript.Arguments.Item(1)
-  end If
+VERBOSE = 0
+args = WScript.Arguments.Count
+
+If args == 4 then
+  strProjectName = Wscript.Arguments.Item(0)
+  strSubFolders = Wscript.Arguments.Item(1)
+  
+  ' Open log file
+  Call OpenLogFile(Wscript.Arguments.Item(args - 2), Wscript.Arguments.Item(args - 1))
+
+  ' Log script parameters
+  Call Log("createUserProject.vbs" & "<br>)
+  Call Log("  Project Name: " & strProjectName & "<br>)
+  Call Log("  Sub folders : " & strSubFolders "<br>)
+  Call Log("<br>")
 
 
   strGroupName = strProjectName & " Researchers"  'e.g. 'ARITMO Researchers
@@ -89,29 +100,41 @@
       ' Create Date Share on this level
       Call createShare(strProjectName & "-Data",strProjectsFolder & strProjectName & "\" & strDataMainSub, VERBOSE)
     End If
-  End if 
+  End If
+End If
 
+If IsObject(objExplorer) Then
+  objExplorer.document.title = "Ready" 
+End If
+
+Call CloseLogFile()
 
 
 Private Sub CreateFolder (strDirectory, VERBOSE)
  ' Create FileSystemObject. So we can apply .createFolder method
  Dim objFSO, objFolder, DEBUG
 
- if VERBOSE Then
+ Call Log("Creating " & strDirectory + "<br>")
+ If VERBOSE Then
       WScript.Echo "Creating " & strDirectory
  End If
  Set objFSO = CreateObject("Scripting.FileSystemObject")
  If objFSO.FolderExists(strDirectory) Then
    Set objFolder = objFSO.GetFolder(strDirectory)
-   WScript.Echo strDirectory & " was already created "
+   Call Log(strDirectory & " was already created<br>")
+   If VERBOSE Then
+     Script.Echo strDirectory & " was already created"
+   End If
  Else
    Set objFolder = objFSO.CreateFolder(strDirectory)
-   if VERBOSE Then
+   Call Log("Just created " & strDirectory & "<br>")
+   If VERBOSE Then
       WScript.Echo "Just created " & strDirectory
    End If
  End If
 
 end Sub
+
 
 Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE)
 ' sets the permissions for a user or group
@@ -126,9 +149,10 @@ Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE)
 
 
    If intRunError <> 0 Then
-   Wscript.Echo "Error assigning permissions for user " _
-     & strName & " to folder " & strDirectory
+   Call Log("<font color=red>Error assigning permissions for user " & strName & " to folder " & strDirectory & "<font color=black><br>")
+   Wscript.Echo "Error assigning permissions for user " & strName & " to folder " & strDirectory
    Else
+     Call Log("<font color=green>" & strPermissions & " permissions set for " & strDirectory & " for " & strName & "<font color=black><br>")
      if VERBOSE Then
        WScript.Echo strPermissions & " permissions set for " & strDirectory & " for " & strName
      End If
@@ -136,6 +160,7 @@ Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE)
  End If
 
 end Sub
+
 
 Private Sub RemoveAndDisableInheritance(strDirectory, strName, VERBOSE)
 ' sets the permissions for a user or group
@@ -151,15 +176,17 @@ Private Sub RemoveAndDisableInheritance(strDirectory, strName, VERBOSE)
 
    
    If intRunError <> 0 Then
-     Wscript.Echo "Error assigning permissions for user " _
-     & strUserName & " to folder " & strDirectory
+     Call Log("<font color=red>Error assigning permissions for user " & strUserName & " to folder " & strDirectory & "<font color=black><br>")
+     Wscript.Echo "Error assigning permissions for user " & strUserName & " to folder " & strDirectory
    Else
+     Call Log("<font color=green>" & strName & " permissions removed for " & strDirectory & "<font color=black><br>")
      if VERBOSE Then
        WScript.Echo strName & " permissions removed for " & strDirectory
      End If
    End If
  End If
 end Sub
+
 
 Private Sub CreateUserGroup(strOU,strNewGp, VERBOSE)
 ' Adds a usergroup to the OU
@@ -181,10 +208,12 @@ Private Sub CreateUserGroup(strOU,strNewGp, VERBOSE)
     objGroup.setInfo  
     IF (Err.Number <> 0) Then
       on Error Goto 0
+      Call Log("<font color=orange>Group " & strNewGp & " already existed (Skipped)<font color=black><br>")
       wscript.Echo "Group " & strNewGp & " already existed (Skipped)"
     ELSE
+      Call Log("<font color=green>Group " & strMewGp & " created<font color=black><br>")
       if VERBOSE Then
-        WScript.Echo "Group " & strMewGp & " created "
+        WScript.Echo "Group " & strMewGp & " created"
       End If
    End If
 End Sub
@@ -192,7 +221,6 @@ End Sub
 
 Private Sub AddGrpMem(strGroupI,strMemberI,VERBOSE)
 ' Adds a member to a group
-  
 
    Dim strOU, strGroup, strUser, strDNSDomain
    Dim objRootLDAP, objGroup, objUser
@@ -213,8 +241,10 @@ Private Sub AddGrpMem(strGroupI,strMemberI,VERBOSE)
    objGroup.add(objUser.ADsPath) 
    IF (Err.Number <> 0) Then
       on Error Goto 0
+      Call Log("<font color=orange>Member " & strMemberI & " already exists? (Skipped)<font color=black><br>")
       wscript.Echo "Member " & strMemberI & " already exists? (Skipped)"
    ELSE
+      Call Log("<font color=green>Member " & strmemberI & " added to " & strGroupI" & "<font color=black><br>")
       if VERBOSE Then
         WScript.Echo "Member " & strmemberI & " added to " & strGroupI
       End If
@@ -230,18 +260,18 @@ Private Sub createShareAlternative(strShareName, strShareFolder, VERBOSE)
    Const ShareDescription = " "
 
    strComputer = "."
-   Set objWMIService = GetObject("winmgmts:" _
-       & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
+   Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
 
    Set objNewShare = objWMIService.Get("Win32_Share")
 
    ON Error Resume Next
-   errReturn = objNewShare.Create _
-       (strSharefolder, strSharename, FILE_SHARE, MAXIMUM_CONNECTIONS, ShareDescription)
+   errReturn = objNewShare.Create (strSharefolder, strSharename, FILE_SHARE, MAXIMUM_CONNECTIONS, ShareDescription)
    IF (Err.Number <> 0) Then
       on Error Goto 0
+      Call Log("<font color=red>Share " & strShareName & " not created (Skipped)<font color=black><br>")
       wscript.Echo "Share " & strShareName & " not created (Skipped)"
    ELSE
+      Call Log("<font color=green>Share " & strShareName & " created.<font color=black><br>")
       If VERBOSE Then
         WScript.Echo "Share " & strShareName & " created." 
       End If
@@ -249,20 +279,71 @@ Private Sub createShareAlternative(strShareName, strShareFolder, VERBOSE)
 
 End Sub
 
+
 Private Sub createShare(strShareName, strShareFolder, VERBOSE)
- Dim intRunError, objShell, objFSO
+  Dim intRunError, objShell, objFSO
 
- Set objShell = CreateObject("Wscript.Shell")
- Set objExecObject = objShell.Exec("cmd /c NET SHARE " & strShareName & "=" & Chr(34) & strShareFolder & Chr(34) & " /GRANT:EVERYONE,FULL") 
-  
- if VERBOSE Then
-   WScript.Echo "Permissions set for " & strShareName
- End If
-end Sub
+  Set objShell = CreateObject("Wscript.Shell")
+  Set objExecObject = objShell.Exec("cmd /c NET SHARE " & strShareName & "=" & Chr(34) & strShareFolder & Chr(34) & " /GRANT:EVERYONE,FULL") 
+ 
+  Call Log("<font color=green>Permissions set for " & strShareName & " created.<font color=black><br>")
+  if VERBOSE Then
+    WScript.Echo "Permissions set for " & strShareName
+  End If
+End Sub
 
-If args<1 then
-  WScript.Echo "Done!"
-End If
+
+Private Sub OpenLogFile(fileName, indent)
+  If StrComp(fileName, "") <> 0 Then
+    logFileName = fileName
+    logFileIndent = indent
+    Set objLogFile = CreateObject("Scripting.FileSystemObject").OpenTextFile(logFileName,8,false)
+  End If
+End Sub
+
+
+Private Sub Log(text)
+  If IsObject(objExplorer) Then
+    objExplorer.document.write text
+  End If
+  If StrComp(logFileName, "") <> 0 Then
+    objLogFile.WriteLine(logFileIndent & StripHTMLTags(text))
+  End If
+End Sub
+
+
+Private Sub CloseLogFile()
+  If StrComp(logFileName, "") <> 0 Then
+    objLogFile.Close
+    Set objLogFile = Nothing
+  End If
+End Sub
+
+
+Private Function StripHTMLTags(text)
+  Dim strippedText, gtPos
+  strippedText = text
+  ' Strip HTML tags at the start
+  Do While StrComp(Left(strippedText, 1), "<") = 0
+    gtPos = InStr(strippedText,">")
+    If gtPos > 0 Then
+      strippedText = Mid(strippedText, gtPos + 1)
+    Else
+      Exit Do
+    End If
+  Loop
+  ' Strip HTML tags at the end
+  Do While StrComp(Right(strippedText, 1), ">") = 0
+    gtPos = InStrRev(strippedText,"<")
+    If gtPos > 0 Then
+      strippedText = Mid(strippedText, 1, gtPos - 1)
+    Else
+      Exit Do
+    End If
+  Loop
+  StripHTMLTags = strippedText
+End Function
+
   
 WScript.Quit 
 
