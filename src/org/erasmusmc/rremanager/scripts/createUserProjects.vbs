@@ -4,7 +4,7 @@
 '
 ' ----------------------------------------------------------------------
 ' Copyright (c) 2003-2010 Richard L. Mueller
-' Modified 2011 Peter Rijnbeek
+' Modified 2011 Peter Rijnbeek, Mees Mosseveld
 ' Hilltop Lab web site - http://www.rlmueller.net
 ' Version 1.0 - September 8, 2003
 ' Version 1.1 - January 25, 2004 - Modify error trapping.
@@ -95,7 +95,7 @@ strNetBIOSdomain = Left(strNetBIOSDomain, Len(strNetBIOSDomain) - 1)
 
 args = WScript.Arguments.Count
 
-If args == 11 then
+If args = 11 then
   strFirst = Wscript.Arguments.Item(0)
   strInitials = Wscript.Arguments.Item(1)
   strLast = Wscript.Arguments.Item(2)
@@ -110,16 +110,16 @@ If args == 11 then
   Call OpenLogFile(Wscript.Arguments.Item(args - 2), Wscript.Arguments.Item(args - 1))
 
   ' Log script parameters
-  Call Log("createUserProjects.vbs" & "<br>)
-  Call Log("  First Name   : " & strFirst & "<br>)
-  Call Log("  Initial      : " & strInitials "<br>)
-  Call Log("  Last Name    : " & strLast "<br>)
-  Call Log("  User Name    : " & strUserName "<br>)
-  Call Log("  Password     : " & strPW "<br>)
-  Call Log("  Email Address: " & strEmail "<br>)
-  Call Log("  Projects     : " & strProjects "<br>)
-  Call Log("  Groups       : " & strGroups "<br>)
-  Call Log("  Update       : " & strUpdate "<br>)
+  Call Log("createUserProjects.vbs" & "<br>")
+  Call Log("  First Name   : " & strFirst & "<br>")
+  Call Log("  Initial      : " & strInitials "<br>")
+  Call Log("  Last Name    : " & strLast "<br>")
+  Call Log("  User Name    : " & strUserName "<br>")
+  Call Log("  Password     : " & strPW "<br>")
+  Call Log("  Email Address: " & strEmail "<br>")
+  Call Log("  Projects     : " & strProjects "<br>")
+  Call Log("  Groups       : " & strGroups "<br>")
+  Call Log("  Update       : " & strUpdate "<br>")
   Call Log("<br>")
   
   DIM ProjectsArray

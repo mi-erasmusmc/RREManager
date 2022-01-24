@@ -1,5 +1,5 @@
 ' CreateProject.vbs
-' Author Peter Rijnbeek
+' Authors: Peter Rijnbeek, Mees Mosseveld
 
 ' ------------------------------------------------'
 ' This script will create a new project in the RRE
@@ -34,12 +34,10 @@ If IsObject(objExplorer) Then
   objExplorer.document.title = "Please be patient.... "
 End If
 
-Call Log("<font color=green>Creating project!<font color=black><br>")
-
 VERBOSE = 0
 args = WScript.Arguments.Count
 
-If args == 4 then
+If args = 4 then
   strProjectName = Wscript.Arguments.Item(0)
   strSubFolders = Wscript.Arguments.Item(1)
   
@@ -47,9 +45,9 @@ If args == 4 then
   Call OpenLogFile(Wscript.Arguments.Item(args - 2), Wscript.Arguments.Item(args - 1))
 
   ' Log script parameters
-  Call Log("createUserProject.vbs" & "<br>)
-  Call Log("  Project Name: " & strProjectName & "<br>)
-  Call Log("  Sub folders : " & strSubFolders "<br>)
+  Call Log("createProject.vbs" & "<br>")
+  Call Log("  Project Name: " & strProjectName & "<br>")
+  Call Log("  Sub folders : " & strSubFolders & "<br>")
   Call Log("<br>")
 
 
@@ -213,7 +211,7 @@ Private Sub CreateUserGroup(strOU,strNewGp, VERBOSE)
     ELSE
       Call Log("<font color=green>Group " & strMewGp & " created<font color=black><br>")
       if VERBOSE Then
-        WScript.Echo "Group " & strMewGp & " created"
+        WScript.Echo "Group " & strNewGp & " created"
       End If
    End If
 End Sub
@@ -244,7 +242,7 @@ Private Sub AddGrpMem(strGroupI,strMemberI,VERBOSE)
       Call Log("<font color=orange>Member " & strMemberI & " already exists? (Skipped)<font color=black><br>")
       wscript.Echo "Member " & strMemberI & " already exists? (Skipped)"
    ELSE
-      Call Log("<font color=green>Member " & strmemberI & " added to " & strGroupI" & "<font color=black><br>")
+      Call Log("<font color=green>Member " & strmemberI & " added to " & strGroupI & "<font color=black><br>")
       if VERBOSE Then
         WScript.Echo "Member " & strmemberI & " added to " & strGroupI
       End If

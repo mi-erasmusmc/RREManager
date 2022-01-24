@@ -677,6 +677,7 @@ public class MainFrame {
 			}
 
 			parameters.add(fullLogFileName);
+			parameters.add("                           ");
 			String logLine = "  " + action;
 			String paramatersLogLn = "";
 			for (String parameter : parameters) {

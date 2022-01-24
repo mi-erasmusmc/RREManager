@@ -82,6 +82,7 @@ public class RREManager {
 		if (setCurrentPath()) {
 			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
+				test = (!iniFile.getValue("General", "DataFile").equals("F:\\Administration\\Users\\UsersProjects.xlsx"));
 				administratorSelector = new AdministratorSelector(null);
 				administrator = administratorSelector.getAdministrator();
 				if (administrator != null) {
