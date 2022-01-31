@@ -488,39 +488,16 @@ public class MainFrame {
 	
 	
 	public void log(String logText) {
+		if (!RREManager.loggingStarted) {
+			startLogging();
+		}
 		System.out.print(logText);
 	}
 	
 	
 	public void logLn(String logText) {
 		if (!RREManager.loggingStarted) {
-			RREManager.loggingStarted = true;
-			console.setDebugFile(RREManager.noLogging ? null : fullLogFileName);
-			String allTimeLogHeader = "Action";
-			allTimeLogHeader += "," + "Recipient";
-			allTimeLogHeader += "," + "User";
-			allTimeLogHeader += "," + "First Name";
-			allTimeLogHeader += "," + "Last Name";
-			allTimeLogHeader += "," + "BCC";
-			allTimeLogHeader += "," + "Password";
-			allTimeLogHeader += "," + "IP-addresses";
-			allTimeLogHeader += "," + "Approved";
-			allTimeLogHeader += "," + "Project";
-			allTimeLogHeader += "," + "Group";
-			allTimeLogHeader += "," + "Result";
-			allTimeLogHeader += "," + "Error";
-			allTimeLogHeader += "," + "Log File";
-			allTimeLogFile = RREManager.noLogging ? null : new File(allTimeLogFileName);
-			if (RREManager.noLogging || allTimeLogFile.exists() || allTimeLog(allTimeLogHeader, "Info")) {
-				logWithTimeLn("RRE Manager v" + RREManager.version + " - " + rreManager.getAdministrator());
-				logLn("");
-				logLn("");
-				logLn(RREManager.getIniFile().getFileName() + ":");
-				logLn("--------------------------------------------------------------------------------------");
-				RREManager.getIniFile().writeFile(System.out);
-				logLn("--------------------------------------------------------------------------------------");
-				logLn("");
-			}
+			startLogging();
 		}
 		System.out.println(logText);
 	}
@@ -529,6 +506,9 @@ public class MainFrame {
 	public boolean allTimeLog(String record, String info) {
 		boolean success = true;
 		if (!RREManager.noLogging) {
+			if (!RREManager.loggingStarted) {
+				startLogging();
+			}
 			if (allTimeLogFile.exists()) {
 				record = DateUtilities.getCurrentTime().replaceAll(" ", ",") + "," + rreManager.getAdministrator() + "," + record;
 				record += "," + getLogFileName();
@@ -549,6 +529,37 @@ public class MainFrame {
 			}
 		}
 		return success;
+	}
+	
+	
+	private void startLogging() {
+		RREManager.loggingStarted = true;
+		console.setDebugFile(RREManager.noLogging ? null : fullLogFileName);
+		String allTimeLogHeader = "Action";
+		allTimeLogHeader += "," + "Recipient";
+		allTimeLogHeader += "," + "User";
+		allTimeLogHeader += "," + "First Name";
+		allTimeLogHeader += "," + "Last Name";
+		allTimeLogHeader += "," + "BCC";
+		allTimeLogHeader += "," + "Password";
+		allTimeLogHeader += "," + "IP-addresses";
+		allTimeLogHeader += "," + "Approved";
+		allTimeLogHeader += "," + "Project";
+		allTimeLogHeader += "," + "Group";
+		allTimeLogHeader += "," + "Result";
+		allTimeLogHeader += "," + "Error";
+		allTimeLogHeader += "," + "Log File";
+		allTimeLogFile = RREManager.noLogging ? null : new File(allTimeLogFileName);
+		if (RREManager.noLogging || allTimeLogFile.exists() || allTimeLog(allTimeLogHeader, "Info")) {
+			logWithTimeLn("RRE Manager v" + RREManager.version + " - " + rreManager.getAdministrator());
+			logLn("");
+			logLn("");
+			logLn(RREManager.getIniFile().getFileName() + ":");
+			logLn("--------------------------------------------------------------------------------------");
+			RREManager.getIniFile().writeFile(System.out);
+			logLn("--------------------------------------------------------------------------------------");
+			logLn("");
+		}
 	}
 	
 	

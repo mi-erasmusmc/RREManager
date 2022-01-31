@@ -1,4 +1,4 @@
- CreateUsers.vbs
+' CreateUserProjects.vbs
 ' VBScript program to create users according to the information in a
 ' Microsoft Excel spreadsheet.
 '
@@ -33,9 +33,11 @@
 '   log file path
 '   log file indent
 
+
 Option Explicit
 
-Dim VERBOSE, logFileName, logFileIndent, objLogFile
+Dim wshShell, strUserDNSDomain, userDNSDomainArray, strDC, counter
+Dim args, VERBOSE, logFileName, logFileIndent, objLogFile
 Dim Update, FTPOnly, strFirst, strLast, strInitials, strUserName, strPW, strProjects, strGroups, strEmail
 Dim strGroupDN, objUser, objGroup, objContainer
 Dim strCN, strNTName, strContainerDN
@@ -44,7 +46,7 @@ Dim intRunError, strNetBIOSDomain, strDNSDomain, strProjectName
 Dim objRootDSE, objTrans, strLogonScript, strUPN
 Dim strPreviousDN, blnBound, multiOTPGroup, projectsDrive
 Dim FolderScript, FTPOnlyFolderScript, objExplorer
-Dim strUserOU, strGroupOU, strGroup, strUser
+Dim strUserOU, strGroupOU, strGroup, strUser, strUpdate
 Dim objRootLDAP
 
 Dim strExportDirectory, strImportDirectory, strDownLoadFtpDirectory, strUpLoadFtpDirectory, strUserDirectory
@@ -75,8 +77,17 @@ Set objExplorer = createobject("internetexplorer.application")
 If IsObject(objExplorer) Then
   objExplorer.navigate2 "about:blank" : objExplorer.width = 700 : objExplorer.height = 600 : objExplorer.toolbar = false : objExplorer.menubar = false : objExplorer.statusbar = false : objExplorer.visible = True
   objExplorer.document.title = "Please be patient.... "
-
 End If
+
+' Get the current domain
+Set wshShell = CreateObject("WScript.Shell")
+strUserDNSDomain = wshShell.ExpandEnvironmentStrings("%USERDNSDOMAIN%")
+userDNSDomainArray = Split(strUserDNSDomain,".")
+strDC = ""
+For counter = 0 to UBound(userDNSDomainArray)
+  strDC = strDC & ",dc=" & Trim(userDNSDomainArray(counter))
+Next
+strContainerDN = "ou=Researchers" & strDC
 
 Call Log("<font color=green>Creating user account!<font color=black><br>")
 
@@ -112,14 +123,14 @@ If args = 11 then
   ' Log script parameters
   Call Log("createUserProjects.vbs" & "<br>")
   Call Log("  First Name   : " & strFirst & "<br>")
-  Call Log("  Initial      : " & strInitials "<br>")
-  Call Log("  Last Name    : " & strLast "<br>")
-  Call Log("  User Name    : " & strUserName "<br>")
-  Call Log("  Password     : " & strPW "<br>")
-  Call Log("  Email Address: " & strEmail "<br>")
-  Call Log("  Projects     : " & strProjects "<br>")
-  Call Log("  Groups       : " & strGroups "<br>")
-  Call Log("  Update       : " & strUpdate "<br>")
+  Call Log("  Initial      : " & strInitials & "<br>")
+  Call Log("  Last Name    : " & strLast & "<br>")
+  Call Log("  User Name    : " & strUserName & "<br>")
+  Call Log("  Password     : " & strPW & "<br>")
+  Call Log("  Email Address: " & strEmail & "<br>")
+  Call Log("  Projects     : " & strProjects & "<br>")
+  Call Log("  Groups       : " & strGroups & "<br>")
+  Call Log("  Update       : " & strUpdate & "<br>")
   Call Log("<br>")
   
   DIM ProjectsArray
@@ -173,28 +184,29 @@ If args = 11 then
       strLogonScript = ""
     
       ' Show some info to the user
-      Call Log(<p><font color=black>-----------------------------------------------------------------<br>")
-      Call Log("Adding user: " & strCN & "</p>")
+      Call Log("<p><font color=black>-----------------------------------------------------------------<br>")
     
       ' Is this a new user?
          
-      If Not DoesExist( strDNSDomain, strNTName ) OR Update Then
+      If Not DoesExist(strDNSDomain, strNTName) OR Update Then
           If Update Then
-  	        Call Log("<font color=red>Only Adding missing projects and groups for user: " & strNTName & "<br>")
+  	        Call Log("<font color=red>Only Adding missing projects and groups for user: " & strCN & " (" & strNTName & ")<br>")
+  	      Else
+            Call Log("Adding user: " & strCN & " (" & strNTName & ")</p>")
           End If
           ' If this container is different from the previous, bind to
           ' the container the user object will be created in.
     
           If (strContainerDN <> strPreviousDN) Then
+              Call Log("Bind to container: " & strContainerDN & "<br>")
               On Error Resume Next
               Set objContainer = GetObject("LDAP://" & strContainerDN)
               If (Err.Number <> 0) Then
                   On Error GoTo 0
-                  Call Log("Unable to bind to container: " & strContainerDN)
-                  Call Log("Unable to create user with NT name: " & strNTName)
+                  Call Log("<font color=red>Unable to bind to container: " & strContainerDN & "<br>")
+                  Call Log("<font color=red>Unable to create user with NT name: " & strNTName & "<br>")
                   ' Flag that container not bound.
                   strPreviousDN = ""
-  	              noError = 0	
               Else
                   On Error GoTo 0
                   strPreviousDN = strContainerDN
@@ -202,9 +214,11 @@ If args = 11 then
           End If
           ' Proceed if parent container bound.
           If (strPreviousDN <> "") Then
+              Call Log("Bound to container: " & strPreviousDN)
               On Error Resume Next
               If NOT Update Then
                 ' Create user object.
+                Call Log("Create user " & strCN & "<br>")
                 Set objUser = objContainer.Create("user", "cn=" & strCN)
               Else
                 ' Get user object.
@@ -214,8 +228,9 @@ If args = 11 then
               If (Err.Number <> 0) Then
                   On Error GoTo 0
                   Wscript.Echo "Unable to create user with cn: " & strCN
-  	              Call Log("Unable to create user with cn: " & strCN)
+  	              Call Log("<font color=red>Unable to create user with cn: " & strCN & "<br>")
               Else
+  	              Call Log("<font color=green>Created user with cn: " & strCN & "<br>")
                   ' Assign mandatory attributes and save user object.
                   If (strNTName = "") Then
                       strNTName = strCN
@@ -229,7 +244,7 @@ If args = 11 then
                   Else
                       ' Set password for user.
                       objUser.SetPassword strPW
-                      Call Log("<font color=green>password for user " & strNTName & " " & strPW & "<br>")
+                      Call Log("<font color=green>password for user " & strNTName & ": " & strPW & "<br>")
                       If (Err.Number <> 0) Then
                          On Error GoTo 0
                          Call Log("<font color=red>Unable to set password for user " & strNTName & "<br>")
@@ -297,7 +312,6 @@ If args = 11 then
                       ' Group DN's (Comma Seperated).
                       Call Log("<font color=green>Start Group assignment<br>")
               
-                      DIM counter
                       For counter = 0 to UBound(groupArray)
                           strGroupDN = Trim(groupArray(counter))
                           ' Attempt to bind to group object DN.
@@ -361,7 +375,7 @@ If args = 11 then
               End If
           End If
       Else
-          Call Log("<font color=orange>Skipped, already exists! <br>")
+          Call Log("<font color=orange>User " & strCN & " (" & strNTName & ") already exists! (skipped)<br>")
       End If ' User exists?
         
       ' Add the user to the multiOTPGroup in AD Users
@@ -386,7 +400,7 @@ If args = 11 then
    	    Call Log("<font color=green>" & strCN & " added to group " & multiOTPGroup & "<br>")
       End If
         
-      Call Log(<p><font color=black>-----------------------------------------------------------------</p><br>")
+      Call Log("<p><font color=black>-----------------------------------------------------------------</p><br>")
   End If
 
   Call CloseLogFile()
@@ -397,8 +411,67 @@ If args = 11 then
 End If
 
 
+function DoesExist(strDomain, strUser)
+DIM cnn, cmd, rs
+
+
+Const ADS_SCOPE_SUBTREE = 2
+Set cnn = CreateObject("ADODB.Connection")
+Set cmd = CreateObject("ADODB.Command")
+cnn.Provider = "ADsDSOObject"
+cnn.Open "Active Directory Provider"
+Set cmd.ActiveConnection = cnn
+cmd.Properties("Page Size") = 1000
+cmd.Properties("Timeout") = 30
+cmd.Properties("Searchscope") = ADS_SCOPE_SUBTREE
+cmd.Properties("Cache Results") = False
+
+cmd.CommandText = "SELECT name from 'LDAP://" & strDomain & "' WHERE objectCategory = 'user' AND SAMAccountName = '" & strUser & "'"
+
+Set rs = cmd.Execute
+If rs.EOF Then
+    DoesExist = false
+  Else
+    DoesExist = true
+End If
+
+End function
+
+
+Private Sub AddGrpMem(strGroupI,strMemberI,VERBOSE)
+' Adds a member to a group
+
+   Dim strUserOU, strGroupOU, strGroup, strUser, strDNSDomain
+   Dim objRootLDAP, objGroup, objUser
+
+   '  Check these objects referenced by strOU, strGroup exist in strOU
+   strUserOU = "OU=Researchers,"
+   strUser = "CN=" & strMemberI & ","
+   strGroupOU = "OU=Users,"
+   strGroup = "CN=" & strGroupI & ","
+
+   '  Bind to Active Directory and get LDAP name
+   Set objRootLDAP = GetObject("LDAP://RootDSE")
+   strDNSDomain = objRootLDAP.Get("DefaultNamingContext")
+
+   ' Add (str)User to (str)Group
+   ON Error Resume Next
+   Set objUser = GetObject("LDAP://"& strUser & strUserOU & strDNSDomain)
+   Set objGroup = GetObject("LDAP://"& strGroup & strGroupOU & strDNSDomain)
+   objGroup.add(objUser.ADsPath) 
+   IF (Err.Number <> 0) Then
+      on Error Goto 0
+      Call Log("<font color=orange>Member " & strMemberI & " already exists? (Skipped)<br>")
+   ELSE
+      if VERBOSE Then
+        Call Log("<font color=green>Member " & strmemberI & " added to " & strGroupI & "<br>")
+      End If
+   End If
+End Sub
+
+
 Private Sub CreateFolders(strUserName, strProjectName, strGroupName, strDriveName, VERBOSE)
-  Dim strSharedDirectory
+  Dim orgLogFileIndent, strSharedDirectory
 
   orgLogFileIndent = logFileIndent
   logFileIndent = logFileIndent & "    "
@@ -450,6 +523,7 @@ End Sub
 
 
 private Sub CreateFTPOnlyFolders(strUserName, VERBOSE)
+  Dim orgLogFileIndent, strSharedDirectory
 
   orgLogFileIndent = logFileIndent
   logFileIndent = logFileIndent & "    "
@@ -507,7 +581,7 @@ Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE)
      Call Log("<font color=red>Error assigning permissions for user " & strUserName & " to folder " & strDirectory & "<font color=black><br>")
    Else
      if (VERBOSE="1") Then
-       Call Log(<font color=green>" & strPermissions & " permissions set for " & strDirectory & " for " & strName & "<font color=black><br>")
+       Call Log("<font color=green>" & strPermissions & " permissions set for " & strDirectory & " for " & strName & "<font color=black><br>")
      End If
    End If
  End If
@@ -531,7 +605,7 @@ Private Sub RemoveAndDisableInheritance(strDirectory, strName, VERBOSE)
      Call Log("<font color=red>Error assigning permissions for user " & strUserName & " to folder " & strDirectory & "<font color=black><br>")
    Else
      if (VERBOSE="1") Then
-       Call Log(<font color=green>" & strName & " permissions removed for " & strDirectory & "<font color=black><br>")
+       Call Log("<font color=green>" & strName & " permissions removed for " & strDirectory & "<font color=black><br>")
      End If
    End If
  End If

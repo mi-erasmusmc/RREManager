@@ -17,7 +17,10 @@
 '   log file path
 '   log file indent
 
-Dim VERBOSE, logFileName, logFileIndent, objLogFile, objExplorer
+
+Option Explicit
+
+Dim args, VERBOSE, logFileName, logFileIndent, objLogFile, objExplorer
 Dim strSubFolders,strMainGroup, strOU, strProjectsFolder, strDataMainSub, strGroupName, strProjectName, strShareMainSub
 Dim strDataSUbFolder, strSubFolder, strSubGroupName, strDataFolder, strShareFolder
 

@@ -1,4 +1,6 @@
-Dim logFileName, logFileIndent, objLogFile
+Option Explicit
+
+Dim argCount, logFileName, logFileIndent, objLogFile
 
 argCount = WScript.Arguments.Count
 
