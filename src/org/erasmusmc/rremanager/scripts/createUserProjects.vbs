@@ -370,13 +370,7 @@ If args = 11 then
                         End If
                         strProjectName = Replace(ProjectsArray(counter)," ","")
   	                    Call Log("<br>")
-  	                    
-'REPLACED                        Call CloseLogFile()
-'REPLACED                        objShell.run chr(34) & FolderScript & chr(34) & " " & chr(34) & strNTName & chr(34) & " " & chr(34) & strProjectName & chr(34) & " " & chr(34) & strProjectName & " Researchers" & chr(34) & " " & VERBOSE & " " & projectsDrive & " " & chr(34) & logFileName & chr(34) & " " & chr(34) & logFileIndent & "    " & chr(34),1,True
-'REPLACED                        Call OpenLogFile(logFileName, logFileIndent)
-                        
                         Call CreateFolders(strNTName, strProjectName, strProjectName & " Researchers", projectsDrive, VERBOSE)
-                        
                         Call Log("<br>")
                         Call Log("<font color=green>User folders have been created. <br>")
                       Next
