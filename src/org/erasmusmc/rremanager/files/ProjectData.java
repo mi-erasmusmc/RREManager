@@ -135,7 +135,6 @@ public class ProjectData {
 									if (allTimeLogRecord != null) {
 										allTimeLogRecord += "," + "Failed";
 										allTimeLogRecord += "," + "\"" + error + "\"";
-										mainFrame.logLn("");
 										mainFrame.logWithTimeLn(logLine + "FAILED");
 										mainFrame.allTimeLog(allTimeLogRecord, "");
 									}
@@ -147,7 +146,6 @@ public class ProjectData {
 										
 										allTimeLogRecord += "," + "Succeeded";
 										allTimeLogRecord += ",";
-										mainFrame.logLn("");
 										mainFrame.logWithTimeLn(logLine + "SUCCEEDED");
 										mainFrame.allTimeLog(allTimeLogRecord, "");
 									}

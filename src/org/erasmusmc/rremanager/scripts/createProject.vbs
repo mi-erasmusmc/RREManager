@@ -20,10 +20,11 @@
 
 Option Explicit
 
-Dim args, VERBOSE, logFileName, logFileIndent, objLogFile, objExplorer
+Dim exitCode, args, argNr, VERBOSE, logFileName, logFileIndent, objLogFile, objExplorer
 Dim strSubFolders,strMainGroup, strOU, strProjectsFolder, strDataMainSub, strGroupName, strProjectName, strShareMainSub
 Dim strDataSUbFolder, strSubFolder, strSubGroupName, strDataFolder, strShareFolder
 
+exitCode = 0
 strProjectsFolder = "D:\Projects\" 
 strDataMainSub = "Data"
 strShareMainSub = "Share"
@@ -46,6 +47,7 @@ If args = 4 then
   
   ' Open log file
   Call OpenLogFile(Wscript.Arguments.Item(args - 2), Wscript.Arguments.Item(args - 1))
+  Call Log("<font color=green>Creating project.<font color=black><br><br>")
 
   ' Log script parameters
   Call Log("createProject.vbs" & "<br>")
@@ -102,6 +104,15 @@ If args = 4 then
       Call createShare(strProjectName & "-Data",strProjectsFolder & strProjectName & "\" & strDataMainSub, VERBOSE)
     End If
   End If
+Else
+  Call OpenLogFile("", "")
+  Call Log("<font color=red>Creating project.<font color=black><br><br>")
+  Call Log("<font color=red>Incorrect number of arguments (" & args & " instead of 4):<br>")
+  For argNr = 0 To (args - 1)
+    Call Log("<font color=red>  " & argNr & "=" & Wscript.Arguments.Item(argNr) & "<br>")
+  Next
+  Call CloseLogFile()
+  exitCode = 1 
 End If
 
 If IsObject(objExplorer) Then
@@ -150,8 +161,9 @@ Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE)
 
 
    If intRunError <> 0 Then
-   Call Log("<font color=red>Error assigning permissions for user " & strName & " to folder " & strDirectory & "<font color=black><br>")
-   Wscript.Echo "Error assigning permissions for user " & strName & " to folder " & strDirectory
+     Call Log("<font color=red>Error assigning permissions for user " & strName & " to folder " & strDirectory & "<font color=black><br>")
+     Wscript.Echo "Error assigning permissions for user " & strName & " to folder " & strDirectory
+     exitCode = 1
    Else
      Call Log("<font color=green>" & strPermissions & " permissions set for " & strDirectory & " for " & strName & "<font color=black><br>")
      if VERBOSE Then
@@ -179,6 +191,7 @@ Private Sub RemoveAndDisableInheritance(strDirectory, strName, VERBOSE)
    If intRunError <> 0 Then
      Call Log("<font color=red>Error assigning permissions for user " & strUserName & " to folder " & strDirectory & "<font color=black><br>")
      Wscript.Echo "Error assigning permissions for user " & strUserName & " to folder " & strDirectory
+     exitCode = 2
    Else
      Call Log("<font color=green>" & strName & " permissions removed for " & strDirectory & "<font color=black><br>")
      if VERBOSE Then
@@ -192,7 +205,7 @@ end Sub
 Private Sub CreateUserGroup(strOU,strNewGp, VERBOSE)
 ' Adds a usergroup to the OU
 
-  Dim StrNewGpLong, strDNSDomain, objArguments
+  Dim StrNewGpLong, objRootDSE, strDNSDomain, objOU, objGroup, objArguments
 
   StrNewGpLong = "CN=" & StrNewGp
 
@@ -223,8 +236,8 @@ End Sub
 Private Sub AddGrpMem(strGroupI,strMemberI,VERBOSE)
 ' Adds a member to a group
 
-   Dim strOU, strGroup, strUser, strDNSDomain
-   Dim objRootLDAP, objGroup, objUser
+   Dim strOU, strUser, strGroup, objRootLDAP
+   Dim strDNSDomain, objUser, objGroup
 
    '  Check these objects referenced by strOU, strGroup exist in strOU
    strOU = "OU=Researchers,"
@@ -253,36 +266,8 @@ Private Sub AddGrpMem(strGroupI,strMemberI,VERBOSE)
 End Sub
 
 
-Private Sub createShareAlternative(strShareName, strShareFolder, VERBOSE)
-'Obsolete
-
-   Const FILE_SHARE = 0
-   Const MAXIMUM_CONNECTIONS = 100
-   Const ShareDescription = " "
-
-   strComputer = "."
-   Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
-
-   Set objNewShare = objWMIService.Get("Win32_Share")
-
-   ON Error Resume Next
-   errReturn = objNewShare.Create (strSharefolder, strSharename, FILE_SHARE, MAXIMUM_CONNECTIONS, ShareDescription)
-   IF (Err.Number <> 0) Then
-      on Error Goto 0
-      Call Log("<font color=red>Share " & strShareName & " not created (Skipped)<font color=black><br>")
-      wscript.Echo "Share " & strShareName & " not created (Skipped)"
-   ELSE
-      Call Log("<font color=green>Share " & strShareName & " created.<font color=black><br>")
-      If VERBOSE Then
-        WScript.Echo "Share " & strShareName & " created." 
-      End If
-   End If
-
-End Sub
-
-
 Private Sub createShare(strShareName, strShareFolder, VERBOSE)
-  Dim intRunError, objShell, objFSO
+  Dim objShell, objExecObject, objFSO
 
   Set objShell = CreateObject("Wscript.Shell")
   Set objExecObject = objShell.Exec("cmd /c NET SHARE " & strShareName & "=" & Chr(34) & strShareFolder & Chr(34) & " /GRANT:EVERYONE,FULL") 
@@ -295,9 +280,9 @@ End Sub
 
 
 Private Sub OpenLogFile(fileName, indent)
-  If StrComp(fileName, "") <> 0 Then
-    logFileName = fileName
-    logFileIndent = indent
+  logFileName = fileName
+  logFileIndent = indent
+  If StrComp(logFileName, "") <> 0 Then
     Set objLogFile = CreateObject("Scripting.FileSystemObject").OpenTextFile(logFileName,8,false)
   End If
 End Sub
@@ -346,5 +331,5 @@ Private Function StripHTMLTags(text)
 End Function
 
   
-WScript.Quit 
+WScript.Quit(exitCode) 
 

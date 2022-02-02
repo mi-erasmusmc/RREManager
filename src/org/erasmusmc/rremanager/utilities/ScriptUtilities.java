@@ -3,6 +3,7 @@ package org.erasmusmc.rremanager.utilities;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,19 +27,19 @@ public class ScriptUtilities {
 			File semaphoreFile = new File(workPath + getSemaphoreName());
 			semaphoreFile.delete();
 			
-			String argumentsString = "";
-			if (arguments != null) {
-				for (String argument : arguments) {
-					argumentsString += " & \" \" & chr(34) & \"" + argument + "\" & chr(34)";
-				}
-			} 
-			
-			String scriptWrapper = getScriptWrapper(workPath, scriptPath, argumentsString);
+			String scriptWrapper = getScriptWrapper(workPath, scriptPath, arguments);
 			if (scriptWrapper != null) {
 				String command = "wscript \"" + scriptWrapper + "\"";
 				try {
 					Runtime.getRuntime().exec(command);
 					while (!semaphoreFile.exists());
+					BufferedReader semaphoreFileReader = new BufferedReader(new FileReader(semaphoreFile));
+					String resultMessage = semaphoreFileReader.readLine();
+					semaphoreFileReader.close();
+					if (!resultMessage.equals("Ready")) {
+						result = false;
+						JOptionPane.showMessageDialog(null, vbScript + ": " + resultMessage, "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+					}
 				} catch( IOException e ) {
 					result = false;
 				}
@@ -47,7 +48,6 @@ public class ScriptUtilities {
 				JOptionPane.showMessageDialog(null, "Could not create script wrapper.", "RREManager Error", JOptionPane.ERROR_MESSAGE);
 			}
 
-			semaphoreFile.delete();
 			if (scriptWrapper != null) {
 				(new File(scriptWrapper)).delete();
 			}
@@ -105,21 +105,35 @@ public class ScriptUtilities {
 	}
 	
 	
-	private static String getScriptWrapper(String workPath, String scriptPath, String argumentsString) {
+	private static String getScriptWrapper(String workPath, String scriptPath, List<String> arguments) {
 		String scriptWrapperScript = workPath + "ScriptWrapper.vbs";
 		
 		try {
+			String argumentsString = "";
+			if (arguments != null) {
+				for (String argument : arguments) {
+					argumentsString += " & \" \" & chr(34) & \"" + argument + "\" & chr(34)";
+				}
+			}
+			
 			PrintWriter scriptWriter = new PrintWriter(scriptWrapperScript);
-			scriptWriter.println("dim objShell, objFSO");
+			scriptWriter.println("dim command, exitCode, objShell, objFSO");
 			scriptWriter.println();
 			scriptWriter.println("Set objShell = CreateObject(\"Wscript.Shell\")");
-			scriptWriter.println("objShell.run chr(34) & \"" + scriptPath + "\" & chr(34)" + argumentsString + ",1,true");
+			scriptWriter.println("command = \"wscript.exe \" & chr(34) & \"" + scriptPath + "\" & chr(34)" + argumentsString);
+			scriptWriter.println("exitCode = objShell.Run(command,1,true)");
 			scriptWriter.println();
 			scriptWriter.println("Set objFSO=CreateObject(\"Scripting.FileSystemObject\")");
-			scriptWriter.println();
 			scriptWriter.println("outFile=\"" + workPath + getSemaphoreName() + "\"");
 			scriptWriter.println("Set objFile = objFSO.CreateTextFile(outFile,True)");
-			scriptWriter.println("objFile.Write \"Ready\"");
+			scriptWriter.println();
+			scriptWriter.println("If exitCode > 0 Then");
+			scriptWriter.println("  objFile.WriteLine \"ExitCode=\" & exitCode");
+			scriptWriter.println("Else");
+			scriptWriter.println("  objFile.WriteLine \"Ready\"");
+			scriptWriter.println("End If");
+			scriptWriter.println("objFile.WriteLine command");
+			scriptWriter.println();
 			scriptWriter.println("objFile.Close");
 			scriptWriter.close();
 		} catch (FileNotFoundException e) {

@@ -36,8 +36,8 @@
 
 Option Explicit
 
-Dim wshShell, strUserDNSDomain, userDNSDomainArray, strDC, counter
-Dim args, VERBOSE, logFileName, logFileIndent, objLogFile
+Dim exitCode, wshShell, strUserDNSDomain, userDNSDomainArray, strDC, counter
+Dim args, argNr, VERBOSE, logFileName, logFileIndent, objLogFile
 Dim Update, FTPOnly, strFirst, strLast, strInitials, strUserName, strPW, strProjects, strGroups, strEmail
 Dim strGroupDN, objUser, objGroup, objContainer
 Dim strCN, strNTName, strContainerDN
@@ -51,6 +51,7 @@ Dim objRootLDAP
 
 Dim strExportDirectory, strImportDirectory, strDownLoadFtpDirectory, strUpLoadFtpDirectory, strUserDirectory
 
+exitCode = 0
 multiOTPGroup = "MultiOTP Users"
 FolderScript = "createFolders.vbs"
 FTPOnlyFolderScript = "createFTPOnlyFolders.vbs"
@@ -89,8 +90,6 @@ For counter = 0 to UBound(userDNSDomainArray)
 Next
 strContainerDN = "ou=Researchers" & strDC
 
-Call Log("<font color=green>Creating user account!<font color=black><br>")
-
 ' Determine DNS domain name from RootDSE object.
 Set objRootDSE = GetObject("LDAP://RootDSE")
 strDNSDomain = objRootDSE.Get("DefaultNamingContext")
@@ -119,6 +118,7 @@ If args = 11 then
   
   ' Open log file
   Call OpenLogFile(Wscript.Arguments.Item(args - 2), Wscript.Arguments.Item(args - 1))
+  Call Log("<font color=green>Creating user account.<font color=black><br><br>")
 
   ' Log script parameters
   Call Log("createUserProjects.vbs" & "<br>")
@@ -190,7 +190,7 @@ If args = 11 then
          
       If Not DoesExist(strDNSDomain, strNTName) OR Update Then
           If Update Then
-  	        Call Log("<font color=red>Only Adding missing projects and groups for user: " & strCN & " (" & strNTName & ")<br>")
+  	        Call Log("<font color=orange>Only Adding missing projects and groups for user: " & strCN & " (" & strNTName & ")<br>")
   	      Else
             Call Log("Adding user: " & strCN & " (" & strNTName & ")</p>")
           End If
@@ -207,6 +207,7 @@ If args = 11 then
                   Call Log("<font color=red>Unable to create user with NT name: " & strNTName & "<br>")
                   ' Flag that container not bound.
                   strPreviousDN = ""
+                  exitCode = 1
               Else
                   On Error GoTo 0
                   strPreviousDN = strContainerDN
@@ -214,7 +215,7 @@ If args = 11 then
           End If
           ' Proceed if parent container bound.
           If (strPreviousDN <> "") Then
-              Call Log("Bound to container: " & strPreviousDN)
+              Call Log("Bound to container: " & strPreviousDN & "<br>")
               On Error Resume Next
               If NOT Update Then
                 ' Create user object.
@@ -229,6 +230,7 @@ If args = 11 then
                   On Error GoTo 0
                   Wscript.Echo "Unable to create user with cn: " & strCN
   	              Call Log("<font color=red>Unable to create user with cn: " & strCN & "<br>")
+                  exitCode = 2
               Else
   	              Call Log("<font color=green>Created user with cn: " & strCN & "<br>")
                   ' Assign mandatory attributes and save user object.
@@ -236,18 +238,20 @@ If args = 11 then
                       strNTName = strCN
                   End If
                   objUser.sAMAccountName = strNTName
-                  On Error Resume Next
+                  On Error GoTo 0
                   objUser.SetInfo
                   If (Err.Number <> 0) Then
                       On Error GoTo 0
                       Call Log("<font color=red>Unable to create user with NT name: " & strNTName & "<br>")
+                      exitCode = 3
                   Else
                       ' Set password for user.
-                      objUser.SetPassword strPW
                       Call Log("<font color=green>password for user " & strNTName & ": " & strPW & "<br>")
+                      objUser.SetPassword strPW
                       If (Err.Number <> 0) Then
                          On Error GoTo 0
                          Call Log("<font color=red>Unable to set password for user " & strNTName & "<br>")
+                         exitCode = 4
                       End If
                       On Error GoTo 0
                       ' Enable the user account.
@@ -287,6 +291,7 @@ If args = 11 then
                       If (Err.Number <> 0) Then
                         On Error GoTo 0
                         Call Log("<font color=red>Unable to set attributes for user with NT name: " & strNTName & "<br>")
+                        exitCode = 5
                       End If
                       On Error GoTo 0
                       ' Create home folder.
@@ -297,6 +302,7 @@ If args = 11 then
                               If (Err.Number <> 0) Then
                                   On Error GoTo 0
                                   Call Log("<font color=red>Unable to create home folder: " & strHomeFolder & "<br>")
+                                  exitCode = 6
                               End If
                               On Error GoTo 0
                           End If
@@ -305,6 +311,7 @@ If args = 11 then
                               intRunError = objShell.Run("%COMSPEC% /c Echo Y| cacls " & strHomeFolder & " /T /E /C /G " & strNetBIOSDomain & "\" & strNTName & ":F", 2, True)
                               If (intRunError <> 0) Then
                                   Call Log("<font color=red>Error assigning permissions for user " & strNTName & " to home folder " & strHomeFolder & "<br>")
+                                  exitCode = 7
                               End If
                           End If
                       End If
@@ -315,9 +322,10 @@ If args = 11 then
                       For counter = 0 to UBound(groupArray)
                           strGroupDN = Trim(groupArray(counter))
                           ' Attempt to bind to group object DN.
+                          Call Log("<font color=black>Bind to group " & strGroupDN & "<br>")
                           blnBound = False
                           On Error Resume Next
-                          Set objGroup = GetObject("LDAP://" & strGroupDN)
+                          Set objGroup = GetObject("LDAP://CN=" & strGroupDN & ",OU=Researchers" & strDNSDomain)
                           If (Err.Number <> 0) Then
                               On Error GoTo 0
                               ' Try  again converting NT Name to DN.
@@ -326,6 +334,7 @@ If args = 11 then
                               If (Err.Number <> 0) Then
                                   On Error GoTo 0
                                   Call Log("<font color=red>Unable to bind to group " & strGroupDN & "<br>")
+                                  exitCode = 8
                               Else
                                   On Error GoTo 0
                                   strGroupDN = objTrans.Get(ADS_NAME_TYPE_1779)
@@ -341,7 +350,7 @@ If args = 11 then
                               objGroup.Add(objUser.AdsPath)
                               If (Err.Number <> 0) Then
                                   On Error GoTo 0
-                                  Call Log("<font color=red>user " & strNTName & " already added to group " & strGroupDN  & "? (skipped)<br>")
+                                  Call Log("<font color=orange>user " & strNTName & " already added to group " & strGroupDN  & "? (skipped)<br>")
                               End If
                           End If
                           On Error GoTo 0
@@ -350,7 +359,7 @@ If args = 11 then
                       ' Create folders
                       If Update Then
                          VERBOSE = -1 ' No messages about existing directories
-                         Call Log("<font color=Red>User folders will only be created for new projects<br>")
+                         Call Log("<font color=orange>User folders will only be created for new projects<br>")
                       Else
                          VERBOSE = 0 ' Only messages about existing directories
                       End If
@@ -389,12 +398,12 @@ If args = 11 then
       Set objRootLDAP = GetObject("LDAP://RootDSE")
 
       ' Add (str)User to (str)Group
-      ON Error Resume Next
+      ON Error GoTo 0
       Set objUser = GetObject("LDAP://"& strUser & strUserOU & strDNSDomain)
       Set objGroup = GetObject("LDAP://"& strGroup & strGroupOU & strDNSDomain)
       objGroup.add(objUser.ADsPath) 
       If (Err.Number <> 0) Then
-        on Error Goto 0
+        on Error GoTo 0
   	    Call Log("<font color=orange>" & strCN & " already member of group " & multiOTPGroup & "? (Skipped)<br>")
       Else
    	    Call Log("<font color=green>" & strCN & " added to group " & multiOTPGroup & "<br>")
@@ -408,6 +417,15 @@ If args = 11 then
   If IsObject(objExplorer) Then
     objExplorer.document.title = "Ready" 
   End If
+Else
+  Call OpenLogFile("", "")
+  Call Log("<font color=red>Creating user account.<font color=black><br><br>")
+  Call Log("<font color=red>Incorrect number of arguments (" & args & " instead of 11):<br>")
+  For argNr = 0 To (args - 1)
+    Call Log("<font color=red>  " & argNr & "=" & Wscript.Arguments.Item(argNr) & "<br>")
+  Next
+  Call CloseLogFile()
+  exitCode = 9
 End If
 
 
@@ -579,6 +597,7 @@ Private Sub SetPermissions(strDirectory, strName, strPermissions, VERBOSE)
 
    If intRunError <> 0 Then
      Call Log("<font color=red>Error assigning permissions for user " & strUserName & " to folder " & strDirectory & "<font color=black><br>")
+     exitCode = 10
    Else
      if (VERBOSE="1") Then
        Call Log("<font color=green>" & strPermissions & " permissions set for " & strDirectory & " for " & strName & "<font color=black><br>")
@@ -603,6 +622,7 @@ Private Sub RemoveAndDisableInheritance(strDirectory, strName, VERBOSE)
    
    If intRunError <> 0 Then
      Call Log("<font color=red>Error assigning permissions for user " & strUserName & " to folder " & strDirectory & "<font color=black><br>")
+     exitCode = 11
    Else
      if (VERBOSE="1") Then
        Call Log("<font color=green>" & strName & " permissions removed for " & strDirectory & "<font color=black><br>")
@@ -614,9 +634,9 @@ End Sub
 
 
 Private Sub OpenLogFile(fileName, indent)
-  If StrComp(fileName, "") <> 0 Then
-    logFileName = fileName
-    logFileIndent = indent
+  logFileName = fileName
+  logFileIndent = indent
+  If StrComp(logFileName, "") <> 0 Then
     Set objLogFile = CreateObject("Scripting.FileSystemObject").OpenTextFile(logFileName,8,false)
   End If
 End Sub
@@ -663,3 +683,6 @@ Private Function StripHTMLTags(text)
   Loop
   StripHTMLTags = strippedText
 End Function
+
+  
+WScript.Quit(exitCode)

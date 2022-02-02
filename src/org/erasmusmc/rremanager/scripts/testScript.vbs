@@ -1,31 +1,103 @@
 Option Explicit
 
-Dim argCount, logFileName, logFileIndent, objLogFile
+Dim exitCode, args, argNr, objExplorer, logFileName, logFileIndent, objLogFile
 
-argCount = WScript.Arguments.Count
+exitCode = 0
+args = WScript.Arguments.Count
 
-If argCount > 0 then
-	logFileName = Wscript.Arguments.Item(argCount - 2)
-	logFileIndent = Wscript.Arguments.Item(argCount - 1)
+' Create log in internet explorer
+Set objExplorer = createobject("internetexplorer.application")
+If IsObject(objExplorer) Then
+  objExplorer.navigate2 "about:blank" : objExplorer.width = 700 : objExplorer.height = 600 : objExplorer.toolbar = false : objExplorer.menubar = false : objExplorer.statusbar = false : objExplorer.visible = True
+  objExplorer.document.title = "Please be patient.... "
+End If
+
+Call OpenLogFile("", "")
+Call Log("<font color=green>Testing.<font color=black><br><br>")
+
+If args > 0 then
+	logFileName = Wscript.Arguments.Item(args - 2)
+	logFileIndent = Wscript.Arguments.Item(args - 1)
 	Set objLogFile = CreateObject("Scripting.FileSystemObject").OpenTextFile(logFileName,8,false)
 	objLogFile.WriteLine(logFileIndent & "testScript.vbs")
 	
 	objLogFile.WriteLine(logFileIndent & "  Action: " & Wscript.Arguments.Item(0))
 	If StrComp(Wscript.Arguments.Item(0),"Create Project") = 0 Then
-		objLogFile.WriteLine(logFileIndent & "  Project   : " & Wscript.Arguments.Item(1))
-		objLogFile.WriteLine(logFileIndent & "  Subfolders: " & Wscript.Arguments.Item(2))
+		Call Log(logFileIndent & "  Project   : " & Wscript.Arguments.Item(1) & "<br>")
+		Call Log(logFileIndent & "  Subfolders: " & Wscript.Arguments.Item(2) & "<br>")
 	ElseIf (StrComp(Wscript.Arguments.Item(0),"Modify User") = 0) OR (StrComp(Wscript.Arguments.Item(0),"Add User") = 0) Then
-		objLogFile.WriteLine(logFileIndent & "  First Name   : " & Wscript.Arguments.Item(1))
-		objLogFile.WriteLine(logFileIndent & "  Initial      : " & Wscript.Arguments.Item(2))
-		objLogFile.WriteLine(logFileIndent & "  Last Name    : " & Wscript.Arguments.Item(3))
-		objLogFile.WriteLine(logFileIndent & "  User Name    : " & Wscript.Arguments.Item(4))
-		objLogFile.WriteLine(logFileIndent & "  Password     : " & Wscript.Arguments.Item(5))
-		objLogFile.WriteLine(logFileIndent & "  Email Address: " & Wscript.Arguments.Item(6))
-		objLogFile.WriteLine(logFileIndent & "  Projects     : " & Wscript.Arguments.Item(7))
-		objLogFile.WriteLine(logFileIndent & "  Groups       : " & Wscript.Arguments.Item(8))
-		objLogFile.WriteLine(logFileIndent & "  Update       : " & Wscript.Arguments.Item(9))
+		Call Log(logFileIndent & "  First Name   : " & Wscript.Arguments.Item(1) & "<br>")
+		Call Log(logFileIndent & "  Initial      : " & Wscript.Arguments.Item(2) & "<br>")
+		Call Log(logFileIndent & "  Last Name    : " & Wscript.Arguments.Item(3) & "<br>")
+		Call Log(logFileIndent & "  User Name    : " & Wscript.Arguments.Item(4) & "<br>")
+		Call Log(logFileIndent & "  Password     : " & Wscript.Arguments.Item(5) & "<br>")
+		Call Log(logFileIndent & "  Email Address: " & Wscript.Arguments.Item(6) & "<br>")
+		Call Log(logFileIndent & "  Projects     : " & Wscript.Arguments.Item(7) & "<br>")
+		Call Log(logFileIndent & "  Groups       : " & Wscript.Arguments.Item(8) & "<br>")
+		Call Log(logFileIndent & "  Update       : " & Wscript.Arguments.Item(9) & "<br>")
 	End If
 	
-	objLogFile.Close
-	set objLogFile = Nothing
+    Call CloseLogFile()
+Else
+  Call Log("<font color=red>Incorrect number of arguments (" & args & "):<br>")
+  For argNr = 0 To (args - 1)
+    Call Log("<font color=red>  " & argNr & "=" & Wscript.Arguments.Item(argNr) & "<br>")
+  Next
+  Call CloseLogFile()
+  exitCode = 1 
 End If
+
+
+Private Sub OpenLogFile(fileName, indent)
+  logFileName = fileName
+  logFileIndent = indent
+  If StrComp(logFileName, "") <> 0 Then
+    Set objLogFile = CreateObject("Scripting.FileSystemObject").OpenTextFile(logFileName,8,false)
+  End If
+End Sub
+
+
+Private Sub Log(text)
+  If IsObject(objExplorer) Then
+    objExplorer.document.write text
+  End If
+  If StrComp(logFileName, "") <> 0 Then
+    objLogFile.WriteLine(logFileIndent & StripHTMLTags(text))
+  End If
+End Sub
+
+
+Private Sub CloseLogFile()
+  If StrComp(logFileName, "") <> 0 Then
+    objLogFile.Close
+    Set objLogFile = Nothing
+  End If
+End Sub
+
+
+Private Function StripHTMLTags(text)
+  Dim strippedText, gtPos
+  strippedText = text
+  ' Strip HTML tags at the start
+  Do While StrComp(Left(strippedText, 1), "<") = 0
+    gtPos = InStr(strippedText,">")
+    If gtPos > 0 Then
+      strippedText = Mid(strippedText, gtPos + 1)
+    Else
+      Exit Do
+    End If
+  Loop
+  ' Strip HTML tags at the end
+  Do While StrComp(Right(strippedText, 1), ">") = 0
+    gtPos = InStrRev(strippedText,"<")
+    If gtPos > 0 Then
+      strippedText = Mid(strippedText, 1, gtPos - 1)
+    Else
+      Exit Do
+    End If
+  Loop
+  StripHTMLTags = strippedText
+End Function
+
+  
+WScript.Quit(exitCode)
