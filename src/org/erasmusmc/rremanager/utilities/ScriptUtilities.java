@@ -9,25 +9,41 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
 import org.erasmusmc.rremanager.RREManager;
 
 public class ScriptUtilities {
-	
-	
-	public static boolean callVBS(String vbScript, List<String> arguments) {
+
+
+	public static boolean callScript(String script, List<String> arguments) {
 		boolean result = true;
-		
+		if (script.substring(script.lastIndexOf(".")).toLowerCase().equals(".vbs")) {
+			callVisualBasicScript(script, arguments);
+		}
+		else if (script.substring(script.lastIndexOf(".")).toLowerCase().equals(".ps1")) {
+			callPowerShellScript(script, arguments);
+		}
+		else {
+			result = false;
+		}
+		return result;
+	}
+
+
+	private static boolean callVisualBasicScript(String script, List<String> arguments) {
+		boolean result = true;
+
 		String workPath = RREManager.getCurentPath() + File.separator;
-		String scriptPath = copyScript(workPath, vbScript);
-		
+		String scriptPath = copyScript(workPath, script);
+
 		if (scriptPath != null) {
 			File semaphoreFile = new File(workPath + getSemaphoreName());
 			semaphoreFile.delete();
-			
-			String scriptWrapper = getScriptWrapper(workPath, scriptPath, arguments);
+
+			String scriptWrapper = getVisualBasicScriptWrapper(workPath, scriptPath, arguments);
 			if (scriptWrapper != null) {
 				String command = "wscript \"" + scriptWrapper + "\"";
 				try {
@@ -38,7 +54,7 @@ public class ScriptUtilities {
 					semaphoreFileReader.close();
 					if (!resultMessage.equals("Ready")) {
 						result = false;
-						JOptionPane.showMessageDialog(null, vbScript + ": " + resultMessage, "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(null, script + ": " + resultMessage, "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
 					}
 				} catch( IOException e ) {
 					result = false;
@@ -55,59 +71,21 @@ public class ScriptUtilities {
 		else {
 			JOptionPane.showMessageDialog(null, "Cannot find VBScript '" + scriptPath + "'.", "RREManager Error", JOptionPane.ERROR_MESSAGE);
 		}
-		
+
 		if (scriptPath != null) {
 			(new File(scriptPath)).delete();
 		}
 		if (workPath != null) {
 			(new File(workPath + getSemaphoreName())).delete();
 		}
-		
+
 		return result;
 	}
-	
-	
-	private static String copyScript(String workPath, String scriptName) {
-		String scriptFileName = workPath + getScriptName();
-		
-		InputStream resourceStream = null;
-		resourceStream = RREManager.class.getResourceAsStream("scripts/" + scriptName);
-		
-		try {
-			BufferedReader scriptReader = new BufferedReader(new InputStreamReader(resourceStream));
-			PrintWriter scriptWriter = new PrintWriter(scriptFileName);
-			
-			String line = scriptReader.readLine();
-			while (line != null) {
-				scriptWriter.println(line);
-				line = scriptReader.readLine();
-			}
-			scriptReader.close();
-			scriptWriter.close();
-		} catch (FileNotFoundException e) {
-			scriptFileName = null;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return scriptFileName;
-	}
-	
-	
-	private static String getSemaphoreName() {
-		return "ScriptWrapperSemaphore.txt";
-	}
-	
-	
-	private static String getScriptName() {
-		return "Script.vbs";
-	}
-	
-	
-	private static String getScriptWrapper(String workPath, String scriptPath, List<String> arguments) {
+
+
+	private static String getVisualBasicScriptWrapper(String workPath, String scriptPath, List<String> arguments) {
 		String scriptWrapperScript = workPath + "ScriptWrapper.vbs";
-		
+
 		try {
 			String argumentsString = "";
 			if (arguments != null) {
@@ -115,7 +93,7 @@ public class ScriptUtilities {
 					argumentsString += " & \" \" & chr(34) & \"" + argument + "\" & chr(34)";
 				}
 			}
-			
+
 			PrintWriter scriptWriter = new PrintWriter(scriptWrapperScript);
 			scriptWriter.println("dim command, exitCode, objShell, objFSO");
 			scriptWriter.println();
@@ -139,8 +117,130 @@ public class ScriptUtilities {
 		} catch (FileNotFoundException e) {
 			scriptWrapperScript = null;
 		}
-		
+
 		return scriptWrapperScript;
 	}
 
+
+	private static boolean callPowerShellScript(String script, List<String> arguments) {
+		boolean result = true;
+
+		String workPath = "D:\\Temp\\RRE\\"; //RREManager.getCurentPath() + File.separator;
+		String scriptPath = copyScript(workPath, script);
+
+		if (scriptPath != null) {
+			File semaphoreFile = new File(workPath + getSemaphoreName());
+			semaphoreFile.delete();
+
+			String scriptWrapper = getPowerShellScriptWrapper(workPath, scriptPath, arguments);
+			try {
+				Runtime.getRuntime().exec("powershell -file \"" + scriptWrapper + "\"");
+				while (!semaphoreFile.exists());
+				TimeUnit.SECONDS.sleep(2);
+				BufferedReader semaphoreFileReader = new BufferedReader(new FileReader(semaphoreFile));
+				String resultMessage = semaphoreFileReader.readLine();
+				semaphoreFileReader.close();
+				if (!resultMessage.equals("Ready")) {
+					result = false;
+					JOptionPane.showMessageDialog(null, script + ": " + resultMessage, "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+				}
+			} catch( IOException e ) {
+				result = false;
+			} catch (InterruptedException e) {
+				//Do nothing
+			}
+		}
+		else {
+			JOptionPane.showMessageDialog(null, "Cannot find VBScript '" + scriptPath + "'.", "RREManager Error", JOptionPane.ERROR_MESSAGE);
+		}
+
+		if (scriptPath != null) {
+			(new File(scriptPath)).delete();
+		}
+		if (workPath != null) {
+			(new File(workPath + getSemaphoreName())).delete();
+		}
+
+		return result;
+	}
+
+
+	private static String getPowerShellScriptWrapper(String workPath, String scriptPath, List<String> arguments) {
+		String scriptWrapperScript = workPath + "ScriptWrapper.ps1";
+
+		try {
+			String argumentsString = "";
+			if (arguments != null) {
+				for (String argument : arguments) {
+					argumentsString += " " + argument.replaceAll("\"", "\"\"");
+				}
+			}
+
+			PrintWriter scriptWriter = new PrintWriter(scriptWrapperScript);
+			scriptWriter.println("$command = \"& \"\"" + scriptPath + "\"\"" + argumentsString + "\"");
+			scriptWriter.println("Invoke-Expression $command");
+			scriptWriter.println("$exitCode = $LASTEXITCODE");
+			scriptWriter.println("if ($exitCode -gt 0) {");
+			scriptWriter.println("  $errorString = \"ExitCode=\" + $exitCode");
+			scriptWriter.println("  $errorString | Out-File -FilePath \"" + workPath + getSemaphoreName() + "\" -Encoding ASCII");
+			scriptWriter.println("}");
+			scriptWriter.println("else {");
+			scriptWriter.println("  \"Ready\" | Out-File -FilePath \"" + workPath + getSemaphoreName() + "\" -Encoding ASCII");
+			scriptWriter.println("}");
+			scriptWriter.println("$command | Out-File -FilePath \"" + workPath + getSemaphoreName() + "\" -Encoding ASCII -Append");
+			scriptWriter.close();
+		} catch (FileNotFoundException e) {
+			scriptWrapperScript = null;
+		}
+
+		return scriptWrapperScript;
+	}
+
+
+	private static String copyScript(String workPath, String scriptName) {
+		String scriptFileName = workPath + getScriptName(scriptName);
+
+		InputStream resourceStream = null;
+		resourceStream = RREManager.class.getResourceAsStream("scripts/" + scriptName);
+
+		try {
+			BufferedReader scriptReader = new BufferedReader(new InputStreamReader(resourceStream));
+			PrintWriter scriptWriter = new PrintWriter(scriptFileName);
+
+			String line = scriptReader.readLine();
+			while (line != null) {
+				scriptWriter.println(line);
+				line = scriptReader.readLine();
+			}
+			scriptReader.close();
+			scriptWriter.close();
+		} catch (FileNotFoundException e) {
+			scriptFileName = null;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return scriptFileName;
+	}
+
+
+	private static String getSemaphoreName() {
+		return "ScriptWrapperSemaphore.txt";
+	}
+
+
+	private static String getScriptName(String orgScriptName) {
+		return "Script" + orgScriptName.substring(orgScriptName.lastIndexOf("."));
+	}
+
+/*
+	public static void main(String[] args) {
+		List<String> arguments = new ArrayList<String>();
+		arguments.add("-Text1 \"Hello\"");
+		arguments.add("-Text2 \"World!\"");
+		callScript("testScript.ps1", arguments);
+		System.out.println("Ready");
+	}
+*/
 }

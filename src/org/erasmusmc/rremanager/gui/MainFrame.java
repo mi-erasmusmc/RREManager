@@ -703,7 +703,7 @@ public class MainFrame {
 			
 			if (script != null) {
 				logWithTimeLn("    " + script + paramatersLogLn);
-				if (ScriptUtilities.callVBS(script, parameters)) {
+				if (ScriptUtilities.callScript(script, parameters)) {
 					allTimeLogRecord += "," + "Succeeded";
 					allTimeLogRecord += ",";
 					allTimeLog(allTimeLogRecord, script);
