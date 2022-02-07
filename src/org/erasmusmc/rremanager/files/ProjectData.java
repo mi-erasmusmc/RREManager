@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
+import org.erasmusmc.rremanager.changelog.AddProjectGPOsLogEntry;
 import org.erasmusmc.rremanager.changelog.AddProjectLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
 
@@ -192,10 +193,14 @@ public class ProjectData {
 			for (String project : newProjects.keySet()) {
 				String groups = "";
 				for (String newGroup : newProjects.get(project)) {
-					groups += (groups.equals("") ? "" : ",") + newGroup;
+					newGroup = newGroup.trim();
+					if (!newGroup.equals("")) {
+						groups += (groups.equals("") ? "" : ",") + newGroup;
+					}
 				}
 				
 				RREManager.changeLog.addLogEntry(new AddProjectLogEntry(project, groups));
+				RREManager.changeLog.addLogEntry(new AddProjectGPOsLogEntry(project, groups));
 			}
 		}
 		else {

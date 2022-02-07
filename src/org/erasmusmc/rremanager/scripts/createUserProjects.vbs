@@ -637,6 +637,7 @@ End Sub
 
 
 Private Sub Log(text)
+  objExplorer.document.title = "Please be patient.... "
   If IsObject(objExplorer) Then
     objExplorer.document.write text
   End If

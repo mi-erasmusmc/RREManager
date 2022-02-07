@@ -23,6 +23,7 @@ Option Explicit
 Dim exitCode, args, argNr, VERBOSE, logFileName, logFileIndent, objLogFile, objExplorer
 Dim strSubFolders,strMainGroup, strOU, strProjectsFolder, strDataMainSub, strGroupName, strProjectName, strShareMainSub
 Dim strDataSUbFolder, strSubFolder, strSubGroupName, strDataFolder, strShareFolder
+DIM SubFolderArray, counter, wshNetwork, strComputerName, gpoName
 
 exitCode = 0
 strProjectsFolder = "D:\Projects\" 
@@ -48,6 +49,7 @@ If args = 4 then
   ' Open log file
   Call OpenLogFile(Wscript.Arguments.Item(args - 2), Wscript.Arguments.Item(args - 1))
   Call Log("<font color=green>Creating project.<font color=black><br><br>")
+  Call Log("<font color=blue><br><br>IMPORTANT: FOLLOW THE INSTRUCTIONS AT THE END OF THIS PAGE<font color=black><br><br>")
 
   ' Log script parameters
   Call Log("createProject.vbs" & "<br>")
@@ -79,10 +81,8 @@ If args = 4 then
     Call createShare(strProjectName & "-Share",strProjectsFolder & strProjectName & "\" & strShareMainSub, VERBOSE)
 
     if Len(strSubFolders)> 0 Then
-
       Call RemoveAndDisableInheritance(strProjectsFolder & strProjectName & "\" & strDataMainSub, strGroupName, VERBOSE)
 
-      DIM SubFolderArray, counter
       SubFolderArray = Split(strSubFolders,",")
       For counter = 0 to UBound(subFolderArray)
          strSubFolder = Trim(subFolderArray(counter))
@@ -99,8 +99,51 @@ If args = 4 then
          ' Create Date Share on this level
          Call createShare(strProjectName & "-" & strSubFolder & "-Data",strDataSubFolder, VERBOSE)
       Next
+      
+      Set wshNetwork = WScript.CreateObject( "WScript.Network" )
+      strComputerName = wshNetwork.ComputerName
+    
+      Call Log("<font color=blue><br>")
+      Call Log("<br>")
+      Call Log("IMPORTANT:<br>")
+      Call Log("<br>")
+      Call Log("You have to edit the following group policies as described:<br>")
+      For counter = 0 to UBound(subFolderArray)
+        strSubFolder = Trim(subFolderArray(counter))
+        gpoName = "Map " & strProjectName & " " & strSubFolder & " Data"
+    
+        Call Log("<br>")
+        Call Log("Group Policy: " & gpoName & "<br>")
+        Call Log("  Add a new Mapped Drive in 'User Configuration - Preferences - Windows Settings - Drive Maps<br>")
+        Call Log("  Set the properties on the General tab as follows:<br>")
+        Call Log("<br>")
+        Call Log("Action: Create<br>")
+        Call Log("Location: \\" & strComputerName & "\" & strProjectName & "-" & strSubFolder & "-Data<br>")
+        Call Log("Reconnect: Enabled<br>")
+        Call Log("Label as: " & strProjectName & "-" & strSubFolder & "-Data<br>")
+        Call Log("Use first available: Enabled<br>")
+        Call Log("Letter: I<br>")
+        Call Log("Hide/Show this drive: Show this drive<br>")
+        Call Log("Hide/Show all drives: No change<br>")
+      Next
+  
+      gpoName = "Map User Share " & strProjectName
+    
+      Call Log("<br>")
+      Call Log("Group Policy: " & gpoName & "<br>")
+      Call Log("Add a new Mapped Drive in 'User Configuration - Preferences - Windows Settings - Drive Maps<br>")
+      Call Log("Set the properties on the General tab as follows:<br>")
+      Call Log("<br>")
+      Call Log("Action: Create<br>")
+      Call Log("Location: \\" & strComputerName & "\" & strProjectName & "-Share<br>")
+      Call Log("Reconnect: Enabled<br>")
+      Call Log("Label as: " & strProjectName & "-Share<br>")
+      Call Log("Use first available: Enabled<br>")
+      Call Log("Letter: S<br>")
+      Call Log("Hide/Show this drive: Show this drive<br>")
+      Call Log("Hide/Show all drives: No change<br>")
     Else
-      ' Create Date Share on this level
+      ' Create Data Share on this level
       Call createShare(strProjectName & "-Data",strProjectsFolder & strProjectName & "\" & strDataMainSub, VERBOSE)
     End If
   End If
@@ -289,6 +332,7 @@ End Sub
 
 
 Private Sub Log(text)
+  objExplorer.document.title = "Please be patient.... "
   If IsObject(objExplorer) Then
     objExplorer.document.write text
   End If

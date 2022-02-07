@@ -24,6 +24,7 @@ import javax.swing.JTextArea;
 
 import org.apache.commons.io.FileUtils;
 import org.erasmusmc.rremanager.RREManager;
+import org.erasmusmc.rremanager.changelog.AddProjectGPOsLogEntry;
 import org.erasmusmc.rremanager.changelog.AddProjectLogEntry;
 import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
 import org.erasmusmc.rremanager.changelog.LogEntry;
@@ -622,6 +623,24 @@ public class MainFrame {
 				allTimeLogRecord += "," + "\"" + ((AddProjectLogEntry) logEntry).getProject() + "\"";
 				allTimeLogRecord += "," + "\"" + ((AddProjectLogEntry) logEntry).getSubFolders() + "\"";
 			}
+			else if (logEntry.isAddProjectGPOLogEntry()) {
+				action = "Create Project GPOs";
+				parameters.add(((AddProjectGPOsLogEntry) logEntry).getProject());
+				parameters.add(((AddProjectGPOsLogEntry) logEntry).getGroups());
+				script = "createProjectDriveMapGPOs.ps1";
+
+				allTimeLogRecord += "Run " + action + " Script";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += ",";
+				allTimeLogRecord += "," + "Yes";
+				allTimeLogRecord += "," + "\"" + ((AddProjectGPOsLogEntry) logEntry).getProject() + "\"";
+				allTimeLogRecord += "," + "\"" + ((AddProjectGPOsLogEntry) logEntry).getGroups() + "\"";
+			}
 			else if (logEntry.isModifyUserLogEntry()) {
 				String userName = ((ModifyUserLogEntry) logEntry).getUserName();
 				String[] user = userData.getUser(userName);
@@ -687,8 +706,10 @@ public class MainFrame {
 				}
 			}
 
+			String logFileIndent = "                           ";
 			parameters.add(fullLogFileName);
-			parameters.add("                           ");
+			parameters.add(logFileIndent);
+			
 			String logLine = "  " + action;
 			String paramatersLogLn = "";
 			for (String parameter : parameters) {
@@ -698,7 +719,7 @@ public class MainFrame {
 			
 			if (RREManager.test) {
 				parameters.add(0, action);
-				script = "testScript.vbs";
+				script = "testScript" + script.substring(script.lastIndexOf("."));
 			}
 			
 			if (script != null) {

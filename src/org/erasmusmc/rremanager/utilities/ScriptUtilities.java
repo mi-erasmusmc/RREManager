@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -49,9 +50,13 @@ public class ScriptUtilities {
 				try {
 					Runtime.getRuntime().exec(command);
 					while (!semaphoreFile.exists());
-					BufferedReader semaphoreFileReader = new BufferedReader(new FileReader(semaphoreFile));
-					String resultMessage = semaphoreFileReader.readLine();
-					semaphoreFileReader.close();
+					String resultMessage = null;
+					do {
+						BufferedReader semaphoreFileReader = new BufferedReader(new FileReader(semaphoreFile));
+						resultMessage = semaphoreFileReader.readLine();
+						semaphoreFileReader.close();
+						
+					} while (resultMessage == null);
 					if (!resultMessage.equals("Ready")) {
 						result = false;
 						JOptionPane.showMessageDialog(null, script + ": " + resultMessage, "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
@@ -125,7 +130,7 @@ public class ScriptUtilities {
 	private static boolean callPowerShellScript(String script, List<String> arguments) {
 		boolean result = true;
 
-		String workPath = "D:\\Temp\\RRE\\"; //RREManager.getCurentPath() + File.separator;
+		String workPath = RREManager.getCurentPath() + File.separator;
 		String scriptPath = copyScript(workPath, script);
 
 		if (scriptPath != null) {
@@ -133,32 +138,42 @@ public class ScriptUtilities {
 			semaphoreFile.delete();
 
 			String scriptWrapper = getPowerShellScriptWrapper(workPath, scriptPath, arguments);
-			try {
-				Runtime.getRuntime().exec("powershell -file \"" + scriptWrapper + "\"");
-				while (!semaphoreFile.exists());
-				TimeUnit.SECONDS.sleep(2);
-				BufferedReader semaphoreFileReader = new BufferedReader(new FileReader(semaphoreFile));
-				String resultMessage = semaphoreFileReader.readLine();
-				semaphoreFileReader.close();
-				if (!resultMessage.equals("Ready")) {
+			if (scriptWrapper != null) {
+				try {
+					Runtime.getRuntime().exec("powershell -file \"" + scriptWrapper + "\"");
+					while (!semaphoreFile.exists());
+					String resultMessage = null;
+					do {
+						BufferedReader semaphoreFileReader = new BufferedReader(new FileReader(semaphoreFile));
+						resultMessage = semaphoreFileReader.readLine();
+						semaphoreFileReader.close();
+						
+					} while (resultMessage == null);
+					if (!resultMessage.equals("Ready")) {
+						result = false;
+						JOptionPane.showMessageDialog(null, script + ": " + resultMessage, "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+					}
+				} catch( IOException e ) {
 					result = false;
-					JOptionPane.showMessageDialog(null, script + ": " + resultMessage, "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
 				}
-			} catch( IOException e ) {
-				result = false;
-			} catch (InterruptedException e) {
-				//Do nothing
+			}
+			else {
+				JOptionPane.showMessageDialog(null, "Could not create script wrapper.", "RREManager Error", JOptionPane.ERROR_MESSAGE);
+			}
+
+			if (scriptWrapper != null) {
+				//(new File(scriptWrapper)).delete();
 			}
 		}
 		else {
-			JOptionPane.showMessageDialog(null, "Cannot find VBScript '" + scriptPath + "'.", "RREManager Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Cannot find PowerShell script '" + scriptPath + "'.", "RREManager Error", JOptionPane.ERROR_MESSAGE);
 		}
 
 		if (scriptPath != null) {
-			(new File(scriptPath)).delete();
+			//(new File(scriptPath)).delete();
 		}
 		if (workPath != null) {
-			(new File(workPath + getSemaphoreName())).delete();
+			//(new File(workPath + getSemaphoreName())).delete();
 		}
 
 		return result;
@@ -172,7 +187,7 @@ public class ScriptUtilities {
 			String argumentsString = "";
 			if (arguments != null) {
 				for (String argument : arguments) {
-					argumentsString += " " + argument.replaceAll("\"", "\"\"");
+					argumentsString += " \"\"" + argument + "\"\"";
 				}
 			}
 
@@ -234,13 +249,16 @@ public class ScriptUtilities {
 		return "Script" + orgScriptName.substring(orgScriptName.lastIndexOf("."));
 	}
 
-/*
+	/*
 	public static void main(String[] args) {
 		List<String> arguments = new ArrayList<String>();
-		arguments.add("-Text1 \"Hello\"");
-		arguments.add("-Text2 \"World!\"");
+		arguments.add("CreateProjectGPOs");
+		arguments.add("Hello");
+		arguments.add("World!");
+		arguments.add("D:\\Temp\\RRE\\Log.txt");
+		arguments.add("  ");
 		callScript("testScript.ps1", arguments);
 		System.out.println("Ready");
 	}
-*/
+	*/
 }
