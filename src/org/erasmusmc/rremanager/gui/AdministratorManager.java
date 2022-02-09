@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
 
 import org.erasmusmc.rremanager.RREManager;
 
-public class AdministratorSelector {
+public class AdministratorManager {
 	private JFrame parentFrame;
 	private String administrator = null;
 	
@@ -59,14 +59,12 @@ public class AdministratorSelector {
 	}
 
 	
-	public AdministratorSelector(JFrame parentFrame) {
+	public AdministratorManager(JFrame parentFrame) {
 		this.parentFrame = parentFrame;
 	}
 	
 	
 	public String getAdministrator() {
-		administrator = null;
-		
 		Map<String, String> administratorsMap = RREManager.getIniFile().getGroup("Administrators");
 		if (administratorsMap != null) {
 			List<String> administratorsList = new ArrayList<String>();
@@ -94,9 +92,14 @@ public class AdministratorSelector {
 				
 				JLabel administratorLabel = new JLabel("Administrator:");
 				JComboBox<String> administratorComboBox = new JComboBox<String>();
-				administratorComboBox.addItem("");
-				for (String administratorName : administratorsList) {
-					administratorComboBox.addItem(administratorName);
+				if (administrator == null) {
+					administratorComboBox.addItem("");
+					for (String administratorName : administratorsList) {
+						administratorComboBox.addItem(administratorName);
+					}
+				}
+				else {
+					administratorComboBox.addItem(administrator);
 				}
 				JLabel passwordLabel = new JLabel("Password:");
 				JPasswordField passwordField = new JPasswordField(20);
@@ -264,8 +267,76 @@ public class AdministratorSelector {
 		passwordEncryptor.setVisible(true);
 	}
 	
+	
+	public void addAdministrator() {
+		JDialog administratorDefiner = new JDialog(parentFrame, true);
+		administratorDefiner.setTitle("Add Administrator");
+		administratorDefiner.setLayout(new BorderLayout());
+		
+		JPanel mainPanel = new JPanel();
+		GroupLayout layout = new GroupLayout(mainPanel);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		
+		mainPanel.setLayout(layout);
+		
+		JLabel nameLabel = new JLabel("Name");
+		JTextField nameField = new JTextField(50);
+		JLabel passwordLabel = new JLabel("Password:");
+		JPasswordField passwordField = new JPasswordField(50);
+		JLabel confirmLabel = new JLabel("Confirm:");
+		JPasswordField confirmField = new JPasswordField(50);
+		JButton okButton = new JButton("OK");
+		JButton cancelButton = new JButton("Cancel");
+	
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					.addGroup(
+							layout.createSequentialGroup()
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+									.addComponent(nameLabel)
+									.addComponent(passwordLabel)
+									.addComponent(confirmLabel)
+									)
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+									.addComponent(nameField)
+									.addComponent(passwordField)
+									.addComponent(confirmField)
+									)
+							)
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(okButton)
+							.addComponent(cancelButton)
+							)
+				);
+		
+		layout.setVerticalGroup(
+				layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(nameLabel)
+							.addComponent(nameField)
+							)
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(passwordLabel)
+							.addComponent(passwordField)
+							)
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(confirmLabel)
+							.addComponent(confirmField)
+							)
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(okButton)
+							.addComponent(cancelButton)
+							)
+				);
+
+		administratorDefiner.add(mainPanel, BorderLayout.CENTER);
+		administratorDefiner.pack();
+		administratorDefiner.setVisible(true);
+	}
+	
 
 	public static void main(String[] args) {
-		AdministratorSelector.getEncryptedPassword();
+		AdministratorManager.getEncryptedPassword();
 	}
 }

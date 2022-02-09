@@ -119,6 +119,7 @@ If args = 11 then
   ' Open log file
   Call OpenLogFile(Wscript.Arguments.Item(args - 2), Wscript.Arguments.Item(args - 1))
   Call Log("<font color=green>Creating user account.<font color=black><br><br>")
+  Call Log("<font color=blue><br><br>IMPORTANT: FOLLOW THE INSTRUCTIONS AT THE END OF THIS PAGE<font color=black><br><br>")
 
   ' Log script parameters
   Call Log("createUserProjects.vbs" & "<br>")
@@ -148,6 +149,7 @@ If args = 11 then
   
   
 
+  FTPOnly = 0
   If strGroups = "" Then
   	' FTP Only user (no group(s) specified)
     FTPOnly = 1
@@ -405,6 +407,62 @@ If args = 11 then
         
       Call Log("<p><font color=black>-----------------------------------------------------------------</p><br>")
   End If
+    
+  Call Log("<font color=blue>IMPORTANT:<br>")
+  Call Log("<br>")
+  Call Log("You have to add the user to the Cerberus FTP server:<br>")
+  Call Log("<br>")
+  Call Log("In Cerberus click on 'User Manager' in the left panel.<br>")
+  Call Log("Right click on a similar user in the users list and select the option 'Clone User'<br>")
+  Call Log("The information of the cloned user is now shown in the middle panel.<br>")
+  Call Log("Set the following fields as follows:<br>")
+  Call Log("<br>")
+  Call Log("User Name = " & strUserName & "<br>")
+  Call Log("First Name = " & strFirst & "<br>")
+  Call Log("Last Name = " & strLast & "<br>")
+  Call Log("<br>")
+  Call Log("Click on the 'Update User' button.<br>"
+  Call Log("Click on the 'Change Password' button and set the password to: " & strPW & "<br>")
+  Call Log("<br>")
+  Call Log("Click on the 'Directories' link above the User Name field.<br>")
+  Call Log("<br>")
+  Call Log("Double click on the download folder definition and change the Path to:<br>")
+  Call Log("<br>")
+  Call Log(strDownLoadFtpDirectory & strUserName & "<br>")
+  Call Log("<br>")
+  Call Log("Make sure that the options 'List Files', 'List Directories', 'Delete', and 'Download'<br>)
+  Call Log("are checked and the others not.<br>")
+  Call Log("<br>")
+  Call Log("Click on the 'Update' button<br>")
+  Call Log("<br>")
+  Call Log("Double click on the upload folder definition and change the Path to:<br>")
+  Call Log("<br>")
+  Call Log(strUpLoadFtpDirectory & strUserName & "<br>")
+  Call Log("<br>")
+  Call Log("Make sure that the options 'List Files', 'List Directories', 'Delete' 'Rename', 'Upload',<br>")
+  Call Log("and 'Create Directories' are checked and the others not.<br>")
+  Call Log("<br>")
+  Call Log("Click on the 'Update' button<br>")
+  Call Log("<br>")
+  Call Log("<br>")
+  Call Log("IMPORTANT: In case you also have defined or modified projects first perform the actions<br>")
+  Call Log("described in the web page.<br>")
+  Call Log("<br>")
+  Call Log("Now double click on the desktop shortcut 'Force GP Update' and wait till it is finished.<br>")
+  If (FTPOnly = 0) Then
+    Call Log("<br>")
+    Call Log("Now double click on the desktop shortcut 'SyncOTP-AD' and wait till it is finished.<br>")
+    Call Log("Open Google Chrome and click on the 'MultiOTP Admin' bookmark and login.<br>")
+    Call Log("In the list of users click on the 'Print' button in front of the user '" & strUserName & "'.<br>")
+    Call Log("Now press the keys <Ctrl>+<p> and save it as '" & strUserName & ".pdf' to the folder:<br>")
+    Call Log("<br>")
+    Call Log("F:\Administration\OTP Accounts<br>")
+  End If
+  Call Log("<br>")
+  Call Log("<br>")
+  Call Log("Now you can close the browser window(s) and start the RREManager again to send the mails<br>")
+  Call Log("for opening the firewall and later the mails with the login credentials of the user.<br>")
+  
 
   Call CloseLogFile()
 

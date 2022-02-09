@@ -103,9 +103,7 @@ If args = 4 then
       Set wshNetwork = WScript.CreateObject( "WScript.Network" )
       strComputerName = wshNetwork.ComputerName
     
-      Call Log("<font color=blue><br>")
-      Call Log("<br>")
-      Call Log("IMPORTANT:<br>")
+      Call Log("<font color=blue>IMPORTANT:<br>")
       Call Log("<br>")
       Call Log("You have to edit the following group policies as described:<br>")
       For counter = 0 to UBound(subFolderArray)
@@ -113,7 +111,9 @@ If args = 4 then
         gpoName = "Map " & strProjectName & " " & strSubFolder & " Data"
     
         Call Log("<br>")
+        Call Log("<br>")
         Call Log("Group Policy: " & gpoName & "<br>")
+        Call Log("REMOVE 'Authenticated Users' from Security Filtering<br>")
         Call Log("  Add a new Mapped Drive in 'User Configuration - Preferences - Windows Settings - Drive Maps<br>")
         Call Log("  Set the properties on the General tab as follows:<br>")
         Call Log("<br>")
@@ -130,7 +130,9 @@ If args = 4 then
       gpoName = "Map User Share " & strProjectName
     
       Call Log("<br>")
+      Call Log("<br>")
       Call Log("Group Policy: " & gpoName & "<br>")
+      Call Log("REMOVE 'Authenticated Users' from Security Filtering<br>")
       Call Log("Add a new Mapped Drive in 'User Configuration - Preferences - Windows Settings - Drive Maps<br>")
       Call Log("Set the properties on the General tab as follows:<br>")
       Call Log("<br>")
@@ -142,6 +144,8 @@ If args = 4 then
       Call Log("Letter: S<br>")
       Call Log("Hide/Show this drive: Show this drive<br>")
       Call Log("Hide/Show all drives: No change<br>")
+      
+      Call Log("<br>")
     Else
       ' Create Data Share on this level
       Call createShare(strProjectName & "-Data",strProjectsFolder & strProjectName & "\" & strDataMainSub, VERBOSE)

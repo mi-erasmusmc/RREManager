@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 import org.erasmusmc.rremanager.changelog.ChangeLog;
 import org.erasmusmc.rremanager.files.IniFile;
 import org.erasmusmc.rremanager.files.UserData;
-import org.erasmusmc.rremanager.gui.AdministratorSelector;
+import org.erasmusmc.rremanager.gui.AdministratorManager;
 import org.erasmusmc.rremanager.gui.EmailEditor;
 import org.erasmusmc.rremanager.gui.IPAddressSelector;
 import org.erasmusmc.rremanager.gui.MainFrame;
@@ -38,7 +38,7 @@ public class RREManager {
 	private static String currentPath = null;
 	private static IniFile iniFile = null;
 	
-	private AdministratorSelector administratorSelector;
+	private AdministratorManager administratorSelector;
 	private PasswordManager passwordManager;
 	private IPAddressSelector ipAddressSelector;
 	private EmailEditor emailReviewer;
@@ -83,7 +83,7 @@ public class RREManager {
 			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
 				test = (!iniFile.getValue("General", "DataFile").equals("F:\\Administration\\Users\\UsersProjects.xlsx"));
-				administratorSelector = new AdministratorSelector(null);
+				administratorSelector = new AdministratorManager(null);
 				administrator = administratorSelector.getAdministrator();
 				if (administrator != null) {
 					mainFrame = new MainFrame(this);

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import javax.swing.DefaultListModel;
@@ -64,6 +65,43 @@ public class UserDefiner {
 	private List<String> selectedGroups;
 	private List<String> groupsSelectedToRemove;
 	
+	
+	private static String generatePassword() {
+		final int UPPERCASE = 0;
+		final int LOWERCASE = 1;
+		final int SPECIAL   = 2;
+		final int CHARSETS  = 3;
+		
+		String[] characterSets = new String[CHARSETS];
+		characterSets[UPPERCASE] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		characterSets[LOWERCASE] = "abcdefghijklmnopqrstuvwxyz";
+		characterSets[SPECIAL]   = "~!@#$%^&*+-_:;";
+		
+		int[] lengths = new int[CHARSETS];
+		lengths[UPPERCASE] = 4;
+		lengths[LOWERCASE] = 4;
+		lengths[SPECIAL]   = 4;
+		
+		Random random = new Random();
+		List<String> characters = new ArrayList<String>();
+		for (int charSetNr = 0; charSetNr < CHARSETS; charSetNr++) {
+			for (int charNr = 0; charNr < lengths[charSetNr]; charNr++) {
+				int characterNr = random.nextInt(characterSets[charSetNr].length());
+				characters.add(characterSets[charSetNr].substring(characterNr, characterNr + 1));
+			}
+		}
+		
+		String password = "";
+		while (characters.size() > 1) {
+			int charNr = random.nextInt(characters.size()); 
+			password += characters.get(charNr);
+			characters.remove(charNr);
+		} 
+		password += characters.get(0);
+		
+		return password;
+	}
+	
 		
 	public UserDefiner(JFrame parentFrame) {
 		this.parentFrame = parentFrame;
@@ -79,17 +117,17 @@ public class UserDefiner {
 	
 	
 	private void askUser() {
-		String firstName    = user == null ? "" : user[UserData.FIRST_NAME]   == null ? ""     : user[UserData.FIRST_NAME].trim();
-		String initials     = user == null ? "" : user[UserData.INITIALS]     == null ? ""     : user[UserData.INITIALS].trim();
-		String lastName     = user == null ? "" : user[UserData.LAST_NAME]    == null ? ""     : user[UserData.LAST_NAME].trim();
-		String userName     = user == null ? "" : user[UserData.USER_NAME]    == null ? ""     : user[UserData.USER_NAME].trim();
-		String password     = user == null ? "" : user[UserData.PASSWORD]     == null ? ""     : user[UserData.PASSWORD].trim();
-		String emailAddress = user == null ? "" : user[UserData.EMAIL]        == null ? ""     : user[UserData.EMAIL].trim();
-		String emailFormat  = user == null ? "" : user[UserData.EMAIL_FORMAT] == null ? "HTML" : user[UserData.EMAIL_FORMAT].trim();
-		String projects     = user == null ? "" : user[UserData.PROJECTS]     == null ? ""     : user[UserData.PROJECTS].trim();
-		String groups       = user == null ? "" : user[UserData.GROUPS]       == null ? ""     : user[UserData.GROUPS].trim();
-		String ipAddresses  = user == null ? "" : user[UserData.IP_ADDRESSES] == null ? ""     : user[UserData.IP_ADDRESSES].trim();
-		Boolean ftpOnly     = user == null ? false : groups.equals("");
+		String firstName    = user == null ? ""                 : user[UserData.FIRST_NAME]   == null ? ""     : user[UserData.FIRST_NAME].trim();
+		String initials     = user == null ? ""                 : user[UserData.INITIALS]     == null ? ""     : user[UserData.INITIALS].trim();
+		String lastName     = user == null ? ""                 : user[UserData.LAST_NAME]    == null ? ""     : user[UserData.LAST_NAME].trim();
+		String userName     = user == null ? ""                 : user[UserData.USER_NAME]    == null ? ""     : user[UserData.USER_NAME].trim();
+		String password     = user == null ? generatePassword() : user[UserData.PASSWORD]     == null ? ""     : user[UserData.PASSWORD].trim();
+		String emailAddress = user == null ? ""                 : user[UserData.EMAIL]        == null ? ""     : user[UserData.EMAIL].trim();
+		String emailFormat  = user == null ? ""                 : user[UserData.EMAIL_FORMAT] == null ? "HTML" : user[UserData.EMAIL_FORMAT].trim();
+		String projects     = user == null ? ""                 : user[UserData.PROJECTS]     == null ? ""     : user[UserData.PROJECTS].trim();
+		String groups       = user == null ? ""                 : user[UserData.GROUPS]       == null ? ""     : user[UserData.GROUPS].trim();
+		String ipAddresses  = user == null ? ""                 : user[UserData.IP_ADDRESSES] == null ? ""     : user[UserData.IP_ADDRESSES].trim();
+		Boolean ftpOnly     = user == null ? false              : groups.equals("");
 		originalFTPOnly = ftpOnly;
 
 		availableGroups = new ArrayList<String>();

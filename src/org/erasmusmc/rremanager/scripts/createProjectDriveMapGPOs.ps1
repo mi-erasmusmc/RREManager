@@ -33,7 +33,11 @@ if ($args.count -eq 4) {
     $securityFilter = $project + " " + $group
     New-GPO -Name $gpoName
     New-GPLink -Name $gpoName -Target $researchers
+    # Since PowerShell cannot remove the "Authenticated Users" from the Security Filtering without
+    # an interactive confirm it is set to GPORead so it is not applied.
+    Set-GPPermission -Name $gpoName -TargetName "Authenticated Users" -TargetType Group -PermissionLevel GPORead  
     Set-GPPermission -Name $gpoName -TargetName $securityFilter -TargetType Group -PermissionLevel GpoApply -Replace
+    Log("  done")
   }
 
   # Create Share drive
@@ -43,6 +47,7 @@ if ($args.count -eq 4) {
   New-GPO -Name $gpoName
   New-GPLink -Name $gpoName -Target $researchers
   Set-GPPermission -Name $gpoName -TargetName $securityFilter -TargetType Group -PermissionLevel GpoApply -Replace
+  Log("  done")
 
   exit 0
 }

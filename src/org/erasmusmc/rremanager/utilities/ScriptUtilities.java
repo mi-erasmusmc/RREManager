@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +48,9 @@ public class ScriptUtilities {
 				String command = "wscript \"" + scriptWrapper + "\"";
 				try {
 					Runtime.getRuntime().exec(command);
-					while (!semaphoreFile.exists());
+					while (!semaphoreFile.exists()) {
+						TimeUnit.SECONDS.sleep(2);
+					};
 					String resultMessage = null;
 					do {
 						BufferedReader semaphoreFileReader = new BufferedReader(new FileReader(semaphoreFile));
@@ -63,6 +64,8 @@ public class ScriptUtilities {
 					}
 				} catch( IOException e ) {
 					result = false;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 			else {
@@ -141,7 +144,9 @@ public class ScriptUtilities {
 			if (scriptWrapper != null) {
 				try {
 					Runtime.getRuntime().exec("powershell -file \"" + scriptWrapper + "\"");
-					while (!semaphoreFile.exists());
+					while (!semaphoreFile.exists()) {
+						TimeUnit.SECONDS.sleep(2);
+					};
 					String resultMessage = null;
 					do {
 						BufferedReader semaphoreFileReader = new BufferedReader(new FileReader(semaphoreFile));
@@ -155,6 +160,8 @@ public class ScriptUtilities {
 					}
 				} catch( IOException e ) {
 					result = false;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 			else {
@@ -162,7 +169,7 @@ public class ScriptUtilities {
 			}
 
 			if (scriptWrapper != null) {
-				//(new File(scriptWrapper)).delete();
+				(new File(scriptWrapper)).delete();
 			}
 		}
 		else {
@@ -170,10 +177,10 @@ public class ScriptUtilities {
 		}
 
 		if (scriptPath != null) {
-			//(new File(scriptPath)).delete();
+			(new File(scriptPath)).delete();
 		}
 		if (workPath != null) {
-			//(new File(workPath + getSemaphoreName())).delete();
+			(new File(workPath + getSemaphoreName())).delete();
 		}
 
 		return result;
@@ -232,7 +239,6 @@ public class ScriptUtilities {
 		} catch (FileNotFoundException e) {
 			scriptFileName = null;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
