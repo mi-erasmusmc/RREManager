@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import org.erasmusmc.rremanager.changelog.ChangeLog;
 import org.erasmusmc.rremanager.files.IniFile;
 import org.erasmusmc.rremanager.files.UserData;
+import org.erasmusmc.rremanager.gui.AdministratorDefiner;
 import org.erasmusmc.rremanager.gui.AdministratorManager;
 import org.erasmusmc.rremanager.gui.EmailEditor;
 import org.erasmusmc.rremanager.gui.IPAddressSelector;
@@ -45,6 +46,7 @@ public class RREManager {
 	private SMTPMailClient mailClient = null;
 	private ProjectDefiner projectDefiner = null;
 	private UserDefiner userDefiner = null;
+	private AdministratorDefiner administratorDefiner = null;
 	private MainFrame mainFrame = null;
 	
 	private String administrator = null;
@@ -93,6 +95,7 @@ public class RREManager {
 					emailReviewer = new EmailEditor(mainFrame.getFrame());
 					projectDefiner = new ProjectDefiner(mainFrame.getFrame());
 					userDefiner = new UserDefiner(mainFrame.getFrame());
+					administratorDefiner = new AdministratorDefiner(mainFrame.getFrame());
 				}
 				else {
 		            System.exit(0);
@@ -800,6 +803,16 @@ public class RREManager {
 	
 	public UserDefiner getUserDefiner() {
 		return userDefiner;
+	}
+	
+	
+	public AdministratorManager getAdministratorSelector() {
+		return administratorSelector;
+	}
+	
+	
+	public AdministratorDefiner getAdministratorDefiner() {
+		return administratorDefiner;
 	}
 	
 

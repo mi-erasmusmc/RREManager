@@ -341,6 +341,7 @@ public class UsersTab extends MainFrameTab {
 	public void update() {
 		userData = new UserData(mainFrame, settingsGroup);
 		users = userData.getUsersList();
+		mainFrame.refreshLog();
 		showSelection();
 		repaint();
 	}

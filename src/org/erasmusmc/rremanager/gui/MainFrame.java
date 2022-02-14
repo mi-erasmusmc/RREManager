@@ -49,6 +49,7 @@ public class MainFrame {
 	private UsersTab usersTab = null;
 	private UsersTab specialsTab = null;
 	private ProjectsTab projectsTab = null;
+	private AdministratorsTab administratorsTab = null;
 	private LogTab logTab = null;
 	private Console console = null;
 	private String busy = null; 
@@ -154,12 +155,14 @@ public class MainFrame {
 		usersTab    = new UsersTab(rreManager, this, "User Projects");
 		specialsTab = new UsersTab(rreManager, this, "Specials");
 		projectsTab = new ProjectsTab(rreManager, this, "Projects");
+		administratorsTab = new AdministratorsTab(rreManager, this);
 		logTab      = RREManager.noLogging ? null : new LogTab(rreManager, this);
 		
-		if (usersTab    != null) tabbedPane.addTab("Users"   , usersTab);
-		if (specialsTab != null) tabbedPane.addTab("Specials", specialsTab);        		
-		if (projectsTab != null) tabbedPane.addTab("Projects", projectsTab);
-		if (logTab      != null) tabbedPane.addTab("Log"     , logTab);
+		if (usersTab          != null) tabbedPane.addTab("Users"         , usersTab);
+		if (specialsTab       != null) tabbedPane.addTab("Specials"      , specialsTab);        		
+		if (projectsTab       != null) tabbedPane.addTab("Projects"      , projectsTab);        		
+		if (administratorsTab != null) tabbedPane.addTab("Administrators", administratorsTab);
+		if (logTab            != null) tabbedPane.addTab("Log"           , logTab);
 		
         frame.add(tabbedPane, BorderLayout.CENTER);
         
