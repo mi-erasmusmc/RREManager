@@ -421,7 +421,7 @@ If args = 11 then
   Call Log("First Name = " & strFirst & "<br>")
   Call Log("Last Name = " & strLast & "<br>")
   Call Log("<br>")
-  Call Log("Click on the 'Update User' button.<br>"
+  Call Log("Click on the 'Update User' button.<br>")
   Call Log("Click on the 'Change Password' button and set the password to: " & strPW & "<br>")
   Call Log("<br>")
   Call Log("Click on the 'Directories' link above the User Name field.<br>")

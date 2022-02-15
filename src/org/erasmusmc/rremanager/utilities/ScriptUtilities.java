@@ -205,8 +205,7 @@ public class ScriptUtilities {
 			scriptWriter.println("if ($exitCode -gt 0) {");
 			scriptWriter.println("  $errorString = \"ExitCode=\" + $exitCode");
 			scriptWriter.println("  $errorString | Out-File -FilePath \"" + workPath + getSemaphoreName() + "\" -Encoding ASCII");
-			scriptWriter.println("}");
-			scriptWriter.println("else {");
+			scriptWriter.println("} else {");
 			scriptWriter.println("  \"Ready\" | Out-File -FilePath \"" + workPath + getSemaphoreName() + "\" -Encoding ASCII");
 			scriptWriter.println("}");
 			scriptWriter.println("$command | Out-File -FilePath \"" + workPath + getSemaphoreName() + "\" -Encoding ASCII -Append");

@@ -227,11 +227,12 @@ public class AdministratorsTab extends MainFrameTab {
 	
 	
 	public void update() {
+		RREManager.getIniFile().readFile();
 		administratorData = new AdministratorData(mainFrame);
 		administrators = administratorData.getAdministratorsList();
 		mainFrame.refreshLog();
+		administratorsTableModel.fireTableDataChanged();
 		showSelection();
-		administratorsTable.repaint();
 	}
 	
 	
@@ -277,7 +278,7 @@ public class AdministratorsTab extends MainFrameTab {
 	
 	
 	private void editAdministrator(int[] selectedAdministrators, AdministratorData administratorData) {
-		if (rreManager.getAdministratorSelector().getAdministrator() != null) {
+		if (rreManager.getAdministratorSelector().login() != null) {
 			String[] administrator = null;
 			if ((selectedAdministrators != null) && (selectedAdministrators.length == 1)) {
 				administrator = administratorData.getAdministrator(selectedAdministrators[0]);
@@ -287,7 +288,7 @@ public class AdministratorsTab extends MainFrameTab {
 				}
 				modifiedAdministrator = rreManager.getAdministratorDefiner().getAdministrator(modifiedAdministrator);
 				if (modifiedAdministrator != null) {
-					administratorData.modifyAdministrator(administrator, modifiedAdministrator);
+					administratorData.modifyAdministrator(modifiedAdministrator);
 					update();
 				}
 			}
@@ -296,7 +297,7 @@ public class AdministratorsTab extends MainFrameTab {
 	
 	
 	private void addAdministrator() {
-		if (rreManager.getAdministratorSelector().getAdministrator() != null) {
+		if (rreManager.getAdministratorSelector().login() != null) {
 			String[] administrator = rreManager.getAdministratorDefiner().getAdministrator(null);
 			if (administrator != null) {
 				administratorData.addAdministrator(administrator);

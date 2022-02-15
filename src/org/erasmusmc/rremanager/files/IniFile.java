@@ -15,11 +15,12 @@ public class IniFile {
 	private String fileName;
 	private File iniFile;
 	private String error = "";
-	private Map<String, Map<String, String>> iniFileMap = new HashMap<String, Map<String, String>>();
-	private Map<String, List<String>> groupComments = new HashMap<String, List<String>>();
-	private Map<String, Map<String, List<String>>> variableComments = new HashMap<String, Map<String, List<String>>>();
-	private List<String> groupOrder = new ArrayList<String>();
-	private Map<String, List<String>> groupVariableOrder = new HashMap<String, List<String>>();
+	
+	private Map<String, Map<String, String>> iniFileMap = null;
+	private Map<String, List<String>> groupComments = null;
+	private Map<String, Map<String, List<String>>> variableComments = null;
+	private List<String> groupOrder = null;
+	private Map<String, List<String>> groupVariableOrder = null;
 	
 	
 	public IniFile(String iniFileName) {
@@ -40,6 +41,12 @@ public class IniFile {
 	
 	public boolean readFile() {
 		boolean ok = false;
+		iniFileMap = new HashMap<String, Map<String, String>>();
+		groupComments = new HashMap<String, List<String>>();
+		variableComments = new HashMap<String, Map<String, List<String>>>();
+		groupOrder = new ArrayList<String>();
+		groupVariableOrder = new HashMap<String, List<String>>();
+		
 		if (iniFile.canRead()) {
 			try {
 				BufferedReader iniFileReader = new BufferedReader(new FileReader(iniFile));
@@ -161,12 +168,14 @@ public class IniFile {
 	
 	
 	public boolean addGroup(String group, List<String> comments) {
+		boolean result = false;
 		if (!hasGroup(group)) {
 			iniFileMap.put(group, new HashMap<String, String>());
 			groupOrder.add(group);
 			groupVariableOrder.put(group, new ArrayList<String>());
+			result = setGroupComments(group, comments);
 		}
-		return setGroupComments(group, comments);
+		return result;
 	}
 	
 	

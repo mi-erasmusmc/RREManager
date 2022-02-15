@@ -17,6 +17,11 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.PlainDocument;
 
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.files.AdministratorData;
@@ -31,6 +36,7 @@ public class AdministratorDefiner {
 	private JFrame parentFrame;
 	private JDialog administratorDialog = null;
 	private JTextField nameField = null;
+	private JTextField userNumberField = null;
 	private JPasswordField passwordField = null;
 	private JPasswordField confirmField = null;
 	private JButton okButton = null;
@@ -42,7 +48,7 @@ public class AdministratorDefiner {
 	}
 	
 	
-	String[] getAdministrator(String[] administrator) {
+	public String[] getAdministrator(String[] administrator) {
 		this.administrator = administrator;
 		askAdministrator();
 		return this.administrator;
@@ -85,7 +91,8 @@ public class AdministratorDefiner {
 		JTextField phoneField = new JTextField(30);
 		phoneField.setText(phone);
 		JLabel userNumberLabel = new JLabel("Erasmus MC Nr:");
-		JTextField userNumberField = new JTextField(30);
+		userNumberField = new JTextField(30);
+		((PlainDocument) userNumberField.getDocument()).setDocumentFilter(new IntegerFilter());
 		userNumberField.setText(userNumber);
 		JLabel passwordLabel = new JLabel("Password:");
 		passwordField = new JPasswordField(30);
@@ -101,7 +108,10 @@ public class AdministratorDefiner {
 				if (nameField.getText().trim().equals("")) {
 					JOptionPane.showMessageDialog(parentFrame, "No name specified!", "Name Error", JOptionPane.ERROR_MESSAGE);
 				}
-				else if (String.valueOf(passwordField.getPassword()).length() < 6) {
+				else if (userNumberLabel.getText().trim().equals("")) {
+					JOptionPane.showMessageDialog(parentFrame, "No Erasmus MC Nr specified!", "Name Error", JOptionPane.ERROR_MESSAGE);
+				}
+				else if ((!String.valueOf(passwordField.getPassword()).equals("")) && (String.valueOf(passwordField.getPassword()).length() < 6)) {
 					JOptionPane.showMessageDialog(parentFrame, "Password should be 6 characters or more!", "Password Error", JOptionPane.ERROR_MESSAGE);
 				}
 				else {
@@ -194,6 +204,56 @@ public class AdministratorDefiner {
 		rootPane.setDefaultButton(okButton);
 		
 		administratorDialog.setVisible(true);
+	}
+	
+	
+	private class IntegerFilter extends DocumentFilter {
+		
+		@Override
+		public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+			Document doc = userNumberField.getDocument();
+			StringBuilder sb = new StringBuilder();
+			sb.append(doc.getText(0, doc.getLength()));
+			sb.insert(offset, string);
+		
+			if (test(sb)) {
+				super.insertString(fb, offset, string, attr);
+			}
+		}
+		
+		@Override
+		public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attr) throws BadLocationException {
+			Document doc = userNumberField.getDocument();
+			StringBuilder sb = new StringBuilder();
+			sb.append(doc.getText(0, doc.getLength()));
+			sb.replace(offset, offset + length, text);
+		
+			if (sb.toString().equals("") || test(sb)) {
+				super.replace(fb, offset, length, text, attr);
+			}
+		}
+		
+		@Override
+		public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+			Document doc = userNumberField.getDocument();
+			StringBuilder sb = new StringBuilder();
+			sb.append(doc.getText(0, doc.getLength()));
+			sb.delete(offset, offset + length);
+		
+			if (sb.toString().equals("") || test(sb)) {
+				super.remove(fb, offset, length);
+			}
+		}
+		
+		private boolean test(StringBuilder sb) {	
+			try {
+				Integer.parseInt(sb.toString());
+				return true;
+			} catch (NumberFormatException exception) {
+				return false;
+			}
+			
+		}
 	}
 	
 	

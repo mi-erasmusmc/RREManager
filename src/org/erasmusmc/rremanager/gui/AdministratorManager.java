@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +32,7 @@ import org.erasmusmc.rremanager.RREManager;
 public class AdministratorManager {
 	private JFrame parentFrame;
 	private String administrator = null;
+	private String selectedAdministrator = null;
 	
 	
 	public static String encryptPassword(String password) {
@@ -64,7 +67,7 @@ public class AdministratorManager {
 	}
 	
 	
-	public String getAdministrator() {
+	public String login() {
 		Map<String, String> administratorsMap = RREManager.getIniFile().getGroup("Administrators");
 		if (administratorsMap != null) {
 			List<String> administratorsList = new ArrayList<String>();
@@ -74,119 +77,131 @@ public class AdministratorManager {
 				}
 			}
 			Collections.sort(administratorsList);
+
+			Dimension dimension = new Dimension(350, 150);
+			JDialog administratorSelectorDialog = new JDialog(parentFrame, true);
+			administratorSelectorDialog.setTitle("Select yourself");
+			administratorSelectorDialog.setLayout(new BorderLayout());
+			administratorSelectorDialog.setMinimumSize(dimension);
+			administratorSelectorDialog.setMaximumSize(dimension);
+			administratorSelectorDialog.setPreferredSize(dimension);
 			
-			if (administratorsList.size() > 1) {
-				Dimension dimension = new Dimension(350, 150);
-				JDialog administratorSelectorDialog = new JDialog(parentFrame, true);
-				administratorSelectorDialog.setTitle("Select yourself");
-				administratorSelectorDialog.setLayout(new BorderLayout());
-				administratorSelectorDialog.setMinimumSize(dimension);
-				administratorSelectorDialog.setMaximumSize(dimension);
-				administratorSelectorDialog.setPreferredSize(dimension);
-				
-				JPanel selectionPanel = new JPanel();
-				GroupLayout layout = new GroupLayout(selectionPanel);
-				layout.setAutoCreateGaps(true);
-				layout.setAutoCreateContainerGaps(true);
-				selectionPanel.setLayout(layout);
-				
-				JLabel administratorLabel = new JLabel("Administrator:");
-				JComboBox<String> administratorComboBox = new JComboBox<String>();
-				if (administrator == null) {
-					administratorComboBox.addItem("");
-					for (String administratorName : administratorsList) {
-						administratorComboBox.addItem(administratorName);
-					}
+			JPanel selectionPanel = new JPanel();
+			GroupLayout layout = new GroupLayout(selectionPanel);
+			layout.setAutoCreateGaps(true);
+			layout.setAutoCreateContainerGaps(true);
+			selectionPanel.setLayout(layout);
+			
+			JLabel administratorLabel = new JLabel("Administrator:");
+			JComboBox<String> administratorComboBox = new JComboBox<String>();
+			if (administrator == null) {
+				administratorComboBox.addItem("");
+				for (String administratorName : administratorsList) {
+					administratorComboBox.addItem(administratorName);
 				}
-				else {
-					administratorComboBox.addItem(administrator);
-				}
-				JLabel passwordLabel = new JLabel("Password:");
-				JPasswordField passwordField = new JPasswordField(20);
-				
-				layout.setHorizontalGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-							.addGroup(
-									layout.createSequentialGroup()
-									.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-											.addComponent(administratorLabel)
-											.addComponent(passwordLabel)
-											)
-									.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-											.addComponent(administratorComboBox)
-											.addComponent(passwordField)
-											)
-									)
-						);
-				
-				layout.setVerticalGroup(
-						layout.createSequentialGroup()
-							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-									.addComponent(administratorLabel)
-									.addComponent(administratorComboBox)
-									)
-							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-									.addComponent(passwordLabel)
-									.addComponent(passwordField)
-									)
-						);
-				
-				layout.linkSize(administratorComboBox, passwordField);
-				
-				JPanel buttonPanel = new JPanel();
-				JButton okButton = new JButton("OK");
-				okButton.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						administrator = (String) administratorComboBox.getSelectedItem();
-						String password = String.valueOf(passwordField.getPassword());
-						if (!administrator.equals("")) {
-							if (!password.equals("")) {
-								String encryptedPassword = encryptPassword(password);
-								if (!administratorsMap.get(administrator).equals(encryptedPassword)) {
-									JOptionPane.showMessageDialog(administratorSelectorDialog, "The pasword for administrator '" + administrator + "' is not correct!", "Incorrect password", JOptionPane.ERROR_MESSAGE);
-									administrator = null;
-								}
-								administratorSelectorDialog.dispose();
-							}
-							else {
-								JOptionPane.showMessageDialog(administratorSelectorDialog, "The pasword may not be empty!", "Empty password", JOptionPane.ERROR_MESSAGE);
-							}
-						}
-						else {
-							JOptionPane.showMessageDialog(administratorSelectorDialog, "You must select an administrator!", "No administrator selected", JOptionPane.ERROR_MESSAGE);
-						}
-					}
-				});
-				JButton cancelButton = new JButton("Cancel");
-				cancelButton.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						administrator = null;
-						administratorSelectorDialog.dispose();
-					}
-				});
-				buttonPanel.add(okButton);
-				buttonPanel.add(cancelButton);
-				
-				administratorSelectorDialog.add(selectionPanel, BorderLayout.CENTER);
-				administratorSelectorDialog.add(buttonPanel, BorderLayout.SOUTH);
-				
-				administratorSelectorDialog.pack();
-				administratorSelectorDialog.setLocationRelativeTo(parentFrame);
-				
-				JRootPane rootPane = SwingUtilities.getRootPane(okButton); 
-				rootPane.setDefaultButton(okButton);
-				
-				administratorSelectorDialog.setVisible(true);
 			}
 			else {
-				administrator = (String) administratorsMap.keySet().toArray()[0];
+				administratorComboBox.addItem(administrator);
 			}
+			JLabel passwordLabel = new JLabel("Password:");
+			JPasswordField passwordField = new JPasswordField(20);
+			
+			layout.setHorizontalGroup(
+					layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addGroup(
+								layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+										.addComponent(administratorLabel)
+										.addComponent(passwordLabel)
+										)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+										.addComponent(administratorComboBox)
+										.addComponent(passwordField)
+										)
+								)
+					);
+			
+			layout.setVerticalGroup(
+					layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+								.addComponent(administratorLabel)
+								.addComponent(administratorComboBox)
+								)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+								.addComponent(passwordLabel)
+								.addComponent(passwordField)
+								)
+					);
+			
+			layout.linkSize(administratorComboBox, passwordField);
+			
+			JPanel buttonPanel = new JPanel();
+			JButton okButton = new JButton("OK");
+			okButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					selectedAdministrator = (String) administratorComboBox.getSelectedItem();
+					String password = String.valueOf(passwordField.getPassword());
+					if (!selectedAdministrator.equals("")) {
+						if (!password.equals("")) {
+							String encryptedPassword = encryptPassword(password);
+							if (!administratorsMap.get(selectedAdministrator).equals(encryptedPassword)) {
+								JOptionPane.showMessageDialog(administratorSelectorDialog, "The pasword for administrator '" + administrator + "' is not correct!", "Incorrect password", JOptionPane.ERROR_MESSAGE);
+								selectedAdministrator = null;
+							}
+							administratorSelectorDialog.dispose();
+						}
+						else {
+							JOptionPane.showMessageDialog(administratorSelectorDialog, "The pasword may not be empty!", "Empty password", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+					else {
+						JOptionPane.showMessageDialog(administratorSelectorDialog, "You must select an administrator!", "No administrator selected", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			});
+			JButton cancelButton = new JButton("Cancel");
+			cancelButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					selectedAdministrator = null;
+					administratorSelectorDialog.dispose();
+				}
+			});
+			buttonPanel.add(okButton);
+			buttonPanel.add(cancelButton);
+			
+			administratorSelectorDialog.add(selectionPanel, BorderLayout.CENTER);
+			administratorSelectorDialog.add(buttonPanel, BorderLayout.SOUTH);
+			
+			administratorSelectorDialog.pack();
+			administratorSelectorDialog.setLocationRelativeTo(parentFrame);
+			
+			JRootPane rootPane = SwingUtilities.getRootPane(okButton); 
+			rootPane.setDefaultButton(okButton);
+
+			if (administrator != null) {
+				administratorSelectorDialog.addWindowListener(new WindowAdapter() {
+				    public void windowOpened( WindowEvent e ) {
+				        passwordField.requestFocus();
+				    }
+				});
+			}
+			
+			administratorSelectorDialog.setVisible(true);
 		}
 		
+		if ((administrator == null) && (selectedAdministrator != null)) {
+			administrator = selectedAdministrator;
+		}
+		
+		return selectedAdministrator;
+	}
+	
+	
+	public String getAdministrator() {
 		return administrator;
 	}
 	
@@ -265,10 +280,5 @@ public class AdministratorManager {
 		passwordEncryptor.add(mainPanel, BorderLayout.CENTER);
 		passwordEncryptor.pack();
 		passwordEncryptor.setVisible(true);
-	}
-	
-
-	public static void main(String[] args) {
-		AdministratorManager.getEncryptedPassword();
 	}
 }

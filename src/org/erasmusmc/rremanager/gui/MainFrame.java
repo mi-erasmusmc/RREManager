@@ -158,9 +158,9 @@ public class MainFrame {
 		administratorsTab = new AdministratorsTab(rreManager, this);
 		logTab      = RREManager.noLogging ? null : new LogTab(rreManager, this);
 		
-		if (usersTab          != null) tabbedPane.addTab("Users"         , usersTab);
+		if (usersTab          != null) tabbedPane.addTab("Users"         , usersTab);        		
+		if (projectsTab       != null) tabbedPane.addTab("Projects"      , projectsTab);
 		if (specialsTab       != null) tabbedPane.addTab("Specials"      , specialsTab);        		
-		if (projectsTab       != null) tabbedPane.addTab("Projects"      , projectsTab);        		
 		if (administratorsTab != null) tabbedPane.addTab("Administrators", administratorsTab);
 		if (logTab            != null) tabbedPane.addTab("Log"           , logTab);
 		

@@ -22,6 +22,51 @@ public class AdministratorData {
 			"Password"
 	};
 	
+	
+	public static boolean addAdministratorToIniFile(String[] administrator, IniFile iniFile, MainFrame mainFrame) {
+		String error = "";
+
+		String allTimeLogRecord = "Add Administrator";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "\"" + administrator[AdministratorData.NAME] + "\"";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "\"" + administrator[AdministratorData.PASSWORD] + "\"";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "Yes";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		
+		String logLn = "Adding Administrator " + administrator[AdministratorData.NAME] + " ";
+		
+		error = (error.equals("") ? (iniFile.setValue("Administrators", administrator[AdministratorData.NAME], administrator[AdministratorData.PASSWORD], null) ? "" : "Error adding admininistrator to group Administrators.") : error);
+		error = (error.equals("") ? (iniFile.addGroup(administrator[AdministratorData.NAME], null) ? "" : "Error adding group for administrator in ini file.") : error);
+		error = (error.equals("") ? (iniFile.setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.ERASMUS], administrator[AdministratorData.ERASMUS], null) ? "" : "Error setting user number.") : error);
+		error = (error.equals("") ? (iniFile.setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.TITLE], administrator[AdministratorData.TITLE], null) ? "" : "Error setting title.") : error);
+		error = (error.equals("") ? (iniFile.setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.PHONE], administrator[AdministratorData.PHONE], null) ? "" : "Error setting telephone number.") : error);
+		error = (error.equals("") ? (RREManager.getIniFile().writeFile() ? "" : "Error writing ini file.") : error);
+
+		if (mainFrame != null) {
+			if (error.equals("")) {
+				allTimeLogRecord += "," + "Succeeded";
+				allTimeLogRecord += ",";
+				mainFrame.allTimeLog(allTimeLogRecord, "");
+				
+				mainFrame.logWithTimeLn(logLn + "SUCCEEDED");
+			}
+			else {
+				allTimeLogRecord += "," + "Failed";
+				allTimeLogRecord += "," + "\"" + error + "\"";
+				
+				mainFrame.logWithTimeLn(logLn + "FAILED");
+				mainFrame.logWithTimeLn(logLn + "  " + error);
+			}
+		}
+		
+		return error.equals("");
+	}
+	
 
 	private MainFrame mainFrame = null;
 	private List<String[]> administrators = new ArrayList<String[]>();
@@ -85,43 +130,59 @@ public class AdministratorData {
 	
 	
 	public boolean addAdministrator(String[] administrator) {
-		boolean success = true;
-		
-		success = success && RREManager.getIniFile().setValue("Administrators", administrator[AdministratorData.NAME], administrator[AdministratorData.PASSWORD], null);
-		success = success && RREManager.getIniFile().addGroup(administrator[AdministratorData.NAME], null);
-		success = success && RREManager.getIniFile().setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.ERASMUS], administrator[AdministratorData.ERASMUS], null);
-		success = success && RREManager.getIniFile().setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.TITLE], administrator[AdministratorData.TITLE], null);
-		success = success && RREManager.getIniFile().setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.PHONE], administrator[AdministratorData.PHONE], null);
-		
-		if (success) {
-			success = RREManager.getIniFile().writeFile();
-			if (success) {
-				getData();
-			}
+		boolean success = false;
+		if (addAdministratorToIniFile(administrator, RREManager.getIniFile(), mainFrame)) {
+			success = true;
+			getData();
 		}
 		
 		return success;
 	}
 	
 	
-	public boolean modifyAdministrator(String[] administrator, String[] modifiedAdministrator) {
-		boolean success = true;
+	public boolean modifyAdministrator(String[] modifiedAdministrator) {
+		String error = "";
+
+		String allTimeLogRecord = "Modify Administrator";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "\"" + modifiedAdministrator[AdministratorData.NAME] + "\"";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "\"" + modifiedAdministrator[AdministratorData.PASSWORD] + "\"";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "Yes";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
 		
-		if (!administrator[AdministratorData.PASSWORD].equals("")) {
-			success = success && RREManager.getIniFile().setValue("Administrators", administrator[AdministratorData.NAME], administrator[AdministratorData.PASSWORD], null);
+		String logLn = "Modifying Administrator " + modifiedAdministrator[AdministratorData.NAME] + " ";
+		
+		if (!modifiedAdministrator[AdministratorData.PASSWORD].equals("")) {
+			error = (error.equals("") ? (RREManager.getIniFile().setValue("Administrators", modifiedAdministrator[AdministratorData.NAME], modifiedAdministrator[AdministratorData.PASSWORD], null) ? "" : "Error setting password.") : error); 
 		}
-		success = success && RREManager.getIniFile().setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.ERASMUS], administrator[AdministratorData.ERASMUS], null);
-		success = success && RREManager.getIniFile().setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.TITLE], administrator[AdministratorData.TITLE], null);
-		success = success && RREManager.getIniFile().setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.PHONE], administrator[AdministratorData.PHONE], null);
+		error = (error.equals("") ? (RREManager.getIniFile().setValue(modifiedAdministrator[AdministratorData.NAME], fieldName[AdministratorData.ERASMUS], modifiedAdministrator[AdministratorData.ERASMUS], null) ? "" : "Error setting user number.") : error);
+		error = (error.equals("") ? (RREManager.getIniFile().setValue(modifiedAdministrator[AdministratorData.NAME], fieldName[AdministratorData.TITLE], modifiedAdministrator[AdministratorData.TITLE], null) ? "" : "Error setting title.") : error);
+		error = (error.equals("") ? (RREManager.getIniFile().setValue(modifiedAdministrator[AdministratorData.NAME], fieldName[AdministratorData.PHONE], modifiedAdministrator[AdministratorData.PHONE], null) ? "" : "Error setting telephone number.") : error);
+		error = (error.equals("") ? (RREManager.getIniFile().writeFile() ? "" : "Error writing ini file.") : error);
 		
-		if (success) {
-			success = RREManager.getIniFile().writeFile();
-			if (success) {
-				getData();
-			}
+		if (error.equals("")) {
+			allTimeLogRecord += "," + "Succeeded";
+			allTimeLogRecord += ",";
+			mainFrame.allTimeLog(allTimeLogRecord, "");
+			
+			mainFrame.logWithTimeLn(logLn + "SUCCEEDED");
+			
+			getData();
+		}
+		else {
+			allTimeLogRecord += "," + "Failed";
+			allTimeLogRecord += "," + "\"" + error + "\"";
+			
+			mainFrame.logWithTimeLn(logLn + "FAILED");
+			mainFrame.logWithTimeLn(logLn + "  " + error);
 		}
 		
-		return success;
+		return error.equals("");
 	}
 
 }

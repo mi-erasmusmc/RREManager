@@ -294,7 +294,7 @@ public class UsersTab extends MainFrameTab {
 		mailingPanel.add(sendButton);
 		
 		actionsPanel.add(mailingPanel);
-		
+
 		JPanel userManagementPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		userManagementPanel.setBorder(BorderFactory.createTitledBorder("User Management"));
 		
@@ -325,7 +325,9 @@ public class UsersTab extends MainFrameTab {
 		userManagementPanel.add(editUserButton);
 		userManagementPanel.add(addUserButton);
 		
-		actionsPanel.add(userManagementPanel);
+		if (!settingsGroup.equals("Specials")) {
+			actionsPanel.add(userManagementPanel);
+		}
 
         JPanel usersLogPanel = new JPanel(new BorderLayout());
 		usersLogPanel.add(usersListPanel, BorderLayout.WEST);
@@ -342,8 +344,8 @@ public class UsersTab extends MainFrameTab {
 		userData = new UserData(mainFrame, settingsGroup);
 		users = userData.getUsersList();
 		mainFrame.refreshLog();
+		usersTableModel.fireTableDataChanged();
 		showSelection();
-		repaint();
 	}
 	
 	

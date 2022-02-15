@@ -13,6 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import org.erasmusmc.rremanager.changelog.ChangeLog;
+import org.erasmusmc.rremanager.files.AdministratorData;
 import org.erasmusmc.rremanager.files.IniFile;
 import org.erasmusmc.rremanager.files.UserData;
 import org.erasmusmc.rremanager.gui.AdministratorDefiner;
@@ -85,8 +86,15 @@ public class RREManager {
 			iniFile = new IniFile(parameters.keySet().contains("settings") ? parameters.get("settings") : (currentPath + File.separator + "RREManager-v" + version + ".ini"));
 			if (iniFile.readFile()) {
 				test = (!iniFile.getValue("General", "DataFile").equals("F:\\Administration\\Users\\UsersProjects.xlsx"));
+				if ((!iniFile.hasGroup("Administrators")) || (iniFile.getGroup("Administrators").keySet().size() == 0)) {
+					administratorDefiner = new AdministratorDefiner(null);
+					String[] firstAdministrator = administratorDefiner.getAdministrator(null);
+					if (firstAdministrator != null) {
+						AdministratorData.addAdministratorToIniFile(firstAdministrator, iniFile, null);
+					}
+				}
 				administratorSelector = new AdministratorManager(null);
-				administrator = administratorSelector.getAdministrator();
+				administrator = administratorSelector.login();
 				if (administrator != null) {
 					mainFrame = new MainFrame(this);
 					mainFrame.setTitle(administrator);
