@@ -1,3 +1,10 @@
+Write-Host "createProjectDriveMapGPOs.ps1"
+for (($argNr = 0); $argNr -lt $args.Count; $argNr++) {
+  Write-Host "  " $args[$argNr]
+}
+Write-Host ""
+
+
 if ($args.count -gt 2) {
   $logFileName = $args[$args.count - 2]
   $logFileIndent = $args[$args.count - 1]

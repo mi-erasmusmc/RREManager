@@ -25,6 +25,8 @@ Dim strSubFolders,strMainGroup, strOU, strProjectsFolder, strDataMainSub, strGro
 Dim strDataSUbFolder, strSubFolder, strSubGroupName, strDataFolder, strShareFolder
 DIM SubFolderArray, counter, wshNetwork, strComputerName, gpoName
 
+args = WScript.Arguments.Count
+
 exitCode = 0
 strProjectsFolder = "D:\Projects\" 
 strDataMainSub = "Data"
@@ -40,7 +42,6 @@ If IsObject(objExplorer) Then
 End If
 
 VERBOSE = 0
-args = WScript.Arguments.Count
 
 If args = 4 then
   strProjectName = Wscript.Arguments.Item(0)

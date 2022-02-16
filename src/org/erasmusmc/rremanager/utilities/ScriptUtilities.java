@@ -31,6 +31,19 @@ public class ScriptUtilities {
 		}
 		return result;
 	}
+	
+	
+	public static void deleteOutputFiles() {
+		String workPath = RREManager.getCurentPath() + File.separator;
+		File folder = new File(workPath);
+		String[] fileList = folder.list();
+		for (String outputFileName : fileList) {
+			File outputFile = new File(outputFileName);
+			if (outputFile.isFile() && outputFileName.endsWith("_Output.txt")) {
+				outputFile.delete();
+			}
+		}
+	}
 
 
 	private static boolean callVisualBasicScript(String script, List<String> arguments) {
@@ -45,7 +58,7 @@ public class ScriptUtilities {
 
 			String scriptWrapper = getVisualBasicScriptWrapper(workPath, scriptPath, arguments);
 			if (scriptWrapper != null) {
-				String command = "wscript \"" + scriptWrapper + "\"";
+				String command = "wscript \"" + scriptWrapper+ "\"";
 				try {
 					Runtime.getRuntime().exec(command);
 					while (!semaphoreFile.exists()) {
@@ -93,6 +106,10 @@ public class ScriptUtilities {
 
 	private static String getVisualBasicScriptWrapper(String workPath, String scriptPath, List<String> arguments) {
 		String scriptWrapperScript = workPath + "ScriptWrapper.vbs";
+		String scriptName = scriptPath;
+		if (scriptName.contains(File.separator)) {
+			scriptName = scriptName.substring(scriptName.lastIndexOf(File.separator) + 1);
+		}
 
 		try {
 			String argumentsString = "";
@@ -103,7 +120,9 @@ public class ScriptUtilities {
 			}
 
 			PrintWriter scriptWriter = new PrintWriter(scriptWrapperScript);
-			scriptWriter.println("dim command, exitCode, objShell, objFSO");
+			scriptWriter.println("dim args, argNr, command, exitCode, objShell, objFSO");
+			scriptWriter.println();
+			scriptWriter.println("args = WScript.Arguments.Count");
 			scriptWriter.println();
 			scriptWriter.println("Set objShell = CreateObject(\"Wscript.Shell\")");
 			scriptWriter.println("command = \"wscript.exe \" & chr(34) & \"" + scriptPath + "\" & chr(34)" + argumentsString);
@@ -135,6 +154,10 @@ public class ScriptUtilities {
 
 		String workPath = RREManager.getCurentPath() + File.separator;
 		String scriptPath = copyScript(workPath, script);
+		String outputFile = RREManager.getIniFile().getValue("General", "Log Folder") + File.separator + script.replaceAll("\\.", "_") + "_Output.txt";
+		if (RREManager.test) {
+			outputFile = "D:\\Temp\\RRE\\RREManagerTestLog\\" + script.replaceAll("\\.", "_") + "_Output.txt";
+		}
 
 		if (scriptPath != null) {
 			File semaphoreFile = new File(workPath + getSemaphoreName());
@@ -142,8 +165,9 @@ public class ScriptUtilities {
 
 			String scriptWrapper = getPowerShellScriptWrapper(workPath, scriptPath, arguments);
 			if (scriptWrapper != null) {
+				String command = "cmd /c powershell -file \"" + scriptWrapper + "\" 2>&1 >> \"" + outputFile + "\"";
 				try {
-					Runtime.getRuntime().exec("powershell -file \"" + scriptWrapper + "\"");
+					Runtime.getRuntime().exec(command);
 					while (!semaphoreFile.exists()) {
 						TimeUnit.SECONDS.sleep(2);
 					};
@@ -189,6 +213,7 @@ public class ScriptUtilities {
 
 	private static String getPowerShellScriptWrapper(String workPath, String scriptPath, List<String> arguments) {
 		String scriptWrapperScript = workPath + "ScriptWrapper.ps1";
+		String scriptName = scriptPath;
 
 		try {
 			String argumentsString = "";
@@ -199,6 +224,12 @@ public class ScriptUtilities {
 			}
 
 			PrintWriter scriptWriter = new PrintWriter(scriptWrapperScript);
+			scriptWriter.println("Write-Host \"ScriptWrapper.ps1 " + scriptName + "\"");
+			scriptWriter.println("for (($argNr = 0); $argNr -lt $args.Count; $argNr++) {");
+			scriptWriter.println("  Write-Host \"  \" $args[$argNr]");
+			scriptWriter.println("}");
+			scriptWriter.println("Write-Host \"\"");
+			scriptWriter.println();
 			scriptWriter.println("$command = \"& \"\"" + scriptPath + "\"\"" + argumentsString + "\"");
 			scriptWriter.println("Invoke-Expression $command");
 			scriptWriter.println("$exitCode = $LASTEXITCODE");

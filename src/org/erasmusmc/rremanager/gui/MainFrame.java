@@ -74,7 +74,7 @@ public class MainFrame {
 	
 	public MainFrame(RREManager rreManager) {
 		this.rreManager = rreManager;
-		allTimeLogFileName = RREManager.noLogging ? null : (RREManager.getIniFile().getValue("General", "Log Folder") + File.separator + "RREManagerLog.csv");
+		allTimeLogFileName = RREManager.noLogging ? null : ((RREManager.test ? "D:\\Temp\\RRE\\RREManagerTestLog" : RREManager.getIniFile().getValue("General", "Log Folder")) + File.separator + "RREManagerLog.csv");
 		createInterface();
 	}
 	
@@ -453,8 +453,8 @@ public class MainFrame {
 		}
 		String logFileName = "RREManager.log";
 		String outputVersion = getOutputVersion(logFileName);;
-		String baseName = logFolder + File.separator + outputVersion;
-		fullLogFileName = baseName + logFileName;
+		String baseName =  (RREManager.test ? "D:\\Temp\\RRE\\RREManagerTestLog" : logFolder) + File.separator + outputVersion;
+		fullLogFileName =baseName + logFileName;
 	}
 	
 	
@@ -601,6 +601,7 @@ public class MainFrame {
 		boolean success = true;
 
 		logWithTimeLn("Running scripts");
+		ScriptUtilities.deleteOutputFiles();
 		UserData userData = new UserData(this, "User Projects");
 		for (LogEntry logEntry : RREManager.changeLog.getLogEntries()) {
 			String allTimeLogRecord = "";

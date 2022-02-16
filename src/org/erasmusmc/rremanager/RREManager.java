@@ -139,7 +139,7 @@ public class RREManager {
 	
 	
 	public static String getCurentPath() {
-		return currentPath;
+		return ((currentPath == null) || test) ? "D:\\Temp\\RRE\\RREManagerTestLog" : currentPath;
 	}
 	
 	

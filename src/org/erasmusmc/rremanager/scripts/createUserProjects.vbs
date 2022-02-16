@@ -51,6 +51,8 @@ Dim objRootLDAP
 
 Dim strExportDirectory, strImportDirectory, strDownLoadFtpDirectory, strUpLoadFtpDirectory, strUserDirectory
 
+args = WScript.Arguments.Count
+
 exitCode = 0
 multiOTPGroup = "MultiOTP Users"
 FolderScript = "createFolders.vbs"
@@ -102,8 +104,6 @@ objTrans.Set ADS_NAME_TYPE_1779, strDNSDomain
 strNetBIOSDomain = objTrans.Get(ADS_NAME_TYPE_NT4)
 ' Remove trailing backslash.
 strNetBIOSdomain = Left(strNetBIOSDomain, Len(strNetBIOSDomain) - 1)
-
-args = WScript.Arguments.Count
 
 If args = 11 then
   strFirst = Wscript.Arguments.Item(0)
@@ -430,7 +430,7 @@ If args = 11 then
   Call Log("<br>")
   Call Log(strDownLoadFtpDirectory & strUserName & "<br>")
   Call Log("<br>")
-  Call Log("Make sure that the options 'List Files', 'List Directories', 'Delete', and 'Download'<br>)
+  Call Log("Make sure that the options 'List Files', 'List Directories', 'Delete', and 'Download'<br>")
   Call Log("are checked and the others not.<br>")
   Call Log("<br>")
   Call Log("Click on the 'Update' button<br>")
