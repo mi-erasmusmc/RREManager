@@ -206,6 +206,7 @@ public class AdministratorManager {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static void getEncryptedPassword() {
 		JFrame passwordEncryptor = new JFrame("Encrypt Password");
 		passwordEncryptor.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

@@ -514,12 +514,19 @@ public class MainFrame {
 				startLogging();
 			}
 			if (allTimeLogFile.exists()) {
-				record = DateUtilities.getCurrentTime().replaceAll(" ", ",") + "," + rreManager.getAdministrator() + "," + record;
+				String fixedFields = DateUtilities.getCurrentTime().replaceAll(" ", ","); // Date and Time
+				fixedFields += "," + RREManager.version;                                  // Version
+				fixedFields += "," + rreManager.getAdministrator();                       // Administrator
+				record = fixedFields + "," + record;
 				record += "," + getLogFileName();
 				record += "," + "\"" + info + "\"";
 			}
 			else { // File does no exist -> write header
-				record = "Date,Time,Administrator," + record;
+				String fixedFields = "Date";
+				fixedFields += "," + "Time";
+				fixedFields += "," + "Version";
+				fixedFields += "," + "Administrator";
+				record = fixedFields + "," + record;
 				record += "," + info;
 			}
 			try {

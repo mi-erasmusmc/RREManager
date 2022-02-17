@@ -325,37 +325,8 @@ If args = 11 then
                           strGroupDN = Trim(groupArray(counter))
                           ' Attempt to bind to group object DN.
                           Call Log("<font color=black>Bind to group " & strGroupDN & "<br>")
-                          blnBound = False
                           On Error Resume Next
-                          Set objGroup = GetObject("LDAP://CN=" & strGroupDN & ",OU=Researchers" & strDNSDomain)
-                          If (Err.Number <> 0) Then
-                              On Error GoTo 0
-                              ' Try  again converting NT Name to DN.
-                              On Error Resume Next
-                              objTrans.Set ADS_NAME_TYPE_NT4, strNetBIOSDomain & "\" & strGroupDN
-                              If (Err.Number <> 0) Then
-                                  On Error GoTo 0
-                                  Call Log("<font color=red>Unable to bind to group " & strGroupDN & "<br>")
-                                  exitCode = 8
-                              Else
-                                  On Error GoTo 0
-                                  strGroupDN = objTrans.Get(ADS_NAME_TYPE_1779)
-                                  Set objGroup = GetObject("LDAP://" & strGroupDN)
-                                  blnBound = True
-                              End If
-                          Else
-                              On Error GoTo 0
-                              blnBound = True
-                          End If
-                          If (blnBound = True) Then
-                              On Error Resume Next
-                              objGroup.Add(objUser.AdsPath)
-                              If (Err.Number <> 0) Then
-                                  On Error GoTo 0
-                                  Call Log("<font color=orange>user " & strNTName & " already added to group " & strGroupDN  & "? (skipped)<br>")
-                              End If
-                          End If
-                          On Error GoTo 0
+                          Call AddGrpMem(strGroupDN,"OU=Researchers",strCN,"OU=Researchers",VERBOSE)
                       Next
                    
                       ' Create folders
@@ -384,26 +355,7 @@ If args = 11 then
       End If ' User exists?
         
       ' Add the user to the multiOTPGroup in AD Users
-      '  Check these objects referenced by strOU, strGroup exist in strOU
-      strUserOU = "OU=Researchers,"
-      strUser = "CN=" & strCN & ","
-      strGroupOU = "CN=Users,"
-      strGroup = "CN=" & multiOTPGroup & ","
-
-      '  Bind to Active Directory and get LDAP name
-      Set objRootLDAP = GetObject("LDAP://RootDSE")
-
-      ' Add (str)User to (str)Group
-      ON Error GoTo 0
-      Set objUser = GetObject("LDAP://"& strUser & strUserOU & strDNSDomain)
-      Set objGroup = GetObject("LDAP://"& strGroup & strGroupOU & strDNSDomain)
-      objGroup.add(objUser.ADsPath) 
-      If (Err.Number <> 0) Then
-        on Error GoTo 0
-  	    Call Log("<font color=orange>" & strCN & " already member of group " & multiOTPGroup & "? (Skipped)<br>")
-      Else
-   	    Call Log("<font color=green>" & strCN & " added to group " & multiOTPGroup & "<br>")
-      End If
+      Call AddGrpMem(multiOTPGroup,"CN=Users",strCN,"OU=Researchers",VERBOSE)
         
       Call Log("<p><font color=black>-----------------------------------------------------------------</p><br>")
   End If
@@ -454,7 +406,7 @@ If args = 11 then
     Call Log("Now double click on the desktop shortcut 'SyncOTP-AD' and wait till it is finished.<br>")
     Call Log("Open Google Chrome and click on the 'MultiOTP Admin' bookmark and login.<br>")
     Call Log("In the list of users click on the 'Print' button in front of the user '" & strUserName & "'.<br>")
-    Call Log("Now press the keys <Ctrl>+<p> and save it as '" & strUserName & ".pdf' to the folder:<br>")
+    Call Log("Now press the keys &lt;Ctrl&gt;+&lt;p&gt; and save it as '" & strUserName & ".pdf' to the folder:<br>")
     Call Log("<br>")
     Call Log("F:\Administration\OTP Accounts<br>")
   End If
@@ -508,16 +460,18 @@ End If
 End function
 
 
-Private Sub AddGrpMem(strGroupI,strMemberI,VERBOSE)
+Private Sub AddGrpMem(strGroupI,strGroupOUI,strMemberI,strUserOUI,VERBOSE)
 ' Adds a member to a group
 
    Dim strUserOU, strGroupOU, strGroup, strUser, strDNSDomain
-   Dim objRootLDAP, objGroup, objUser
+   Dim objRootLDAP, objGroup, objUser, blnBound
+   
+   Call Log("<font color=black>Add user " & strMemberI & " to group " & strGroupI & "<br>")
 
    '  Check these objects referenced by strOU, strGroup exist in strOU
-   strUserOU = "OU=Researchers,"
+   strUserOU = strUserOUI & ","
    strUser = "CN=" & strMemberI & ","
-   strGroupOU = "OU=Users,"
+   strGroupOU = strGroupOUI & ","
    strGroup = "CN=" & strGroupI & ","
 
    '  Bind to Active Directory and get LDAP name
@@ -525,18 +479,39 @@ Private Sub AddGrpMem(strGroupI,strMemberI,VERBOSE)
    strDNSDomain = objRootLDAP.Get("DefaultNamingContext")
 
    ' Add (str)User to (str)Group
-   ON Error Resume Next
+   blnBound = False
    Set objUser = GetObject("LDAP://"& strUser & strUserOU & strDNSDomain)
    Set objGroup = GetObject("LDAP://"& strGroup & strGroupOU & strDNSDomain)
-   objGroup.add(objUser.ADsPath) 
-   IF (Err.Number <> 0) Then
+   If (Err.Number <> 0) Then
       on Error Goto 0
-      Call Log("<font color=orange>Member " & strMemberI & " already exists? (Skipped)<br>")
-   ELSE
-      if VERBOSE Then
-        Call Log("<font color=green>Member " & strmemberI & " added to " & strGroupI & "<br>")
+      ' Try  again converting NT Name to DN.
+      On Error Resume Next
+      objTrans.Set ADS_NAME_TYPE_NT4, strNetBIOSDomain & "\" & strGroupI
+      If (Err.Number <> 0) Then
+          On Error GoTo 0
+          Call Log("<font color=red>Unable to bind to group " & strGroupI & "<br>")
+          exitCode = 8
+      Else
+          On Error GoTo 0
+          strGroupDN = objTrans.Get(ADS_NAME_TYPE_1779)
+          Set objGroup = GetObject("LDAP://" & strGroupDN)
+          blnBound = True
+      End If
+   Else
+      On Error GoTo 0
+      blnBound = True
+   End If
+   If (blnBound = True) Then
+      On Error Resume Next
+      objGroup.Add(objUser.AdsPath)
+      If (Err.Number <> 0) Then
+          On Error GoTo 0
+          Call Log("<font color=orange>User " & strmemberI & " already added to group " & strGroupI  & "? (skipped)<br>")
+      Else
+          Call Log("<font color=green>Member " & strmemberI & " added to " & strGroupI & "<br>")
       End If
    End If
+   On Error GoTo 0
 End Sub
 
 
@@ -597,11 +572,9 @@ private Sub CreateFTPOnlyFolders(strUserName, VERBOSE)
 
   orgLogFileIndent = logFileIndent
   logFileIndent = logFileIndent & "    "
-  strSharedDirectory = strDriveName & ":\Projects\"
   
   Call Log("Create FTP Folders" & "<br>")
   Call Log("  User Name     : " & strUserName & "<br>")
-  Call Log("  Group Name    : " & strGroupName & "<br>")
   Call Log("<br>")
 
   If Len(strUserName) > 0 Then

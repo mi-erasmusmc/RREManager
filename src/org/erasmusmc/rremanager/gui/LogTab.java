@@ -125,11 +125,11 @@ public class LogTab extends MainFrameTab {
 		}
 
 		logListTablePanel = new JPanel(new BorderLayout());
-		logListTablePanel.setMinimumSize(new Dimension(100, 400));
-		logListTablePanel.setMaximumSize(new Dimension(10000, 400));
-		logListTablePanel.setPreferredSize(new Dimension(100, 400));
+		//logListTablePanel.setMinimumSize(new Dimension(100, 400));
+		//logListTablePanel.setMaximumSize(new Dimension(10000, 400));
+		//logListTablePanel.setPreferredSize(new Dimension(100, 400));
 		logTable = getLogTable();
-		logTableScrollPane = new JScrollPane(logTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		logTableScrollPane = new JScrollPane(logTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		logListTablePanel.add(logTableScrollPane, BorderLayout.CENTER);
 		logListPanel.add(logListTablePanel, BorderLayout.NORTH);
 		logListPanel.validate();
@@ -174,7 +174,7 @@ public class LogTab extends MainFrameTab {
                 return tip;
             }
         };
-        logTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        logTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
 		DefaultTableCellRenderer rightAlignmentRenderer = new DefaultTableCellRenderer();
 		rightAlignmentRenderer.setHorizontalAlignment(JLabel.RIGHT);
@@ -201,94 +201,80 @@ public class LogTab extends MainFrameTab {
 		
 		// Date
 		logTable.getColumnModel().getColumn(LogData.DATE).setMinWidth(75);
-		logTable.getColumnModel().getColumn(LogData.DATE).setMaxWidth(75);
 		logTable.getColumnModel().getColumn(LogData.DATE).setPreferredWidth(75);
 		
 		// Time
 		logTable.getColumnModel().getColumn(LogData.TIME).setMinWidth(60);
-		logTable.getColumnModel().getColumn(LogData.TIME).setMaxWidth(60);
 		logTable.getColumnModel().getColumn(LogData.TIME).setPreferredWidth(60);
 		
+		// Version
+		logTable.getColumnModel().getColumn(LogData.VERSION).setMinWidth(60);
+		logTable.getColumnModel().getColumn(LogData.VERSION).setPreferredWidth(60);
+		
 		// Administrator
-		logTable.getColumnModel().getColumn(LogData.ADMINISTRATOR).setMinWidth(120);
-		logTable.getColumnModel().getColumn(LogData.ADMINISTRATOR).setMaxWidth(200);
-		logTable.getColumnModel().getColumn(LogData.ADMINISTRATOR).setPreferredWidth(120);
+		logTable.getColumnModel().getColumn(LogData.ADMINISTRATOR).setMinWidth(150);
+		logTable.getColumnModel().getColumn(LogData.ADMINISTRATOR).setPreferredWidth(150);
 		
 		// Action
-		logTable.getColumnModel().getColumn(LogData.ACTION).setMinWidth(140);
-		logTable.getColumnModel().getColumn(LogData.ACTION).setMaxWidth(300);
-		logTable.getColumnModel().getColumn(LogData.ACTION).setPreferredWidth(140);
+		logTable.getColumnModel().getColumn(LogData.ACTION).setMinWidth(225);
+		logTable.getColumnModel().getColumn(LogData.ACTION).setPreferredWidth(225);
 		
 		// Recipient
-		logTable.getColumnModel().getColumn(LogData.RECIPIENT).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.RECIPIENT).setMaxWidth(300);
-		logTable.getColumnModel().getColumn(LogData.RECIPIENT).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.RECIPIENT).setMinWidth(300);
+		logTable.getColumnModel().getColumn(LogData.RECIPIENT).setPreferredWidth(300);
 		
 		// User Name
-		logTable.getColumnModel().getColumn(LogData.USER).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.USER).setMaxWidth(150);
-		logTable.getColumnModel().getColumn(LogData.USER).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.USER).setMinWidth(100);
+		logTable.getColumnModel().getColumn(LogData.USER).setPreferredWidth(100);
 		
 		// First Name
 		logTable.getColumnModel().getColumn(LogData.FIRST_NAME).setMinWidth(75);
-		logTable.getColumnModel().getColumn(LogData.FIRST_NAME).setMaxWidth(150);
 		logTable.getColumnModel().getColumn(LogData.FIRST_NAME).setPreferredWidth(75);
 		
 		// Last Name
-		logTable.getColumnModel().getColumn(LogData.LAST_NAME).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.LAST_NAME).setMaxWidth(150);
-		logTable.getColumnModel().getColumn(LogData.LAST_NAME).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.LAST_NAME).setMinWidth(150);
+		logTable.getColumnModel().getColumn(LogData.LAST_NAME).setPreferredWidth(150);
 		
 		// BCC
-		logTable.getColumnModel().getColumn(LogData.BCC).setMinWidth(75);
-		logTable.getColumnModel().getColumn(LogData.BCC).setMaxWidth(150);
-		logTable.getColumnModel().getColumn(LogData.BCC).setPreferredWidth(75);
+		logTable.getColumnModel().getColumn(LogData.BCC).setMinWidth(150);
+		logTable.getColumnModel().getColumn(LogData.BCC).setPreferredWidth(150);
 		
 		// Password
 		logTable.getColumnModel().getColumn(LogData.PASSWORD).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.PASSWORD).setMaxWidth(100);
 		logTable.getColumnModel().getColumn(LogData.PASSWORD).setPreferredWidth(80);
 		
 		// IP-addresses
-		logTable.getColumnModel().getColumn(LogData.IP_ADDRESSES).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.IP_ADDRESSES).setMaxWidth(300);
-		logTable.getColumnModel().getColumn(LogData.IP_ADDRESSES).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.IP_ADDRESSES).setMinWidth(100);
+		logTable.getColumnModel().getColumn(LogData.IP_ADDRESSES).setPreferredWidth(100);
 		
 		// Approved
 		logTable.getColumnModel().getColumn(LogData.APPROVED).setMinWidth(60);
-		logTable.getColumnModel().getColumn(LogData.APPROVED).setMaxWidth(60);
 		logTable.getColumnModel().getColumn(LogData.APPROVED).setPreferredWidth(60);
 		
 		// Project
-		logTable.getColumnModel().getColumn(LogData.PROJECT).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.PROJECT).setMaxWidth(100);
-		logTable.getColumnModel().getColumn(LogData.PROJECT).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.PROJECT).setMinWidth(100);
+		logTable.getColumnModel().getColumn(LogData.PROJECT).setPreferredWidth(100);
 		
 		// Group
-		logTable.getColumnModel().getColumn(LogData.GROUP).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.GROUP).setMaxWidth(100);
-		logTable.getColumnModel().getColumn(LogData.GROUP).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.GROUP).setMinWidth(200);
+		logTable.getColumnModel().getColumn(LogData.GROUP).setPreferredWidth(200);
 		
 		// Result
 		logTable.getColumnModel().getColumn(LogData.RESULT).setMinWidth(70);
-		logTable.getColumnModel().getColumn(LogData.RESULT).setMaxWidth(70);
 		logTable.getColumnModel().getColumn(LogData.RESULT).setPreferredWidth(70);
-/*
+
 		// Error
-		logTable.getColumnModel().getColumn(LogData.ERROR).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.ERROR).setMaxWidth(300);
-		logTable.getColumnModel().getColumn(LogData.ERROR).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.ERROR).setMinWidth(300);
+		logTable.getColumnModel().getColumn(LogData.ERROR).setPreferredWidth(300);
 		
 		// Log File
-		logTable.getColumnModel().getColumn(LogData.LOG_FILE).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.LOG_FILE).setMaxWidth(300);
-		logTable.getColumnModel().getColumn(LogData.LOG_FILE).setPreferredWidth(80);
+		logTable.getColumnModel().getColumn(LogData.LOG_FILE).setMinWidth(300);
+		logTable.getColumnModel().getColumn(LogData.LOG_FILE).setPreferredWidth(400);
 		
 		// Attachments
-		logTable.getColumnModel().getColumn(LogData.INFO).setMinWidth(80);
-		logTable.getColumnModel().getColumn(LogData.INFO).setMaxWidth(300);
-		logTable.getColumnModel().getColumn(LogData.INFO).setPreferredWidth(80);
-*/
+		logTable.getColumnModel().getColumn(LogData.INFO).setMinWidth(300);
+		logTable.getColumnModel().getColumn(LogData.INFO).setPreferredWidth(600);
+
 		RREManager.disableWhenRunning(logTable);
 		
 		return logTable;
@@ -330,6 +316,7 @@ public class LogTab extends MainFrameTab {
 		private String[] columnNames = new String[] {
 				"Date",
 				"Time",
+				"Version",
 				"Administrator",
 				"Action",
 				"Recipient",
@@ -342,10 +329,10 @@ public class LogTab extends MainFrameTab {
 				"Approved",
 				"Project",
 				"Group",
-				"Result"/*,
+				"Result",
 				"Error",
 				"Log File",
-				"Attachments"*/
+				"Attachments"
 		};
 
 		@Override

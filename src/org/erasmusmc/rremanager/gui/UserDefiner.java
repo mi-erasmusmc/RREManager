@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
@@ -29,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.LayoutFocusTraversalPolicy;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -426,6 +426,12 @@ public class UserDefiner {
 		userDialog.add(userPanel, BorderLayout.CENTER);
 		userDialog.add(buttonPanel, BorderLayout.SOUTH);
 		
+		// Adjust tab order (skip password field)
+		ExclusionFocusTraversalPolicy focusTraversalPolicy = new ExclusionFocusTraversalPolicy();
+		focusTraversalPolicy.addExcludedComponent(passwordField);
+		userDialog.setFocusTraversalPolicy(focusTraversalPolicy);
+		userDialog.setFocusTraversalPolicyProvider(true);
+		
 		userDialog.pack();
 		userDialog.setLocationRelativeTo(parentFrame);
 		
@@ -466,6 +472,27 @@ public class UserDefiner {
 		}
 		
 		return isEmailAddress;
+	}
+	
+	
+	private class ExclusionFocusTraversalPolicy extends LayoutFocusTraversalPolicy {
+		private static final long serialVersionUID = -7927650027615855402L;
+		
+		private List<Component> excludedComponents = new ArrayList<Component>();
+		
+		@Override
+		protected boolean accept(Component aComponent) {
+			if (excludedComponents.contains(aComponent)) {
+				return false;
+			}
+			else {
+				return super.accept(aComponent);
+			}
+		}
+		
+		public void addExcludedComponent(Component component) {
+			excludedComponents.add(component);
+		}
 	}
 	
 	
