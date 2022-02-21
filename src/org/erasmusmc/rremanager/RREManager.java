@@ -24,6 +24,7 @@ import org.erasmusmc.rremanager.gui.MainFrame;
 import org.erasmusmc.rremanager.gui.ProjectDefiner;
 import org.erasmusmc.rremanager.gui.UserDefiner;
 import org.erasmusmc.rremanager.gui.PasswordManager;
+import org.erasmusmc.rremanager.smtp.Mail;
 import org.erasmusmc.rremanager.smtp.SMTPMailClient;
 
 public class RREManager {
@@ -43,7 +44,7 @@ public class RREManager {
 	private AdministratorManager administratorSelector;
 	private PasswordManager passwordManager;
 	private IPAddressSelector ipAddressSelector;
-	private EmailEditor emailReviewer;
+	private EmailEditor emailEditor;
 	private SMTPMailClient mailClient = null;
 	private ProjectDefiner projectDefiner = null;
 	private UserDefiner userDefiner = null;
@@ -100,7 +101,7 @@ public class RREManager {
 					mainFrame.setTitle(administrator);
 					passwordManager = new PasswordManager(mainFrame.getFrame());
 					ipAddressSelector = new IPAddressSelector(mainFrame.getFrame());
-					emailReviewer = new EmailEditor(mainFrame.getFrame());
+					emailEditor = new EmailEditor(mainFrame.getFrame());
 					projectDefiner = new ProjectDefiner(mainFrame.getFrame());
 					userDefiner = new UserDefiner(mainFrame.getFrame());
 					administratorDefiner = new AdministratorDefiner(mainFrame.getFrame());
@@ -154,9 +155,6 @@ public class RREManager {
 				String[] user = userData.getUser(userNr);
 				if (user != null) {
 					mainFrame.logLn("");
-					String userAccountName = user[UserData.INITIALS].length() > 0 ? user[UserData.INITIALS].substring(0, 1) : "";
-					userAccountName += user[UserData.LAST_NAME];
-					userAccountName = userAccountName.toLowerCase();
 					if (user[UserData.ACCESS].equals("FTP-Only")) { // FTP-Only user
 						String messageType = "FTP-Only Account Mail";
 						if (getIniFile().hasGroup(messageType)) {							
@@ -453,6 +451,12 @@ public class RREManager {
 	
 	
 	public void sendOtherMail(String messageType, int[] selectedUsers, UserData userData) {
+		List<String[]> recipients = new ArrayList<String[]>();
+		for (int userNr : selectedUsers) {
+			recipients.add(userData.getUser(userNr));
+		}
+		new Mail(this, mainFrame, messageType, recipients);
+		/* TODO
 		if (getIniFile().hasGroup(messageType)) {
 			if (!getIniFile().hasVariable(messageType, "Text_1")) {
 				mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
@@ -518,13 +522,14 @@ public class RREManager {
 			mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
 			JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message definition for " + messageType, "No message", JOptionPane.ERROR_MESSAGE);
 		}
+		*/
 	}
 	
 	
 	private boolean getMailClient() {
 		boolean mailClientSet = false;
 		mailClient = null;
-		String password = passwordManager.getPassword(administrator);
+		String password = passwordManager.getPassword("EMail Password", administrator);
 		if (password != null) {
 			mailClient = new SMTPMailClient(
 					getIniFile().getValue("SMTP Mail Server","Server"), 
@@ -763,15 +768,15 @@ public class RREManager {
 	
 	private boolean approveEmail(String emailText, String[] user, String subject, boolean editable) {
 		boolean approved = false;
-		emailReviewer.editEmail(emailText, user[UserData.EMAIL_FORMAT], user, subject, editable);
-		if (!emailReviewer.isApproved()) {
+		emailEditor.editEmailOld(emailText, user[UserData.EMAIL_FORMAT], user, subject, editable);
+		if (!emailEditor.isApproved()) {
 			approvedEmailText = null;
 			approvedSubject = null;
 			mailClient.setError("Rejected by user.");
 		}
 		else {
-			approvedEmailText = emailReviewer.getApprovedText();
-			approvedSubject = emailReviewer.getApprovedSubject();
+			approvedEmailText = emailEditor.getApprovedText();
+			approvedSubject = emailEditor.getApprovedSubject();
 			approved = true;
 		}
 		return approved;
@@ -821,6 +826,16 @@ public class RREManager {
 	
 	public AdministratorDefiner getAdministratorDefiner() {
 		return administratorDefiner;
+	}
+	
+	
+	public PasswordManager getPasswordManager() {
+		return passwordManager;
+	}
+	
+	
+	public EmailEditor getEmailEditor() {
+		return emailEditor;
 	}
 	
 

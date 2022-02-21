@@ -34,6 +34,7 @@ import javax.swing.table.TableRowSorter;
 
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.files.UserData;
+import org.erasmusmc.rremanager.smtp.Mail;
 
 public class UsersTab extends MainFrameTab {
 	private static final long serialVersionUID = 8108196841438054711L;
@@ -268,6 +269,7 @@ public class UsersTab extends MainFrameTab {
 				String messageType = (String) messageTypeComboBox.getSelectedItem();
 				if (!messageType.equals("")) {
 					RREManager.disableComponents();
+					/* TODO
 					if (messageType.equals("Account Mail")) {
 						rreManager.sendAccountInformation(selectedUsers, userData);
 					}
@@ -283,6 +285,15 @@ public class UsersTab extends MainFrameTab {
 					else {
 						rreManager.sendOtherMail(messageType, selectedUsers, userData);
 					}
+					*/
+					List<String[]> selectedUsersData = new ArrayList<String[]>();
+					for (int userNr : selectedUsers) {
+						String[] user = userData.getUser(userNr);
+						if (user != null) {
+							selectedUsersData.add(user);
+						}
+					}
+					new Mail(rreManager, mainFrame, messageType, selectedUsersData);
 					RREManager.enableComponents();
 					mainFrame.refreshLog();
 				}

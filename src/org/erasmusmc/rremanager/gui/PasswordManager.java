@@ -23,10 +23,10 @@ public class PasswordManager {
 	}
 	
 	
-	public String getPassword(String userName) {
+	public String getPassword(String passwordType, String userName) {
 		Dimension dimension = new Dimension(250, 100);
 		JDialog passwordDialog = new JDialog(parentFrame, true);
-		passwordDialog.setTitle("Password for " + userName);
+		passwordDialog.setTitle(passwordType + " for " + userName);
 		passwordDialog.setLayout(new BorderLayout());
 		passwordDialog.setMinimumSize(dimension);
 		passwordDialog.setMaximumSize(dimension);
