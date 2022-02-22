@@ -37,7 +37,6 @@ public class WriteTextFile {
 				bufferedWriter.flush();
 				bufferedWriter.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

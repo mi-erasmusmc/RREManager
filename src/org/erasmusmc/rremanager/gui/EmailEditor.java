@@ -47,7 +47,10 @@ public class EmailEditor {
 	private String approvedSubject = null;
 	private String orgSubject = null;
 	private String orgEmailText = null;
+	Map<JTextComponent, String> fieldVariableMap = new HashMap<JTextComponent, String>();
+	Map<String, JTextComponent> variableFieldMap = new HashMap<String, JTextComponent>();
 	private Map<String, String> additionalInfo = new HashMap<String, String>();
+	private Map<String, Boolean> valueSet = null;
 	
 	
 	public EmailEditor(JFrame parentFrame) {
@@ -70,6 +73,7 @@ public class EmailEditor {
 		approvedText = null;
 		orgSubject = subject;
 		orgEmailText = emailText;
+		valueSet = new HashMap<String, Boolean>();
 		
 		Dimension emailEditorDialogSize = new Dimension(600 + VARIABLES_PANEL_MI_WIDTH + 30, 800);
 		JDialog emailEditorDialog = new JDialog(parentFrame, true);
@@ -163,6 +167,7 @@ public class EmailEditor {
 				}
 			}
 		});
+		
 		JButton rejectButton = new JButton("Reject");
 		rejectButton.addActionListener(new ActionListener() {
 			
@@ -184,9 +189,11 @@ public class EmailEditor {
 		JPanel currentParentPanel = variablesScrollPanel;
 		JPanel nextParentPanel = null;
 		List<String> variables = findNotSetVariables(subject + emailText);
-		Map<JTextComponent, String> fieldVariableMap = new HashMap<JTextComponent, String>();
-		Map<String, JTextComponent> variableFieldMap = new HashMap<String, JTextComponent>();
+		fieldVariableMap = new HashMap<JTextComponent, String>();
+		variableFieldMap = new HashMap<String, JTextComponent>();
+		approveButton.setEnabled(variables.size() == 0);
 		for (String variable : variables) {
+			valueSet.put(variable, false);
 			if (!additionalInfo.containsKey(variable)) {
 				additionalInfo.put(variable, null);
 			}
@@ -225,10 +232,6 @@ public class EmailEditor {
 			}
 			else {
 				variableValueField = new JTextField(50);
-				String value = additionalInfo.get(variable); 
-				if (value != null) {
-					variableValueField.setText(value);
-				}
 				variableValueField.setMinimumSize(new Dimension(VARIABLES_PANEL_MI_WIDTH - VARIABLE_LABEL_WIDTH, FIELD_HEIGHT));
 				variableValueField.setPreferredSize(new Dimension(VARIABLES_PANEL_MI_WIDTH - VARIABLE_LABEL_WIDTH, FIELD_HEIGHT));
 				
@@ -263,18 +266,37 @@ public class EmailEditor {
 	                if (text.length() == 0) {
 	                	text = null;
 	                }
-                    if ((text != null) && variable.startsWith("M:") && emailFormat.equals("HTML")) {
-                    	String[] textSplit = text.split("\n");
-                    	text = String.join("<br>", textSplit);
-                    }
+	                if (text != null) {
+	                	valueSet.put(variable, true);
+	                    if (variable.startsWith("M:") && emailFormat.equals("HTML")) {
+	                    	String[] textSplit = text.split("\n");
+	                    	text = String.join("<br>", textSplit);
+	                    }
+	                }
+	                else {
+	                	valueSet.put(variable, false);
+	                }
                     additionalInfo.put(variable, text);
                     subjectRow.setText(replaceVariables(orgSubject, additionalInfo));
                     emailTextField.setText(replaceVariables(orgEmailText, additionalInfo));
             		if (!emailFormat.equals("TEXT")) {
 				        emailHTMLField.setText(emailTextField.getText());
             		}
+            		boolean allSet = true;
+            		for (String var : valueSet.keySet()) {
+            			allSet = allSet && valueSet.get(var);
+            			if (!allSet) {
+            				break;
+            			}
+            		}
+            		approveButton.setEnabled(allSet);
 	             }
 			});
+			
+			String value = additionalInfo.get(variable); 
+			if (value != null) {
+				variableValueField.setText(value);
+			}
 			
 			nextParentPanel = new JPanel(new BorderLayout());
 			currentParentPanel.add(variablePanel, BorderLayout.NORTH);
@@ -550,10 +572,12 @@ public class EmailEditor {
 	
 	
 	private String replaceVariables(String text, Map<String, String> variableValues) {
-		for (String variable : variableValues.keySet()) {
-			String value = variableValues.get(variable);
-			if (value != null) {
-				text = text.replaceAll("\\[" + variable + "\\]", value);
+		if (variableValues != null) {
+			for (String variable : variableValues.keySet()) {
+				String value = variableValues.get(variable);
+				if (value != null) {
+					text = text.replaceAll("\\[" + variable + "\\]", value);
+				}
 			}
 		}
 		return text;

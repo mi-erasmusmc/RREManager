@@ -109,7 +109,7 @@ public class UsersTab extends MainFrameTab {
                 }
                 
                 if (rowSorter.getViewRowCount() == 0) {
-                	// TODO
+                	// Do nothing
                 }
 
                 if (usersTable.getRowCount() > 0) {
@@ -269,23 +269,6 @@ public class UsersTab extends MainFrameTab {
 				String messageType = (String) messageTypeComboBox.getSelectedItem();
 				if (!messageType.equals("")) {
 					RREManager.disableComponents();
-					/* TODO
-					if (messageType.equals("Account Mail")) {
-						rreManager.sendAccountInformation(selectedUsers, userData);
-					}
-					else if (messageType.equals("Password Mail")) {
-						rreManager.sendPasswords(selectedUsers, userData);
-					}
-					else if (messageType.equals("Firewall Add Mail")) {
-						rreManager.sendFirewallAddRequest(selectedUsers, userData);
-					}
-					else if (messageType.equals("Firewall Remove Mail")) {
-						rreManager.sendFirewallRemoveRequest(selectedUsers, userData);
-					}
-					else {
-						rreManager.sendOtherMail(messageType, selectedUsers, userData);
-					}
-					*/
 					List<String[]> selectedUsersData = new ArrayList<String[]>();
 					for (int userNr : selectedUsers) {
 						String[] user = userData.getUser(userNr);
@@ -293,7 +276,8 @@ public class UsersTab extends MainFrameTab {
 							selectedUsersData.add(user);
 						}
 					}
-					new Mail(rreManager, mainFrame, messageType, selectedUsersData);
+					Mail mail = new Mail(rreManager, mainFrame, userData);
+					mail.send(messageType, selectedUsersData);
 					RREManager.enableComponents();
 					mainFrame.refreshLog();
 				}

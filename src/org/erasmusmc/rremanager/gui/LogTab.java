@@ -86,7 +86,7 @@ public class LogTab extends MainFrameTab {
                 }
                 
                 if (rowSorter.getViewRowCount() == 0) {
-                	// TODO
+                	// Do nothing
                 }
 
                 if (logTable.getRowCount() > 0) {
