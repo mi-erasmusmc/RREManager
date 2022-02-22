@@ -686,6 +686,7 @@ public class MainFrame {
 			}
 			else if (logEntry.isAddUserLogEntry()) {
 				String userName = ((AddUserLogEntry) logEntry).getUserName();
+				ScriptUtilities.saveFileZillaXMLFile(userName);
 				String[] user = userData.getUser(userName);
 				if (user != null) {
 					action = "Add User";

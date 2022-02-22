@@ -220,7 +220,7 @@ public class UsersTab extends MainFrameTab {
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setMinWidth(60);
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setMaxWidth(60);
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setPreferredWidth(60);
-*/		
+*/
 		RREManager.disableWhenRunning(usersTable);		
 
 		JScrollPane usersListScrollPane = new JScrollPane(usersTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

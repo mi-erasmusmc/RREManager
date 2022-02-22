@@ -16,20 +16,21 @@ import org.erasmusmc.rremanager.changelog.ModifyUserLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
 
 public class UserData {
-	public static int FIRST_NAME   =  0;
-	public static int INITIALS     =  1;
-	public static int LAST_NAME    =  2;
-	public static int USER_NAME    =  3;
-	public static int PASSWORD     =  4;
-	public static int EMAIL        =  5;
-	public static int EMAIL_FORMAT =  6;
-	public static int ACCESS       =  7;
-	public static int MULTIOTP     =  8;
-	public static int PROJECTS     =  9;
-	public static int GROUPS       = 10;
-	public static int IP_ADDRESSES = 11;
-	public static int MULTIOTP_PDF = 12;
-	public static int OBJECT_SIZE  = 13;
+	public static int FIRST_NAME    =  0;
+	public static int INITIALS      =  1;
+	public static int LAST_NAME     =  2;
+	public static int USER_NAME     =  3;
+	public static int PASSWORD      =  4;
+	public static int EMAIL         =  5;
+	public static int EMAIL_FORMAT  =  6;
+	public static int ACCESS        =  7;
+	public static int MULTIOTP      =  8;
+	public static int PROJECTS      =  9;
+	public static int GROUPS        = 10;
+	public static int IP_ADDRESSES  = 11;
+	public static int MULTIOTP_PDF  = 12;
+	public static int FILEZILLA_XML = 13;
+	public static int OBJECT_SIZE   = 14;
 	
 	public static String[] fieldName = new String[] {
 			"First name",
@@ -44,7 +45,8 @@ public class UserData {
 			"Projects",
 			"Project groups",
 			"IP Adresses",
-			"MultiOTP PDF"
+			"MultiOTP PDF",
+			"FileZilla XML"
 	};
 	
 
@@ -148,11 +150,13 @@ public class UserData {
 						
 						String access = "FTP-Only";
 						String multiOTPPDFName = "";
+						String fileZillaXMLName = "";
 						if ((groups != null) && (!groups.trim().equals(""))) {
 							access = "RDP";
 							multiOTP = "No";
 							if (!userName.equals("")) {
-								multiOTPPDFName = RREManager.getIniFile().getValue("MultiOTP","PDFFolder") + File.separator + userName + ".pdf";
+								multiOTPPDFName = RREManager.getIniFile().getValue("MultiOTP", "PDFFolder") + File.separator + userName + ".pdf";
+								fileZillaXMLName = RREManager.getIniFile().getValue("FileZilla", "XMLFolder") + File.separator + "FileZilla " + userName + ".xml";
 								File multiOTPPDFFile = new File(multiOTPPDFName);
 								if (multiOTPPDFFile.exists() && multiOTPPDFFile.canRead()) {
 									multiOTP = "Yes";
@@ -161,19 +165,20 @@ public class UserData {
 						}
 						
 						String[] record = new String[OBJECT_SIZE];
-						record[FIRST_NAME]   = firstName == null ? "" : firstName.trim();
-						record[INITIALS]     = initials  == null ? "" : initials.trim();
-						record[LAST_NAME]    = lastName  == null ? "" : lastName.trim();
-						record[USER_NAME]    = userName;
-						record[PASSWORD]     = password  == null ? "" : password.trim();
-						record[EMAIL]        = email     == null ? "" : email.trim();
-						record[EMAIL_FORMAT] = format    == null ? "" : format.trim().toUpperCase();
-						record[ACCESS]       = access;
-						record[MULTIOTP]     = multiOTP;
-						record[PROJECTS]     = projects  == null ? "" : projects.trim();
-						record[GROUPS]       = groups    == null ? "" : groups.trim();
-						record[IP_ADDRESSES] = ipAddresses;
-						record[MULTIOTP_PDF] = multiOTPPDFName;
+						record[FIRST_NAME]    = firstName == null ? "" : firstName.trim();
+						record[INITIALS]      = initials  == null ? "" : initials.trim();
+						record[LAST_NAME]     = lastName  == null ? "" : lastName.trim();
+						record[USER_NAME]     = userName;
+						record[PASSWORD]      = password  == null ? "" : password.trim();
+						record[EMAIL]         = email     == null ? "" : email.trim();
+						record[EMAIL_FORMAT]  = format    == null ? "" : format.trim().toUpperCase();
+						record[ACCESS]        = access;
+						record[MULTIOTP]      = multiOTP;
+						record[PROJECTS]      = projects  == null ? "" : projects.trim();
+						record[GROUPS]        = groups    == null ? "" : groups.trim();
+						record[IP_ADDRESSES]  = ipAddresses;
+						record[MULTIOTP_PDF]  = multiOTPPDFName;
+						record[FILEZILLA_XML] = fileZillaXMLName;
 						
 						users.add(record);
 						
@@ -313,15 +318,6 @@ public class UserData {
 									Cell emailFormatCell = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Email Format Column")));
 									Cell ipAdressesCell  = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column")));
 									
-									if (projectsCell    == null) projectsCell    = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Projects Column")));
-									if (groupsCell      == null) groupsCell      = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Groups Column")));
-									if (firstNameCell   == null) firstNameCell   = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"First Name Column")));
-									if (initialsCell    == null) initialsCell    = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Initials Column")));
-									if (lastNameCell    == null) lastNameCell    = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Last Name Column")));
-									if (emailCell       == null) emailCell       = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Email Column")));
-									if (emailFormatCell == null) emailFormatCell = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Email Format Column")));
-									if (ipAdressesCell  == null) ipAdressesCell  = row.createCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column")));
-									
 									projectsCell.setCellValue(modifiedUser[PROJECTS]);
 									groupsCell.setCellValue(modifiedUser[GROUPS]);
 									firstNameCell.setCellValue(modifiedUser[FIRST_NAME]);
@@ -332,8 +328,12 @@ public class UserData {
 									ipAdressesCell.setCellValue(modifiedUser[IP_ADDRESSES]);
 
 									if (usersFile.write()) {
-										RREManager.changeLog.addLogEntry(new ModifyUserLogEntry(user[USER_NAME]));
-										getData();
+										if (
+												(!user[PROJECTS].equals(modifiedUser[PROJECTS])) ||
+												(!user[GROUPS].equals(modifiedUser[GROUPS]))
+											) {
+											RREManager.changeLog.addLogEntry(new ModifyUserLogEntry(user[USER_NAME]));
+										}
 										success = true;
 									}
 									else {
@@ -344,6 +344,7 @@ public class UserData {
 								}
 							}
 							usersFile.close();
+							getData();
 						}
 						else {
 							error = "ERROR sheet '" + sheetName + "' not found in users file '" + usersFileName + "'";

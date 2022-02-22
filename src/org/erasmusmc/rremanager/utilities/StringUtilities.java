@@ -116,5 +116,28 @@ public class StringUtilities {
 		}
 		return buffer.toString();
 	}
+	
+	
+	public static String replaceAllTags(String string, String tag, String replaceBy) {
+		String newString = "";
+		int tagIndex = string.indexOf(tag);
+		while (tagIndex != -1) {
+			newString += string.substring(0, tagIndex) + replaceBy;
+			string = string.substring(tagIndex + tag.length());
+			tagIndex = string.indexOf(tag);
+		}
+		newString += string;
+		return newString;
+	}
+	
+	
+	public static String replaceSpecialCharacters(String line) {
+		line.replaceAll("\"", "&quot;");
+		line.replaceAll("&", "&amp;");
+		line.replaceAll("/", "&sol;");
+		line.replaceAll("<", "&lt;");
+		line.replaceAll(">", "&gt;");
+		return line;
+	}
 
 }

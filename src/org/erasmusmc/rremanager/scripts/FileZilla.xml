@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileZilla3 version="3.57.0" platform="windows">
+	<Servers>
+		<Server>
+			<Host>rre.erasmusmc.nl</Host>
+			<Port>22</Port>
+			<Protocol>1</Protocol>
+			<Type>0</Type>
+			<User>[USER NAME]</User>
+			<Logontype>2</Logontype>
+			<EncodingType>Auto</EncodingType>
+			<BypassProxy>0</BypassProxy>
+			<Name>RRE</Name>
+			<SyncBrowsing>0</SyncBrowsing>
+			<DirectoryComparison>0</DirectoryComparison>
+		</Server>
+	</Servers>
+</FileZilla3>

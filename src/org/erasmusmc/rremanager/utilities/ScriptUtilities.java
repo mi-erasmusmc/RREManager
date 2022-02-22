@@ -44,6 +44,32 @@ public class ScriptUtilities {
 			}
 		}
 	}
+	
+	
+	public static void saveFileZillaXMLFile(String userName) {
+		String scriptFileName = RREManager.getIniFile().getValue("FileZilla", "XMLFolder") + File.separator + "FileZilla " + userName + ".xml";
+
+		InputStream resourceStream = null;
+		resourceStream = RREManager.class.getResourceAsStream("scripts/FileZilla.xml");
+
+		try {
+			BufferedReader scriptReader = new BufferedReader(new InputStreamReader(resourceStream));
+			PrintWriter scriptWriter = new PrintWriter(scriptFileName);
+
+			String line = scriptReader.readLine();
+			while (line != null) {
+				line = StringUtilities.replaceAllTags(line, "[USER NAME]", userName);
+				scriptWriter.println(line);
+				line = scriptReader.readLine();
+			}
+			scriptReader.close();
+			scriptWriter.close();
+		} catch (FileNotFoundException e) {
+			scriptFileName = null;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 
 	private static boolean callVisualBasicScript(String script, List<String> arguments) {

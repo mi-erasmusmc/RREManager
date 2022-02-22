@@ -14,6 +14,7 @@ import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.files.UserData;
 import org.erasmusmc.rremanager.gui.EmailEditor;
 import org.erasmusmc.rremanager.gui.MainFrame;
+import org.erasmusmc.rremanager.utilities.StringUtilities;
 
 public class Mail {
 	private RREManager rreManager = null;
@@ -92,6 +93,7 @@ public class Mail {
 					}
 					else {
 						List<String> attachments = new ArrayList<String>();
+						attachments.add(recipient[UserData.FILEZILLA_XML]);
 						attachments.addAll(getAttachments(messageType));
 						
 						String emailText = getEmailText(messageType, recipient);
@@ -123,6 +125,7 @@ public class Mail {
 						if (!recipient[UserData.MULTIOTP_PDF].equals("")) {
 							List<String> attachments = new ArrayList<String>();
 							attachments.add(recipient[UserData.MULTIOTP_PDF]);
+							attachments.add(recipient[UserData.FILEZILLA_XML]);
 							attachments.addAll(getAttachments(messageType));
 							
 							String emailText = getEmailText(messageType, recipient);
@@ -649,46 +652,23 @@ public class Mail {
 						else {
 							title = "";
 						}
-						line = replaceAllTags(line, "[ADMINISTRATOR TITLE]", title);
+						line = StringUtilities.replaceAllTags(line, "[ADMINISTRATOR TITLE]", title);
 					}
-					line = replaceAllTags(line, "[BOLD START]", recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "<b>" : "");
-					line = replaceAllTags(line, "[BOLD END]", recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "</b>" : "");
-					line = replaceAllTags(line, "[ITALIC START]", recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "<i>" : "");
-					line = replaceAllTags(line, "[ITALIC END]", recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "</i>" : "");
-					line = replaceAllTags(line, "[FIRST NAME]", recipient[UserData.FIRST_NAME]);
-					line = replaceAllTags(line, "[LAST NAME]", recipient[UserData.LAST_NAME]);
-					line = replaceAllTags(line, "[USER NAME]", recipient[UserData.USER_NAME]);
-					line = replaceAllTags(line, "[PASSWORD]", recipient[UserData.PASSWORD]);
-					line = replaceAllTags(line, "[ADMINISTRATOR]", rreManager.getAdministrator());
-					line = replaceSpecialCharacters(line);
+					line = StringUtilities.replaceAllTags(line, "[BOLD START]", recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "<b>" : "");
+					line = StringUtilities.replaceAllTags(line, "[BOLD END]", recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "</b>" : "");
+					line = StringUtilities.replaceAllTags(line, "[ITALIC START]", recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "<i>" : "");
+					line = StringUtilities.replaceAllTags(line, "[ITALIC END]", recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "</i>" : "");
+					line = StringUtilities.replaceAllTags(line, "[FIRST NAME]", recipient[UserData.FIRST_NAME]);
+					line = StringUtilities.replaceAllTags(line, "[LAST NAME]", recipient[UserData.LAST_NAME]);
+					line = StringUtilities.replaceAllTags(line, "[USER NAME]", recipient[UserData.USER_NAME]);
+					line = StringUtilities.replaceAllTags(line, "[PASSWORD]", recipient[UserData.PASSWORD]);
+					line = StringUtilities.replaceAllTags(line, "[ADMINISTRATOR]", rreManager.getAdministrator());
+					line = StringUtilities.replaceSpecialCharacters(line);
 					email += indent + line + (recipient[UserData.EMAIL_FORMAT].equals("HTML") ? "<br>" : "") + "\r\n";
 				}
 			}
 			lineNr++;
 		} while (line != null);
 		return email;
-	}
-	
-	
-	private String replaceAllTags(String string, String tag, String replaceBy) {
-		String newString = "";
-		int tagIndex = string.indexOf(tag);
-		while (tagIndex != -1) {
-			newString += string.substring(0, tagIndex) + replaceBy;
-			string = string.substring(tagIndex + tag.length());
-			tagIndex = string.indexOf(tag);
-		}
-		newString += string;
-		return newString;
-	}
-	
-	
-	private String replaceSpecialCharacters(String line) {
-		line.replaceAll("\"", "&quot;");
-		line.replaceAll("&", "&amp;");
-		line.replaceAll("/", "&sol;");
-		line.replaceAll("<", "&lt;");
-		line.replaceAll(">", "&gt;");
-		return line;
 	}
 }
