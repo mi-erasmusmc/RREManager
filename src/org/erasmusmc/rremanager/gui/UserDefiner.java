@@ -75,12 +75,12 @@ public class UserDefiner {
 		String[] characterSets = new String[CHARSETS];
 		characterSets[UPPERCASE] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		characterSets[LOWERCASE] = "abcdefghijklmnopqrstuvwxyz";
-		characterSets[SPECIAL]   = "~!@#$%^&*+-_:;";
+		characterSets[SPECIAL]   = "!@#$%&";
 		
 		int[] lengths = new int[CHARSETS];
-		lengths[UPPERCASE] = 4;
-		lengths[LOWERCASE] = 4;
-		lengths[SPECIAL]   = 4;
+		lengths[UPPERCASE] = 5;
+		lengths[LOWERCASE] = 5;
+		lengths[SPECIAL]   = 2;
 		
 		Random random = new Random();
 		List<String> characters = new ArrayList<String>();

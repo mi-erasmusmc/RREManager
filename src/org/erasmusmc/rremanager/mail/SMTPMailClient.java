@@ -1,4 +1,4 @@
-package org.erasmusmc.rremanager.smtp;
+package org.erasmusmc.rremanager.mail;
 
 import java.io.File;
 import java.util.List;

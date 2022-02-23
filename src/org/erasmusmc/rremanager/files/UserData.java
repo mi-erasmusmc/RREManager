@@ -150,13 +150,12 @@ public class UserData {
 						
 						String access = "FTP-Only";
 						String multiOTPPDFName = "";
-						String fileZillaXMLName = "";
+						String fileZillaXMLName = RREManager.getIniFile().getValue("FileZilla", "XMLFolder") + File.separator + "FileZilla " + userName + ".xml";
 						if ((groups != null) && (!groups.trim().equals(""))) {
 							access = "RDP";
 							multiOTP = "No";
 							if (!userName.equals("")) {
 								multiOTPPDFName = RREManager.getIniFile().getValue("MultiOTP", "PDFFolder") + File.separator + userName + ".pdf";
-								fileZillaXMLName = RREManager.getIniFile().getValue("FileZilla", "XMLFolder") + File.separator + "FileZilla " + userName + ".xml";
 								File multiOTPPDFFile = new File(multiOTPPDFName);
 								if (multiOTPPDFFile.exists() && multiOTPPDFFile.canRead()) {
 									multiOTP = "Yes";

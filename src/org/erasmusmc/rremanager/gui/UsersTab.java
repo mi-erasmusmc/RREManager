@@ -34,7 +34,7 @@ import javax.swing.table.TableRowSorter;
 
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.files.UserData;
-import org.erasmusmc.rremanager.smtp.Mail;
+import org.erasmusmc.rremanager.mail.Mail;
 
 public class UsersTab extends MainFrameTab {
 	private static final long serialVersionUID = 8108196841438054711L;
