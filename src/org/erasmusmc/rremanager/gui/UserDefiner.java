@@ -369,10 +369,10 @@ public class UserDefiner {
 				if (firstNameField.getText().trim().equals("")) {
 					JOptionPane.showMessageDialog(parentFrame, "No first name specified!", "user Error", JOptionPane.ERROR_MESSAGE);
 				}
-				else if (lastNameField.getText().trim().equals("")) {
+				else if (lastNameField.getText().trim().equals("") && (projectData != null)) { // Not for Specials
 					JOptionPane.showMessageDialog(parentFrame, "No last name specified!", "user Error", JOptionPane.ERROR_MESSAGE);
 				}
-				else if (initialsField.getText().trim().equals("")) {
+				else if (initialsField.getText().trim().equals("") && (projectData != null)) { // Not for Specials
 					JOptionPane.showMessageDialog(parentFrame, "No initials specified!", "user Error", JOptionPane.ERROR_MESSAGE);
 				}
 				else if (userNameField.getText().trim().equals("")) {
@@ -543,10 +543,18 @@ public class UserDefiner {
 		groupsPanel.add(groupsPanelLabel, BorderLayout.NORTH);
 		groupsPanel.add(groupsScrollPane, BorderLayout.CENTER);
 
-		groupsScrollPane.setEnabled(!ftpOnlyField.isSelected());
-		groupsList.setEnabled(!ftpOnlyField.isSelected());
-		addButton.setEnabled(!ftpOnlyField.isSelected());
-		removeButton.setEnabled(!ftpOnlyField.isSelected());
+		if (projectData != null) { // Normal user
+			groupsScrollPane.setEnabled(!ftpOnlyField.isSelected());
+			groupsList.setEnabled(!ftpOnlyField.isSelected());
+			addButton.setEnabled(!ftpOnlyField.isSelected());
+			removeButton.setEnabled(!ftpOnlyField.isSelected());
+		}
+		else { // Special
+			groupsScrollPane.setEnabled(false);
+			groupsList.setEnabled(false);
+			addButton.setEnabled(false);
+			removeButton.setEnabled(false);
+		}
 		
 		groupsPanel.validate();
 	}

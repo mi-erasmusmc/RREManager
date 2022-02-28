@@ -319,10 +319,8 @@ public class UsersTab extends MainFrameTab {
 		
 		userManagementPanel.add(editUserButton);
 		userManagementPanel.add(addUserButton);
-		
-		if (!settingsGroup.equals("Specials")) {
-			actionsPanel.add(userManagementPanel);
-		}
+
+		actionsPanel.add(userManagementPanel);
 
         JPanel usersLogPanel = new JPanel(new BorderLayout());
 		usersLogPanel.add(usersListPanel, BorderLayout.WEST);
@@ -398,7 +396,7 @@ public class UsersTab extends MainFrameTab {
 			for (int i = 0; i < user.length; i++) {
 				modifiedUser[i] = user[i];
 			}
-			modifiedUser = rreManager.getUserDefiner().getUser(modifiedUser, mainFrame.getProjectsTab().getProjectData());
+			modifiedUser = rreManager.getUserDefiner().getUser(modifiedUser, settingsGroup.equals("Specials") ? null : mainFrame.getProjectsTab().getProjectData());
 			if (modifiedUser != null) {
 				userData.modifyUser(user, modifiedUser);
 				update();
@@ -408,7 +406,7 @@ public class UsersTab extends MainFrameTab {
 	
 	
 	private void addUser() {
-		String[] user = rreManager.getUserDefiner().getUser(null, mainFrame.getProjectsTab().getProjectData());
+		String[] user = rreManager.getUserDefiner().getUser(null, settingsGroup.equals("Specials") ? null : mainFrame.getProjectsTab().getProjectData());
 		if (user != null) {
 			userData.addUser(user);
 			update();

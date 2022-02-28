@@ -217,7 +217,9 @@ public class UserData {
 						row.put(RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column"), user[IP_ADDRESSES]);
 
 						if (usersFile.addRow(sheetName, row) && usersFile.write()) {
-							RREManager.changeLog.addLogEntry(new AddUserLogEntry(user[USER_NAME]));
+							if (!settingsGroup.equals("Specials")) {
+								RREManager.changeLog.addLogEntry(new AddUserLogEntry(user[USER_NAME]));
+							}
 							getData();
 							success = true;
 						}
@@ -246,7 +248,7 @@ public class UserData {
 			success = false;
 		}
 
-		String allTimeLogRecord = "Add User";
+		String allTimeLogRecord = "Add " + (settingsGroup.equals("Specials") ? "Special" : "User");
 		allTimeLogRecord += "," + "\"" + user[EMAIL] + "\"";
 		allTimeLogRecord += "," + "\"" + user[USER_NAME] + "\"";
 		allTimeLogRecord += "," + "\"" + user[FIRST_NAME] + "\"";
@@ -258,7 +260,7 @@ public class UserData {
 		allTimeLogRecord += "," + "\"" + user[PROJECTS] + "\"";
 		allTimeLogRecord += "," + "\"" + user[GROUPS] + "\"";
 		
-		String logLn = "Adding user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ") ";
+		String logLn = "Adding " + (settingsGroup.equals("Specials") ? "Special" : "User") + " " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ") ";
 		
 		if (success) {
 			allTimeLogRecord += "," + "Succeeded";
@@ -327,9 +329,15 @@ public class UserData {
 									ipAdressesCell.setCellValue(modifiedUser[IP_ADDRESSES]);
 
 									if (usersFile.write()) {
+										if (!settingsGroup.equals("Specials")) {
+											
+										}
 										if (
-												(!user[PROJECTS].equals(modifiedUser[PROJECTS])) ||
-												(!user[GROUPS].equals(modifiedUser[GROUPS]))
+												(!settingsGroup.equals("Specials")) &&
+												(
+														(!user[PROJECTS].equals(modifiedUser[PROJECTS])) ||
+														(!user[GROUPS].equals(modifiedUser[GROUPS]))
+												)
 											) {
 											RREManager.changeLog.addLogEntry(new ModifyUserLogEntry(user[USER_NAME]));
 										}
@@ -365,19 +373,19 @@ public class UserData {
 				success = false;
 			}
 
-			String allTimeLogRecord = "Modify User";
-			allTimeLogRecord += "," + "\"" + user[EMAIL] + "\"";
-			allTimeLogRecord += "," + "\"" + user[USER_NAME] + "\"";
-			allTimeLogRecord += "," + "\"" + user[FIRST_NAME] + "\"";
-			allTimeLogRecord += "," + "\"" + user[LAST_NAME] + "\"";
+			String allTimeLogRecord = "Modify " + (settingsGroup.equals("Specials") ? "Special" : "User");
+			allTimeLogRecord += "," + "\"" + modifiedUser[EMAIL] + "\"";
+			allTimeLogRecord += "," + "\"" + modifiedUser[USER_NAME] + "\"";
+			allTimeLogRecord += "," + "\"" + modifiedUser[FIRST_NAME] + "\"";
+			allTimeLogRecord += "," + "\"" + modifiedUser[LAST_NAME] + "\"";
 			allTimeLogRecord += ",";
-			allTimeLogRecord += "," + "\"" + user[PASSWORD] + "\"";
-			allTimeLogRecord += "," + "\"" + user[IP_ADDRESSES] + "\"";
+			allTimeLogRecord += "," + "\"" + modifiedUser[PASSWORD] + "\"";
+			allTimeLogRecord += "," + "\"" + modifiedUser[IP_ADDRESSES] + "\"";
 			allTimeLogRecord += "," + "Yes";
-			allTimeLogRecord += "," + "\"" + user[PROJECTS] + "\"";
-			allTimeLogRecord += "," + "\"" + user[GROUPS] + "\"";
+			allTimeLogRecord += "," + "\"" + modifiedUser[PROJECTS] + "\"";
+			allTimeLogRecord += "," + "\"" + modifiedUser[GROUPS] + "\"";
 			
-			String logLn = "Modifying user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ") ";
+			String logLn = "Modifying " + (settingsGroup.equals("Specials") ? "Special" : "User") + " " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ") ";
 			
 			if (success) {
 				allTimeLogRecord += "," + "Succeeded";
