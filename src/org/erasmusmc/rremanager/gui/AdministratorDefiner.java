@@ -25,6 +25,7 @@ import javax.swing.text.PlainDocument;
 
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.files.AdministratorData;
+import org.erasmusmc.rremanager.utilities.StringUtilities;
 
 public class AdministratorDefiner {
 	private static int LABELWIDTH    = 90;
@@ -37,6 +38,7 @@ public class AdministratorDefiner {
 	private JDialog administratorDialog = null;
 	private JTextField nameField = null;
 	private JTextField userNumberField = null;
+	private JTextField emailAddressField = null;
 	private JPasswordField passwordField = null;
 	private JPasswordField confirmField = null;
 	private JButton okButton = null;
@@ -56,12 +58,13 @@ public class AdministratorDefiner {
 	
 	
 	private void askAdministrator() {
-		String name       = administrator == null ? "" : administrator[AdministratorData.NAME]    == null ? "" : administrator[AdministratorData.NAME].trim();
-		String title      = administrator == null ? "" : administrator[AdministratorData.TITLE]   == null ? "" : administrator[AdministratorData.TITLE].trim();
-		String phone      = administrator == null ? "" : administrator[AdministratorData.PHONE]   == null ? "" : administrator[AdministratorData.PHONE].trim();
-		String userNumber = administrator == null ? "" : administrator[AdministratorData.ERASMUS] == null ? "" : administrator[AdministratorData.ERASMUS].trim();
+		String name         = administrator == null ? "" : administrator[AdministratorData.NAME]    == null ? "" : administrator[AdministratorData.NAME].trim();
+		String title        = administrator == null ? "" : administrator[AdministratorData.TITLE]   == null ? "" : administrator[AdministratorData.TITLE].trim();
+		String phone        = administrator == null ? "" : administrator[AdministratorData.PHONE]   == null ? "" : administrator[AdministratorData.PHONE].trim();
+		String userNumber   = administrator == null ? "" : administrator[AdministratorData.ERASMUS] == null ? "" : administrator[AdministratorData.ERASMUS].trim();
+		String emailAddress = administrator == null ? "" : administrator[AdministratorData.EMAIL]   == null ? "" : administrator[AdministratorData.EMAIL].trim();
 
-		Dimension administratorDialogSize = new Dimension(LABELWIDTH + FIELDWIDTH + 250, (6 * FIELDHEIGHT) + 90);
+		Dimension administratorDialogSize = new Dimension(LABELWIDTH + FIELDWIDTH + 250, (7 * FIELDHEIGHT) + 90);
 		administratorDialog = new JDialog(parentFrame, true);
 		administratorDialog.setTitle("Add Administrator");
 		administratorDialog.setLayout(new BorderLayout());
@@ -94,6 +97,9 @@ public class AdministratorDefiner {
 		userNumberField = new JTextField(30);
 		((PlainDocument) userNumberField.getDocument()).setDocumentFilter(new IntegerFilter());
 		userNumberField.setText(userNumber);
+		JLabel emailAddressLabel = new JLabel("Email address:");
+		emailAddressField = new JTextField();
+		emailAddressField.setText(emailAddress);
 		JLabel passwordLabel = new JLabel("Password:");
 		passwordField = new JPasswordField(30);
 		passwordField.getDocument().addDocumentListener(new NamePasswordDocumentListener());
@@ -111,6 +117,9 @@ public class AdministratorDefiner {
 				else if (userNumberLabel.getText().trim().equals("")) {
 					JOptionPane.showMessageDialog(parentFrame, "No Erasmus MC Nr specified!", "Name Error", JOptionPane.ERROR_MESSAGE);
 				}
+				else if (!StringUtilities.isEmailAddress(emailAddressField.getText().trim())) {
+					JOptionPane.showMessageDialog(parentFrame, "No valid email address specified!", "user Error", JOptionPane.ERROR_MESSAGE);
+				}
 				else if ((!String.valueOf(passwordField.getPassword()).equals("")) && (String.valueOf(passwordField.getPassword()).length() < 6)) {
 					JOptionPane.showMessageDialog(parentFrame, "Password should be 6 characters or more!", "Password Error", JOptionPane.ERROR_MESSAGE);
 				}
@@ -122,6 +131,7 @@ public class AdministratorDefiner {
 					administrator[AdministratorData.TITLE]    = titleField.getText().trim();
 					administrator[AdministratorData.PHONE]    = phoneField.getText().trim();
 					administrator[AdministratorData.ERASMUS]  = userNumberField.getText().trim();
+					administrator[AdministratorData.EMAIL]    = emailAddressField.getText().trim();
 					administrator[AdministratorData.PASSWORD] = String.valueOf(passwordField.getPassword()).equals("") ? "" : AdministratorManager.encryptPassword(String.valueOf(passwordField.getPassword()));
 					administratorDialog.dispose();
 				}
@@ -145,6 +155,7 @@ public class AdministratorDefiner {
 									.addComponent(titleLabel)
 									.addComponent(phoneLabel)
 									.addComponent(userNumberLabel)
+									.addComponent(emailAddressLabel)
 									.addComponent(passwordLabel)
 									.addComponent(confirmLabel)
 									)
@@ -153,6 +164,7 @@ public class AdministratorDefiner {
 									.addComponent(titleField)
 									.addComponent(phoneField)
 									.addComponent(userNumberField)
+									.addComponent(emailAddressField)
 									.addComponent(passwordField)
 									.addComponent(confirmField)
 									)
@@ -180,6 +192,10 @@ public class AdministratorDefiner {
 					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 							.addComponent(userNumberLabel)
 							.addComponent(userNumberField)
+							)
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(emailAddressLabel)
+							.addComponent(emailAddressField)
 							)
 					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 							.addComponent(passwordLabel)

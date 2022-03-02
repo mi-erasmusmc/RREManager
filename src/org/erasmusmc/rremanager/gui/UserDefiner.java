@@ -41,6 +41,7 @@ import javax.swing.event.ListSelectionListener;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.files.ProjectData;
 import org.erasmusmc.rremanager.files.UserData;
+import org.erasmusmc.rremanager.utilities.StringUtilities;
 
 public class UserDefiner {
 	private static int LABELWIDTH    = 90;
@@ -378,7 +379,7 @@ public class UserDefiner {
 				else if (userNameField.getText().trim().equals("")) {
 					JOptionPane.showMessageDialog(parentFrame, "No user name specified!", "user Error", JOptionPane.ERROR_MESSAGE);
 				}
-				else if (!isEmailAddress(emailAddressField.getText().trim())) {
+				else if (!StringUtilities.isEmailAddress(emailAddressField.getText().trim())) {
 					JOptionPane.showMessageDialog(parentFrame, "No valid email address specified!", "user Error", JOptionPane.ERROR_MESSAGE);
 				}
 				else {
@@ -455,23 +456,6 @@ public class UserDefiner {
 		}
 		
 		userDialog.setVisible(true);
-	}
-	
-	
-	private boolean isEmailAddress(String text) {
-		boolean isEmailAddress = true;
-		
-		if (
-				(!text.contains("@")) ||
-				(text.substring(0, text.indexOf("@")).length() == 0) ||
-				(text.length() <= (text.indexOf("@") + 2)) ||
-				(text.substring(text.indexOf("@") + 1).contains("@")) ||
-				(!text.substring(text.indexOf("@") + 2).contains("."))
-			) {
-			isEmailAddress = false;
-		}
-		
-		return isEmailAddress;
 	}
 	
 	

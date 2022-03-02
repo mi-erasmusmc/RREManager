@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
 import org.erasmusmc.rremanager.changelog.ModifyUserLogEntry;
+import org.erasmusmc.rremanager.changelog.NonScriptedChangeLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
 
 public class UserData {
@@ -220,6 +221,9 @@ public class UserData {
 							if (!settingsGroup.equals("Specials")) {
 								RREManager.changeLog.addLogEntry(new AddUserLogEntry(user[USER_NAME]));
 							}
+							else {
+								RREManager.changeLog.addLogEntry(new NonScriptedChangeLogEntry());
+							}
 							getData();
 							success = true;
 						}
@@ -329,17 +333,16 @@ public class UserData {
 									ipAdressesCell.setCellValue(modifiedUser[IP_ADDRESSES]);
 
 									if (usersFile.write()) {
-										if (!settingsGroup.equals("Specials")) {
-											
-										}
 										if (
-												(!settingsGroup.equals("Specials")) &&
 												(
 														(!user[PROJECTS].equals(modifiedUser[PROJECTS])) ||
 														(!user[GROUPS].equals(modifiedUser[GROUPS]))
 												)
 											) {
 											RREManager.changeLog.addLogEntry(new ModifyUserLogEntry(user[USER_NAME]));
+										}
+										else {
+											RREManager.changeLog.addLogEntry(new NonScriptedChangeLogEntry());
 										}
 										success = true;
 									}

@@ -333,7 +333,8 @@ public class AdministratorsTab extends MainFrameTab {
 				AdministratorData.NAME,
 				AdministratorData.TITLE,
 				AdministratorData.PHONE,
-				AdministratorData.ERASMUS
+				AdministratorData.ERASMUS,
+				AdministratorData.EMAIL
 		};
 		
 		detailsPanel.removeAll();

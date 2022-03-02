@@ -6,6 +6,7 @@ public abstract class LogEntry {
 	public static final Integer ACTION_ADD_PROJECT_GPO = 1;
 	public static final Integer ACTION_MODIFY_USER     = 2;
 	public static final Integer ACTION_ADD_USER        = 3;
+	public static final Integer ACTION_NO_SCRIPT       = 4;
 	
 	
 	protected Integer action = -1;
@@ -28,6 +29,11 @@ public abstract class LogEntry {
 	
 	public boolean isAddUserLogEntry() {
 		return action == ACTION_ADD_USER;
+	}
+	
+	
+	public boolean isNonSciptedChangeLogEntry() {
+		return action == ACTION_NO_SCRIPT;
 	}
 	
 	

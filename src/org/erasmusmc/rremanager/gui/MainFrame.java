@@ -102,26 +102,31 @@ public class MainFrame {
 		    		}
 		    		else {
 			    		if (RREManager.changeLog.hasChanges()) {
-			    			if (JOptionPane.showConfirmDialog(frame, "Do you want apply the changes to the server?", "Apply changes?", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
-				    			if (runScripts()) {
-					    			backupDataFile();
+			    			if (RREManager.changeLog.hasScriptedChanges()) {
+				    			if (JOptionPane.showConfirmDialog(frame, "Do you want apply the changes to the server?", "Apply changes?", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
+					    			if (runScripts()) {
+						    			backupDataFile();
+					    			}
+					    			else {
+					    				if (restoreDataFile(true)) {
+					    					JOptionPane.showMessageDialog(null, "Script Error!\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+					    				}
+					    				else {
+					    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+					    				}
+					    			}
 				    			}
 				    			else {
-				    				if (restoreDataFile(true)) {
-				    					JOptionPane.showMessageDialog(null, "Script Error!\nRestored original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+				    				if (restoreDataFile(false)) {
+				    					JOptionPane.showMessageDialog(null, "Restored original data file!", "RREManager Restore", JOptionPane.INFORMATION_MESSAGE);
 				    				}
 				    				else {
-				    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!\nCHECK ACTIVE DIRECTORY STATUS!", "RREManager Script Error", JOptionPane.ERROR_MESSAGE);
+				    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!", "RREManager Restore Error", JOptionPane.ERROR_MESSAGE);
 				    				}
 				    			}
 			    			}
 			    			else {
-			    				if (restoreDataFile(false)) {
-			    					JOptionPane.showMessageDialog(null, "Restored original data file!", "RREManager Restore", JOptionPane.INFORMATION_MESSAGE);
-			    				}
-			    				else {
-			    					JOptionPane.showMessageDialog(null, "Script Error!\nCould not restore original data file!", "RREManager Restore Error", JOptionPane.ERROR_MESSAGE);
-			    				}
+				    			backupDataFile();
 			    			}
 			    		}
 		    		}

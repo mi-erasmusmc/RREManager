@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.erasmusmc.rremanager.RREManager;
+import org.erasmusmc.rremanager.changelog.NonScriptedChangeLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
 
 public class AdministratorData {
@@ -11,14 +12,16 @@ public class AdministratorData {
 	public final static int TITLE       = 1;
 	public final static int PHONE       = 2;
 	public final static int ERASMUS     = 3;
-	public final static int PASSWORD    = 4;
-	public final static int OBJECT_SIZE = 5;
+	public final static int EMAIL       = 4;
+	public final static int PASSWORD    = 5;
+	public final static int OBJECT_SIZE = 6;
 	
 	public static String[] fieldName = new String[] {
 			"Name",
 			"Title",
 			"Telephone",
 			"User Account",
+			"Email Address",
 			"Password"
 	};
 	
@@ -27,7 +30,7 @@ public class AdministratorData {
 		String error = "";
 
 		String allTimeLogRecord = "Add Administrator";
-		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "\"" + administrator[AdministratorData.EMAIL] + "\"";
 		allTimeLogRecord += "," + "\"" + administrator[AdministratorData.NAME] + "\"";
 		allTimeLogRecord += ",";
 		allTimeLogRecord += ",";
@@ -43,6 +46,7 @@ public class AdministratorData {
 		error = (error.equals("") ? (iniFile.setValue("Administrators", administrator[AdministratorData.NAME], administrator[AdministratorData.PASSWORD], null) ? "" : "Error adding admininistrator to group Administrators.") : error);
 		error = (error.equals("") ? (iniFile.addGroup(administrator[AdministratorData.NAME], null) ? "" : "Error adding group for administrator in ini file.") : error);
 		error = (error.equals("") ? (iniFile.setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.ERASMUS], administrator[AdministratorData.ERASMUS], null) ? "" : "Error setting user number.") : error);
+		error = (error.equals("") ? (iniFile.setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.EMAIL], administrator[AdministratorData.EMAIL], null) ? "" : "Error setting email address.") : error);
 		error = (error.equals("") ? (iniFile.setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.TITLE], administrator[AdministratorData.TITLE], null) ? "" : "Error setting title.") : error);
 		error = (error.equals("") ? (iniFile.setValue(administrator[AdministratorData.NAME], fieldName[AdministratorData.PHONE], administrator[AdministratorData.PHONE], null) ? "" : "Error setting telephone number.") : error);
 		error = (error.equals("") ? (RREManager.getIniFile().writeFile() ? "" : "Error writing ini file.") : error);
@@ -119,9 +123,10 @@ public class AdministratorData {
 				String[] administrator = new String[OBJECT_SIZE];
 				administrator[NAME]     = administratorName;
 				administrator[PASSWORD] = administratorsGroup.get(administratorName);
-				administrator[TITLE]    = adminstratorDefinition.get("Title");
-				administrator[PHONE]    = adminstratorDefinition.get("Telephone");
-				administrator[ERASMUS]  = adminstratorDefinition.get("User Account");
+				administrator[TITLE]    = adminstratorDefinition.get(fieldName[TITLE]);
+				administrator[PHONE]    = adminstratorDefinition.get(fieldName[PHONE]);
+				administrator[ERASMUS]  = adminstratorDefinition.get(fieldName[ERASMUS]);
+				administrator[EMAIL]    = adminstratorDefinition.get(fieldName[EMAIL]);
 								
 				administrators.add(administrator);
 			}
@@ -132,6 +137,7 @@ public class AdministratorData {
 	public boolean addAdministrator(String[] administrator) {
 		boolean success = false;
 		if (addAdministratorToIniFile(administrator, RREManager.getIniFile(), mainFrame)) {
+			RREManager.changeLog.addLogEntry(new NonScriptedChangeLogEntry());
 			success = true;
 			getData();
 		}
@@ -144,7 +150,7 @@ public class AdministratorData {
 		String error = "";
 
 		String allTimeLogRecord = "Modify Administrator";
-		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "\"" + modifiedAdministrator[AdministratorData.EMAIL] + "\"";
 		allTimeLogRecord += "," + "\"" + modifiedAdministrator[AdministratorData.NAME] + "\"";
 		allTimeLogRecord += ",";
 		allTimeLogRecord += ",";
@@ -161,6 +167,7 @@ public class AdministratorData {
 			error = (error.equals("") ? (RREManager.getIniFile().setValue("Administrators", modifiedAdministrator[AdministratorData.NAME], modifiedAdministrator[AdministratorData.PASSWORD], null) ? "" : "Error setting password.") : error); 
 		}
 		error = (error.equals("") ? (RREManager.getIniFile().setValue(modifiedAdministrator[AdministratorData.NAME], fieldName[AdministratorData.ERASMUS], modifiedAdministrator[AdministratorData.ERASMUS], null) ? "" : "Error setting user number.") : error);
+		error = (error.equals("") ? (RREManager.getIniFile().setValue(modifiedAdministrator[AdministratorData.NAME], fieldName[AdministratorData.EMAIL], modifiedAdministrator[AdministratorData.EMAIL], null) ? "" : "Error setting email address.") : error);
 		error = (error.equals("") ? (RREManager.getIniFile().setValue(modifiedAdministrator[AdministratorData.NAME], fieldName[AdministratorData.TITLE], modifiedAdministrator[AdministratorData.TITLE], null) ? "" : "Error setting title.") : error);
 		error = (error.equals("") ? (RREManager.getIniFile().setValue(modifiedAdministrator[AdministratorData.NAME], fieldName[AdministratorData.PHONE], modifiedAdministrator[AdministratorData.PHONE], null) ? "" : "Error setting telephone number.") : error);
 		error = (error.equals("") ? (RREManager.getIniFile().writeFile() ? "" : "Error writing ini file.") : error);
@@ -171,6 +178,8 @@ public class AdministratorData {
 			mainFrame.allTimeLog(allTimeLogRecord, "");
 			
 			mainFrame.logWithTimeLn(logLn + "SUCCEEDED");
+			
+			RREManager.changeLog.addLogEntry(new NonScriptedChangeLogEntry());
 			
 			getData();
 		}
