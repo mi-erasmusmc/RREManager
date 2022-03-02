@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 
 import org.erasmusmc.rremanager.RREManager;
+import org.erasmusmc.rremanager.files.AdministratorData;
 import org.erasmusmc.rremanager.files.UserData;
 import org.erasmusmc.rremanager.gui.EmailEditor;
 import org.erasmusmc.rremanager.gui.MainFrame;
@@ -106,7 +107,7 @@ public class Mail {
 							approvedEmailText = emailEditor.getApprovedText();
 						}
 						
-						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, recipient, null, attachments);
+						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, null, recipient, null, attachments);
 					}
 				}
 				else {
@@ -138,7 +139,7 @@ public class Mail {
 								approvedEmailText = emailEditor.getApprovedText();
 							}
 							
-							success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, recipient, null, attachments);
+							success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, null, recipient, null, attachments);
 						}
 						else {
 							mainFrame.logWithTimeLn("ERROR: No multiOTP pdf file found!");
@@ -182,7 +183,7 @@ public class Mail {
 							approvedEmailText = emailEditor.getApprovedText();
 						}
 						
-						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, recipient, null, attachments);
+						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, null, recipient, null, attachments);
 					}
 					else {
 						mainFrame.logWithTimeLn("ERROR: No password found!");
@@ -267,7 +268,8 @@ public class Mail {
 							approvedEmailText = emailEditor.getApprovedText();
 						}
 						
-						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, recipient, null, attachments);
+						String sender = RREManager.getIniFile().getValue(rreManager.getAdministrator(), AdministratorData.fieldName[AdministratorData.EMAIL]);
+						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, sender, recipient, null, attachments);
 					}
 				}
 				else {
@@ -374,8 +376,9 @@ public class Mail {
 							approvedSubject = emailEditor.getApprovedSubject();
 							approvedEmailText = emailEditor.getApprovedText();
 						}
-						
-						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, recipient, null, attachments);
+
+						String sender = RREManager.getIniFile().getValue(rreManager.getAdministrator(), AdministratorData.fieldName[AdministratorData.EMAIL]);
+						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, sender, recipient, null, attachments);
 					}
 					
 				}
@@ -429,7 +432,7 @@ public class Mail {
 					approvedEmailText = emailEditor.getApprovedText();
 				}
 				
-				success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, recipient, bccRecipientsData.get(format), attachments);
+				success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, null, recipient, bccRecipientsData.get(format), attachments);
 			}
 		}
 		else {
@@ -448,7 +451,7 @@ public class Mail {
 					approvedEmailText = emailEditor.getApprovedText();
 				}
 
-				success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, recipient, null, attachments);
+				success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, null, recipient, null, attachments);
 			}
 		}
 		
@@ -456,7 +459,7 @@ public class Mail {
 	}
 	
 	
-	private boolean sendMail(boolean approved, String messageType, String messageSubject, String messageText, String[] recipient, List<String[]> bccRecipientsData, List<String> attachments) {
+	private boolean sendMail(boolean approved, String messageType, String messageSubject, String messageText, String overruleSender, String[] recipient, List<String[]> bccRecipientsData, List<String> attachments) {
 		boolean success = false;
 
 		mainFrame.logLn("");
@@ -521,6 +524,10 @@ public class Mail {
 				String sender = RREManager.getIniFile().getValue("SMTP Mail Server", "From");
 				List<String> ccRecipients = new ArrayList<String>();
 				ccRecipients.add(sender);
+				
+				if ((overruleSender != null) && (!overruleSender.equals(""))) {
+					sender = overruleSender;
+				}
 				
 				success = mailClient.sendMail(messageSubject, html, text, sender, recipients, ccRecipients, bccRecipients, attachments);
 				

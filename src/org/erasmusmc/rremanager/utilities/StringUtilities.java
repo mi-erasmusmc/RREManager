@@ -139,5 +139,22 @@ public class StringUtilities {
 		line.replaceAll(">", "&gt;");
 		return line;
 	}
+	
+	
+	public static boolean isEmailAddress(String text) {
+		boolean isEmailAddress = true;
+		
+		if (
+				(!text.contains("@")) ||
+				(text.substring(0, text.indexOf("@")).length() == 0) ||
+				(text.length() <= (text.indexOf("@") + 2)) ||
+				(text.substring(text.indexOf("@") + 1).contains("@")) ||
+				(!text.substring(text.indexOf("@") + 2).contains("."))
+			) {
+			isEmailAddress = false;
+		}
+		
+		return isEmailAddress;
+	}
 
 }

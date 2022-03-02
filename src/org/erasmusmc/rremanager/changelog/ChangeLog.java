@@ -21,6 +21,18 @@ public class ChangeLog {
 	}
 	
 	
+	public boolean hasScriptedChanges() {
+		boolean hasScriptedChanges = false;
+		for (LogEntry logEntry : log) {
+			if (!logEntry.isNonSciptedChangeLogEntry()) {
+				hasScriptedChanges = true;
+				break;
+			}
+		}
+		return hasScriptedChanges;
+	}
+	
+	
 	public List<LogEntry> getLogEntries() {
 		Collections.sort(log, new Comparator<LogEntry>() {
 
