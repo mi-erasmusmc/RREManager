@@ -383,7 +383,7 @@ public class MainFrame {
 		boolean found = false;
 		for (Integer versionNr = 1; versionNr < 100; versionNr++) {
 			String versionNrString = ("00" + versionNr).substring(versionNr.toString().length());
-			nextFileName = baseFileName + " " + date + " " + versionNrString + extension;
+			nextFileName = baseFileName + " - " + date + " " + versionNrString + extension;
 			File nextFile = new File(nextFileName);
 			if (!nextFile.exists()) {
 				found = true;

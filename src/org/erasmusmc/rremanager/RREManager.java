@@ -23,7 +23,7 @@ import org.erasmusmc.rremanager.gui.UserDefiner;
 import org.erasmusmc.rremanager.gui.PasswordManager;
 
 public class RREManager {
-	public static String version = "2.1.1";
+	public static String version = "2.1.2";
 	public static boolean test = true;
 	public static boolean noLogging = false;
 	public static boolean loggingStarted = false;
