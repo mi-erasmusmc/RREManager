@@ -70,17 +70,20 @@ public class UserDefiner {
 	private static String generatePassword() {
 		final int UPPERCASE = 0;
 		final int LOWERCASE = 1;
-		final int SPECIAL   = 2;
-		final int CHARSETS  = 3;
+		final int NUMBER    = 2;
+		final int SPECIAL   = 3;
+		final int CHARSETS  = 4;
 		
 		String[] characterSets = new String[CHARSETS];
 		characterSets[UPPERCASE] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		characterSets[LOWERCASE] = "abcdefghijklmnopqrstuvwxyz";
+		characterSets[NUMBER]    = "1234567890";
 		characterSets[SPECIAL]   = "!@#$%&";
 		
 		int[] lengths = new int[CHARSETS];
-		lengths[UPPERCASE] = 5;
-		lengths[LOWERCASE] = 5;
+		lengths[UPPERCASE] = 4;
+		lengths[LOWERCASE] = 4;
+		lengths[NUMBER]    = 2;
 		lengths[SPECIAL]   = 2;
 		
 		Random random = new Random();
