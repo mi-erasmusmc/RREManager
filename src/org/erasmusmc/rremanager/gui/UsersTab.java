@@ -45,7 +45,8 @@ public class UsersTab extends MainFrameTab {
 			add("RDP Account Mail");
 			add("FTP-Only Account Mail");
 			add("Password Mail");
-			add("Firewall Add Mail");
+			add("Firewall FTP/RDP Add Mail");
+			add("Firewall FTP Add Mail");
 			add("Firewall Remove Mail");
 		}
 	};
@@ -172,6 +173,7 @@ public class UsersTab extends MainFrameTab {
 					for (int nr = 0; nr < selection.length; nr++) {
 						selectedUsers[nr] = usersTable.convertRowIndexToModel(selection[nr]);
 					}
+					updateMessageTypes();
 				}
 			}
 		});
@@ -195,6 +197,11 @@ public class UsersTab extends MainFrameTab {
 		usersTable.getColumnModel().getColumn(UserData.USER_NAME).setMinWidth(80);
 		usersTable.getColumnModel().getColumn(UserData.USER_NAME).setMaxWidth(150);
 		usersTable.getColumnModel().getColumn(UserData.USER_NAME).setPreferredWidth(80);
+		
+		// Access
+		usersTable.getColumnModel().getColumn(UserData.ACCESS).setMinWidth(60);
+		usersTable.getColumnModel().getColumn(UserData.ACCESS).setMaxWidth(60);
+		usersTable.getColumnModel().getColumn(UserData.ACCESS).setPreferredWidth(60);
 /*		
 		// Password
 		usersTable.getColumnModel().getColumn(UserData.PASSWORD).setMinWidth(80);
@@ -211,16 +218,11 @@ public class UsersTab extends MainFrameTab {
 		usersTable.getColumnModel().getColumn(UserData.EMAIL_FORMAT).setMaxWidth(80);
 		usersTable.getColumnModel().getColumn(UserData.EMAIL_FORMAT).setPreferredWidth(80);
 		
-		// Access
-		usersTable.getColumnModel().getColumn(UserData.ACCESS).setMinWidth(60);
-		usersTable.getColumnModel().getColumn(UserData.ACCESS).setMaxWidth(60);
-		usersTable.getColumnModel().getColumn(UserData.ACCESS).setPreferredWidth(60);
-		
 		// MultiOTP
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setMinWidth(60);
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setMaxWidth(60);
 		usersTable.getColumnModel().getColumn(UserData.MULTIOTP).setPreferredWidth(60);
-*/
+*/	
 		RREManager.disableWhenRunning(usersTable);		
 
 		JScrollPane usersListScrollPane = new JScrollPane(usersTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -237,7 +239,8 @@ public class UsersTab extends MainFrameTab {
 		messageTypeComboBox.addItem("");
 		messageTypeComboBox.addItem("Account Mail");
 		messageTypeComboBox.addItem("Password Mail");
-		messageTypeComboBox.addItem("Firewall Add Mail");
+		messageTypeComboBox.addItem("Firewall FTP/RDP Add Mail");
+		messageTypeComboBox.addItem("Firewall FTP Add Mail");
 		messageTypeComboBox.addItem("Firewall Remove Mail");
 		for (String group : RREManager.getIniFile().getGroups()) {
 			if (RREManager.getIniFile().hasVariable(group, "Subject")) {
@@ -251,11 +254,13 @@ public class UsersTab extends MainFrameTab {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (((String) messageTypeComboBox.getSelectedItem()).equals("")) {
-					sendButton.setEnabled(false);
-				}
-				else {
-					sendButton.setEnabled(true);
+				if (messageTypeComboBox.getSelectedItem() != null) {
+					if (((String) messageTypeComboBox.getSelectedItem()).equals("")) {
+						sendButton.setEnabled(false);
+					}
+					else {
+						sendButton.setEnabled(true);
+					}
 				}
 			}
 			
@@ -342,6 +347,43 @@ public class UsersTab extends MainFrameTab {
 	}
 	
 	
+	private void updateMessageTypes() {
+		boolean ftpOnly = false;
+		boolean ftpRDP = false;
+		for (int selectedUserNr : selectedUsers) {
+			String[] user = users.get(selectedUserNr);
+			if (user[UserData.MULTIOTP].equals("")) {
+				ftpOnly = true;
+			}
+			else {
+				ftpRDP = true;
+			}
+			if (ftpOnly && ftpRDP) {
+				break;
+			}
+		}
+		messageTypeComboBox.removeAllItems();
+		messageTypeComboBox.addItem("");
+		messageTypeComboBox.addItem("Account Mail");
+		messageTypeComboBox.addItem("Password Mail");
+		if (ftpRDP && (!ftpOnly)) {
+			messageTypeComboBox.addItem("Firewall FTP/RDP Add Mail");
+		}
+		if (ftpOnly && (!ftpRDP)) {
+			messageTypeComboBox.addItem("Firewall FTP Add Mail");
+		}
+		messageTypeComboBox.addItem("Firewall Remove Mail");
+		for (String group : RREManager.getIniFile().getGroups()) {
+			if (RREManager.getIniFile().hasVariable(group, "Subject")) {
+				if (!mandatoryEmailTypes.contains(group)) {
+					messageTypeComboBox.addItem(group);
+				}
+			}
+		}
+		
+	}
+	
+	
 	private class UsersTableModel extends AbstractTableModel {
 		private static final long serialVersionUID = -2026827800711156459L;
 		
@@ -349,12 +391,12 @@ public class UsersTab extends MainFrameTab {
 				"First Name",
 				"Initials",
 				"Last Name",
-				"User Name"/*,
+				"User Name",
+				"Access"/*,
+				"RDP",
 				"Password",
 				"Email address",
-				"Email Format",
-				"Access",
-				"MultiOTP"*/
+				"Email Format"*/
 		};
 
 		@Override
