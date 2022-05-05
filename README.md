@@ -129,12 +129,13 @@ Picture_N = <img alt="Embedded Image" height="<picture height>" width="<picture 
 
 Comments can be added by starting a line with a '#' character.
 
-There are five predefined email messages that should be defined:
+There are six predefined email messages that should be defined:
 
 RDP Account Mail<br>
 FTP-Only Account Mail<br>
 Password Mail<br>
-Firewall Add Mail<br>
+Firewall FTP/RDP Add Mail<br>
+Firewall FTP Add Mail<br>
 Firewall Remove Mail
 
 In an email you can use the following in-line tags:
