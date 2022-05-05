@@ -46,8 +46,11 @@ public class Mail {
 				else if (messageType.equals("Password Mail")) {
 					sendPasswords(recipientsData);
 				}
-				else if (messageType.equals("Firewall Add Mail")) {
-					sendFirewallAddRequest(recipientsData);
+				else if (messageType.equals("Firewall FTP/RDP Add Mail")) {
+					sendFirewallFTPRDPAddRequest(recipientsData);
+				}
+				else if (messageType.equals("Firewall FTP Add Mail")) {
+					sendFirewallFTPAddRequest(recipientsData);
 				}
 				else if (messageType.equals("Firewall Remove Mail")) {
 					sendFirewallRemoveRequest(recipientsData, userData);
@@ -201,10 +204,96 @@ public class Mail {
 	}
 	
 	
-	private boolean sendFirewallAddRequest(List<String[]> recipientsData) {
+	private boolean sendFirewallFTPRDPAddRequest(List<String[]> recipientsData) {
 		boolean success = false;
 
-		String messageType = "Firewall Add Mail";
+		String messageType = "Firewall FTP/RDP Add Mail";
+		if (RREManager.getIniFile().hasGroup(messageType)) {
+			if (!RREManager.getIniFile().hasVariable(messageType, "Text_1")) {
+				mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
+				JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message definition for " + messageType, "No message", JOptionPane.ERROR_MESSAGE);
+			}
+			else {
+				String format = RREManager.getIniFile().getValue(messageType, "Format");
+				if (format != null) {
+					Map<String, List<String>> ipMap = new HashMap<String,List<String>>();
+					for (String[] recipient : recipientsData) {
+						String ipAddresses = recipient[UserData.IP_ADDRESSES];
+						if ((ipAddresses != null) && (!ipAddresses.trim().equals(""))) {
+							String[] ipAddressesSplit = ipAddresses.split(";");
+							for (String ipAddress : ipAddressesSplit) {
+								ipAddress = ipAddress.trim();
+								if (!ipAddress.equals("")) {
+									List<String> ipUserList = ipMap.get(ipAddress);
+									if (ipUserList == null) {
+										ipUserList = new ArrayList<String>();
+										ipMap.put(ipAddress, ipUserList);
+									}
+									ipUserList.add(recipient[UserData.USER_NAME]);
+								}
+							}
+						}
+					}
+					
+					rreManager.getIPAddressSelector().selectIPAddresses(ipMap, null);
+					ipMap = rreManager.getIPAddressSelector().getIPSelection();
+					
+					if ((ipMap != null) && (ipMap.keySet().size() > 0)) {
+						String recipient[] = new String[UserData.OBJECT_SIZE + (ipMap.keySet().size() * 2)];
+						recipient[UserData.EMAIL] = RREManager.getIniFile().getValue(messageType, "Email");
+						recipient[UserData.EMAIL_FORMAT] = format;
+						int ipNr = 0;
+						String ipAddressString = "";
+						for (String ipAddress : ipMap.keySet()) {
+							String users = "";
+							for (String user : ipMap.get(ipAddress)) {
+								users += (users.equals("") ? "" : ", ") + user;
+							}
+							recipient[UserData.OBJECT_SIZE + (ipNr * 2)] = ipAddress;
+							recipient[UserData.OBJECT_SIZE + (ipNr * 2) + 1] = users;
+							ipAddressString += (ipAddressString.equals("") ? "" : ";") + ipAddress + " (" + users + ")";
+							ipNr++;
+						}
+						recipient[UserData.IP_ADDRESSES] = ipAddressString;
+						
+						List<String> attachments = new ArrayList<String>();
+						attachments.addAll(getAttachments(messageType));
+						
+						String emailText = getEmailText(messageType, recipient); 
+						emailEditor.setAdditionalInfo(additionalInfo);
+						emailEditor.editEmail(emailText, format, recipient, null, RREManager.getIniFile().getValue(messageType, "Subject"), true);
+						additionalInfo = emailEditor.getAdditionalInfo();
+
+						String approvedSubject = "";
+						String approvedEmailText = "";
+						if (emailEditor.isApproved()) {
+							approvedSubject = emailEditor.getApprovedSubject();
+							approvedEmailText = emailEditor.getApprovedText();
+						}
+						
+						String sender = RREManager.getIniFile().getValue(rreManager.getAdministrator(), AdministratorData.fieldName[AdministratorData.EMAIL]);
+						success = sendMail(emailEditor.isApproved(), messageType, approvedSubject, approvedEmailText, sender, recipient, null, attachments);
+					}
+				}
+				else {
+					mainFrame.logWithTimeLn("ERROR: No message format specified for " + messageType);
+					JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message format specified for " + messageType, "No message format", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+		else {
+			mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);
+			JOptionPane.showMessageDialog(mainFrame.getFrame(), "No message definition for " + messageType, "No message", JOptionPane.ERROR_MESSAGE);
+		}
+		
+		return success;
+	}
+	
+	
+	private boolean sendFirewallFTPAddRequest(List<String[]> recipientsData) {
+		boolean success = false;
+
+		String messageType = "Firewall FTP Add Mail";
 		if (RREManager.getIniFile().hasGroup(messageType)) {
 			if (!RREManager.getIniFile().hasVariable(messageType, "Text_1")) {
 				mainFrame.logWithTimeLn("ERROR: No message definition for " + messageType);

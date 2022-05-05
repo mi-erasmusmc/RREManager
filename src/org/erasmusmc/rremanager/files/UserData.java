@@ -21,10 +21,10 @@ public class UserData {
 	public static int INITIALS      =  1;
 	public static int LAST_NAME     =  2;
 	public static int USER_NAME     =  3;
-	public static int PASSWORD      =  4;
-	public static int EMAIL         =  5;
-	public static int EMAIL_FORMAT  =  6;
-	public static int ACCESS        =  7;
+	public static int ACCESS        =  4;
+	public static int PASSWORD      =  5;
+	public static int EMAIL         =  6;
+	public static int EMAIL_FORMAT  =  7;
 	public static int MULTIOTP      =  8;
 	public static int PROJECTS      =  9;
 	public static int GROUPS        = 10;
@@ -38,10 +38,10 @@ public class UserData {
 			"Iniitials",
 			"Last name",
 			"User name",
+			"Access type",
 			"Password",
 			"Email address",
 			"Email format",
-			"Access type",
 			"QR-Code available",
 			"Projects",
 			"Project groups",
