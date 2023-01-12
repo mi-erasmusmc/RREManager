@@ -323,14 +323,14 @@ public class UserData {
 									Cell emailFormatCell = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"Email Format Column")));
 									Cell ipAdressesCell  = row.getCell(usersFile.getColumnNr(sheetName, RREManager.getIniFile().getValue(settingsGroup,"IP-Addresses Column")));
 									
-									projectsCell.setCellValue(modifiedUser[PROJECTS] == null ? "" : modifiedUser[PROJECTS]);
-									groupsCell.setCellValue(modifiedUser[GROUPS] == null ? "" : modifiedUser[GROUPS]);
-									firstNameCell.setCellValue(modifiedUser[FIRST_NAME] == null ? "" : modifiedUser[FIRST_NAME]);
-									initialsCell.setCellValue(modifiedUser[INITIALS] == null ? "" : modifiedUser[INITIALS]);
-									lastNameCell.setCellValue(modifiedUser[LAST_NAME] == null ? "" : modifiedUser[LAST_NAME]);
-									emailCell.setCellValue(modifiedUser[EMAIL] == null ? "" : modifiedUser[EMAIL]);
-									emailFormatCell.setCellValue(modifiedUser[EMAIL_FORMAT] == null ? "" : modifiedUser[EMAIL_FORMAT]);
-									ipAdressesCell.setCellValue(modifiedUser[IP_ADDRESSES] == null ? "" : modifiedUser[IP_ADDRESSES]);
+									if (projectsCell    != null) projectsCell.setCellValue(modifiedUser[PROJECTS] == null ? "" : modifiedUser[PROJECTS]);
+									if (groupsCell      != null) groupsCell.setCellValue(modifiedUser[GROUPS] == null ? "" : modifiedUser[GROUPS]);
+									if (firstNameCell   != null) firstNameCell.setCellValue(modifiedUser[FIRST_NAME] == null ? "" : modifiedUser[FIRST_NAME]);
+									if (initialsCell    != null) initialsCell.setCellValue(modifiedUser[INITIALS] == null ? "" : modifiedUser[INITIALS]);
+									if (lastNameCell    != null) lastNameCell.setCellValue(modifiedUser[LAST_NAME] == null ? "" : modifiedUser[LAST_NAME]);
+									if (emailCell       != null) emailCell.setCellValue(modifiedUser[EMAIL] == null ? "" : modifiedUser[EMAIL]);
+									if (emailFormatCell != null) emailFormatCell.setCellValue(modifiedUser[EMAIL_FORMAT] == null ? "" : modifiedUser[EMAIL_FORMAT]);
+									if (ipAdressesCell  != null) ipAdressesCell.setCellValue(modifiedUser[IP_ADDRESSES] == null ? "" : modifiedUser[IP_ADDRESSES]);
 
 									if (usersFile.write()) {
 										if (
