@@ -612,160 +612,165 @@ public class MainFrame {
 	private boolean runScripts() {
 		boolean success = true;
 
-		logWithTimeLn("Running scripts");
-		ScriptUtilities.deleteOutputFiles();
-		UserData userData = new UserData(this, "User Projects");
-		for (LogEntry logEntry : RREManager.changeLog.getLogEntries()) {
-			String allTimeLogRecord = "";
-			
-			String action = "<UNKNOWN>";
-			List<String> parameters = new ArrayList<String>();
-			String script = null;
-			if (logEntry.isAddProjectLogEntry()) {
-				action = "Create Project";
-				parameters.add(((AddProjectLogEntry) logEntry).getProject());
-				parameters.add(((AddProjectLogEntry) logEntry).getSubFolders());
-				script = "createProject.vbs";
-
-				allTimeLogRecord += "Run " + action + " Script";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += "," + "Yes";
-				allTimeLogRecord += "," + "\"" + ((AddProjectLogEntry) logEntry).getProject() + "\"";
-				allTimeLogRecord += "," + "\"" + ((AddProjectLogEntry) logEntry).getSubFolders() + "\"";
-			}
-			else if (logEntry.isAddProjectGPOLogEntry()) {
-				action = "Create Project GPOs";
-				parameters.add(((AddProjectGPOsLogEntry) logEntry).getProject());
-				parameters.add(((AddProjectGPOsLogEntry) logEntry).getGroups());
-				script = "createProjectDriveMapGPOs.ps1";
-
-				allTimeLogRecord += "Run " + action + " Script";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += ",";
-				allTimeLogRecord += "," + "Yes";
-				allTimeLogRecord += "," + "\"" + ((AddProjectGPOsLogEntry) logEntry).getProject() + "\"";
-				allTimeLogRecord += "," + "\"" + ((AddProjectGPOsLogEntry) logEntry).getGroups() + "\"";
-			}
-			else if (logEntry.isModifyUserLogEntry()) {
-				String userName = ((ModifyUserLogEntry) logEntry).getUserName();
-				String[] user = userData.getUser(userName);
-				if (user != null) {
-					action = "Modify User";
-					parameters.add(user[UserData.FIRST_NAME]);
-					parameters.add(user[UserData.INITIALS]);
-					parameters.add(user[UserData.LAST_NAME]);
-					parameters.add(user[UserData.USER_NAME]);
-					parameters.add(user[UserData.PASSWORD]);
-					parameters.add(user[UserData.EMAIL]);
-					parameters.add(user[UserData.PROJECTS]);
-					parameters.add(user[UserData.GROUPS]);
-					parameters.add("1"); // Update Flag
-					script = "createUserProjects.vbs";
+		if (!RREManager.getIniFile().getValue("General","DataFile").substring(RREManager.getIniFile().getValue("General","DataFile").lastIndexOf(File.separator) + 1).startsWith("Test")) {
+			logWithTimeLn("Running scripts");
+			ScriptUtilities.deleteOutputFiles();
+			UserData userData = new UserData(this, "User Projects");
+			for (LogEntry logEntry : RREManager.changeLog.getLogEntries()) {
+				String allTimeLogRecord = "";
+				
+				String action = "<UNKNOWN>";
+				List<String> parameters = new ArrayList<String>();
+				String script = null;
+				if (logEntry.isAddProjectLogEntry()) {
+					action = "Create Project";
+					parameters.add(((AddProjectLogEntry) logEntry).getProject());
+					parameters.add(((AddProjectLogEntry) logEntry).getSubFolders());
+					script = "createProject.vbs";
 
 					allTimeLogRecord += "Run " + action + " Script";
 					allTimeLogRecord += ",";
-					allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
-					allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
-					allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
 					allTimeLogRecord += ",";
-					allTimeLogRecord += "," + "\"" + user[UserData.PASSWORD] + "\"";
-					allTimeLogRecord += "," + "\"" + user[UserData.IP_ADDRESSES] + "\"";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
 					allTimeLogRecord += "," + "Yes";
-					allTimeLogRecord += "," + "\"" + user[UserData.PROJECTS] + "\"";
-					allTimeLogRecord += "," + "\"" + user[UserData.GROUPS] + "\"";
+					allTimeLogRecord += "," + "\"" + ((AddProjectLogEntry) logEntry).getProject() + "\"";
+					allTimeLogRecord += "," + "\"" + ((AddProjectLogEntry) logEntry).getSubFolders() + "\"";
 				}
-				else {
-					logWithTimeLn("  " + action + " " + ((ModifyUserLogEntry) logEntry).getUserName() + "FAILED: User does not exist.");
-				}
-			}
-			else if (logEntry.isAddUserLogEntry()) {
-				String userName = ((AddUserLogEntry) logEntry).getUserName();
-				ScriptUtilities.saveFileZillaXMLFile(userName);
-				String[] user = userData.getUser(userName);
-				if (user != null) {
-					action = "Add User";
-					parameters.add(user[UserData.FIRST_NAME]);
-					parameters.add(user[UserData.INITIALS]);
-					parameters.add(user[UserData.LAST_NAME]);
-					parameters.add(user[UserData.USER_NAME]);
-					parameters.add(user[UserData.PASSWORD]);
-					parameters.add(user[UserData.EMAIL]);
-					parameters.add(user[UserData.PROJECTS]);
-					parameters.add(user[UserData.GROUPS]);
-					parameters.add("0"); // Update Flag
-					script = "createUserProjects.vbs";
+				else if (logEntry.isAddProjectGPOLogEntry()) {
+					action = "Create Project GPOs";
+					parameters.add(((AddProjectGPOsLogEntry) logEntry).getProject());
+					parameters.add(((AddProjectGPOsLogEntry) logEntry).getGroups());
+					script = "createProjectDriveMapGPOs.ps1";
 
 					allTimeLogRecord += "Run " + action + " Script";
 					allTimeLogRecord += ",";
-					allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
-					allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
-					allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
 					allTimeLogRecord += ",";
-					allTimeLogRecord += "," + "\"" + user[UserData.PASSWORD] + "\"";
-					allTimeLogRecord += "," + "\"" + user[UserData.IP_ADDRESSES] + "\"";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
+					allTimeLogRecord += ",";
 					allTimeLogRecord += "," + "Yes";
-					allTimeLogRecord += "," + "\"" + user[UserData.PROJECTS] + "\"";
-					allTimeLogRecord += "," + "\"" + user[UserData.GROUPS] + "\"";
+					allTimeLogRecord += "," + "\"" + ((AddProjectGPOsLogEntry) logEntry).getProject() + "\"";
+					allTimeLogRecord += "," + "\"" + ((AddProjectGPOsLogEntry) logEntry).getGroups() + "\"";
 				}
-				else {
-					logWithTimeLn("  " + action + " " + ((AddUserLogEntry) logEntry).getUserName() + "FAILED: User does not exist.");
-				}
-			}
+				else if (logEntry.isModifyUserLogEntry()) {
+					String userName = ((ModifyUserLogEntry) logEntry).getUserName();
+					String[] user = userData.getUser(userName);
+					if (user != null) {
+						action = "Modify User";
+						parameters.add(user[UserData.FIRST_NAME]);
+						parameters.add(user[UserData.INITIALS]);
+						parameters.add(user[UserData.LAST_NAME]);
+						parameters.add(user[UserData.USER_NAME]);
+						parameters.add(user[UserData.PASSWORD]);
+						parameters.add(user[UserData.EMAIL]);
+						parameters.add(user[UserData.PROJECTS]);
+						parameters.add(user[UserData.GROUPS]);
+						parameters.add("1"); // Update Flag
+						script = "createUserProjects.vbs";
 
-			String logFileIndent = "                           ";
-			parameters.add(fullLogFileName);
-			parameters.add(logFileIndent);
-			
-			String logLine = "  " + action;
-			String paramatersLogLn = "";
-			for (String parameter : parameters) {
-				paramatersLogLn += " \"" + parameter + "\"";
-			}
-			logWithTimeLn(logLine + paramatersLogLn);
-			
-			if (RREManager.test) {
-				parameters.add(0, action);
-				script = "testScript" + script.substring(script.lastIndexOf("."));
-			}
-			
-			if (script != null) {
-				logWithTimeLn("    " + script + paramatersLogLn);
-				if (ScriptUtilities.callScript(script, parameters)) {
-					allTimeLogRecord += "," + "Succeeded";
-					allTimeLogRecord += ",";
-					allTimeLog(allTimeLogRecord, script);
-					logWithTimeLn("  SUCCEEDED");
+						allTimeLogRecord += "Run " + action + " Script";
+						allTimeLogRecord += ",";
+						allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
+						allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
+						allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
+						allTimeLogRecord += ",";
+						allTimeLogRecord += "," + "\"" + user[UserData.PASSWORD] + "\"";
+						allTimeLogRecord += "," + "\"" + user[UserData.IP_ADDRESSES] + "\"";
+						allTimeLogRecord += "," + "Yes";
+						allTimeLogRecord += "," + "\"" + user[UserData.PROJECTS] + "\"";
+						allTimeLogRecord += "," + "\"" + user[UserData.GROUPS] + "\"";
+					}
+					else {
+						logWithTimeLn("  " + action + " " + ((ModifyUserLogEntry) logEntry).getUserName() + "FAILED: User does not exist.");
+					}
+				}
+				else if (logEntry.isAddUserLogEntry()) {
+					String userName = ((AddUserLogEntry) logEntry).getUserName();
+					ScriptUtilities.saveFileZillaXMLFile(userName);
+					String[] user = userData.getUser(userName);
+					if (user != null) {
+						action = "Add User";
+						parameters.add(user[UserData.FIRST_NAME]);
+						parameters.add(user[UserData.INITIALS]);
+						parameters.add(user[UserData.LAST_NAME]);
+						parameters.add(user[UserData.USER_NAME]);
+						parameters.add(user[UserData.PASSWORD]);
+						parameters.add(user[UserData.EMAIL]);
+						parameters.add(user[UserData.PROJECTS]);
+						parameters.add(user[UserData.GROUPS]);
+						parameters.add("0"); // Update Flag
+						script = "createUserProjects.vbs";
+
+						allTimeLogRecord += "Run " + action + " Script";
+						allTimeLogRecord += ",";
+						allTimeLogRecord += "," + "\"" + user[UserData.USER_NAME] + "\"";
+						allTimeLogRecord += "," + "\"" + user[UserData.FIRST_NAME] + "\"";
+						allTimeLogRecord += "," + "\"" + user[UserData.LAST_NAME] + "\"";
+						allTimeLogRecord += ",";
+						allTimeLogRecord += "," + "\"" + user[UserData.PASSWORD] + "\"";
+						allTimeLogRecord += "," + "\"" + user[UserData.IP_ADDRESSES] + "\"";
+						allTimeLogRecord += "," + "Yes";
+						allTimeLogRecord += "," + "\"" + user[UserData.PROJECTS] + "\"";
+						allTimeLogRecord += "," + "\"" + user[UserData.GROUPS] + "\"";
+					}
+					else {
+						logWithTimeLn("  " + action + " " + ((AddUserLogEntry) logEntry).getUserName() + "FAILED: User does not exist.");
+					}
+				}
+
+				String logFileIndent = "                           ";
+				parameters.add(fullLogFileName);
+				parameters.add(logFileIndent);
+				
+				String logLine = "  " + action;
+				String paramatersLogLn = "";
+				for (String parameter : parameters) {
+					paramatersLogLn += " \"" + parameter + "\"";
+				}
+				logWithTimeLn(logLine + paramatersLogLn);
+				
+				if (RREManager.test) {
+					parameters.add(0, action);
+					script = "testScript" + script.substring(script.lastIndexOf("."));
+				}
+				
+				if (script != null) {
+					logWithTimeLn("    " + script + paramatersLogLn);
+					if (ScriptUtilities.callScript(script, parameters)) {
+						allTimeLogRecord += "," + "Succeeded";
+						allTimeLogRecord += ",";
+						allTimeLog(allTimeLogRecord, script);
+						logWithTimeLn("  SUCCEEDED");
+					}
+					else {
+						allTimeLogRecord += "," + "Failed";
+						allTimeLogRecord += ",";
+						allTimeLog(allTimeLogRecord, script);
+						logWithTimeLn("  FAILED");
+						success = false;
+						break;
+					}
 				}
 				else {
-					allTimeLogRecord += "," + "Failed";
-					allTimeLogRecord += ",";
-					allTimeLog(allTimeLogRecord, script);
-					logWithTimeLn("  FAILED");
-					success = false;
-					break;
+					logWithTimeLn("    No script specified.");
 				}
+			}
+			if (success) {
+				logWithTimeLn("Running scripts finished successfully");
 			}
 			else {
-				logWithTimeLn("    No script specified.");
+				logWithTimeLn("Running scripts finished with errors");
+				logWithTimeLn("CHECK ACTIVE DIRECTORY STATUS!");
 			}
 		}
-		if (success) {
-			logWithTimeLn("Running scripts finished successfully");
-		}
 		else {
-			logWithTimeLn("Running scripts finished with errors");
-			logWithTimeLn("CHECK ACTIVE DIRECTORY STATUS!");
+			logWithTimeLn("Suppressing scripts for testing");
 		}
 		
 		return success;
