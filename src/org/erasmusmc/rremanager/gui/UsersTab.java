@@ -59,6 +59,7 @@ public class UsersTab extends MainFrameTab {
 	private JComboBox<String> messageTypeComboBox;
 	private JButton sendButton;
 	private JButton editUserButton;
+	private JButton deleteUserButton;
 	private JButton addUserButton;
 	
 	private List<String[]> users = new ArrayList<String[]>();
@@ -168,6 +169,7 @@ public class UsersTab extends MainFrameTab {
 						sendButton.setEnabled(false);
 						editUserButton.setEnabled(false);
 						addUserButton.setEnabled(true);
+						deleteUserButton.setEnabled(false);
 					}
 					selectedUsers = new int[selection.length];
 					for (int nr = 0; nr < selection.length; nr++) {
@@ -322,8 +324,21 @@ public class UsersTab extends MainFrameTab {
 		});
 		RREManager.disableWhenRunning(addUserButton);
 		
+        deleteUserButton = new JButton("Delete User");
+        deleteUserButton.setEnabled(false);
+        deleteUserButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				deleteUser(selectedUsers, userData);
+				mainFrame.refreshLog();
+			}
+		});
+		RREManager.disableWhenRunning(deleteUserButton);
+		
 		userManagementPanel.add(editUserButton);
 		userManagementPanel.add(addUserButton);
+		userManagementPanel.add(deleteUserButton);
 
 		actionsPanel.add(userManagementPanel);
 
@@ -456,6 +471,16 @@ public class UsersTab extends MainFrameTab {
 	}
 	
 	
+	private void deleteUser(int[] selectedUsers, UserData userData) {
+		String[] user = null;
+		if ((selectedUsers != null) && (selectedUsers.length == 1)) {
+			user = userData.getUser(selectedUsers[0]);
+			userData.deleteUser(user);
+			update();
+		}
+	}
+	
+	
 	private void showSelection() {
 		int[] selection = usersTable.getSelectedRows();
 		messageTypeComboBox.setEnabled(true);
@@ -466,9 +491,11 @@ public class UsersTab extends MainFrameTab {
 		}
 		if (selection.length == 1) {
 			editUserButton.setEnabled(true);
+			deleteUserButton.setEnabled(true);
 		}
 		else {
 			editUserButton.setEnabled(false);
+			deleteUserButton.setEnabled(false);
 		}
 		addUserButton.setEnabled(true);
 		showInfo(realSelection);

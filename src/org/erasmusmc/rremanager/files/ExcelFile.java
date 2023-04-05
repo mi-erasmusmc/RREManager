@@ -114,6 +114,12 @@ public class ExcelFile {
 		return excelFile != null ? excelFile.addRow(sheetName, cellValues) : null;
 	}
 	
+	public void deleteRow(String sheetName, Row row) {
+		if (excelFile != null) {
+			excelFile.deleteRow(sheetName, row);
+		}
+	}
+	
 	
 	public List<String> getColumnNames(String sheetName) {
 		return excelFile != null ? excelFile.getColumnNames(sheetName) : null;
@@ -183,6 +189,8 @@ public class ExcelFile {
 		abstract Boolean clearSheet(String sheetName, boolean removeHeader);
 		
 		abstract Boolean addRow(String sheetName, Map<String, Object> cellValues);
+		
+		abstract void deleteRow(String sheetName, Row row);
 		
 		public List<String> getColumnNames(String sheetName) {
 			List<String> columNames = null;
@@ -470,6 +478,16 @@ public class ExcelFile {
 			}
 			return success;
 		}
+
+		@Override
+		void deleteRow(String sheetName, Row row) {
+			HSSFSheet sheet = sheetMap.get(sheetName);
+			int rowToDlete = row.getRowNum();
+			sheet.removeRow(row);
+			if (rowToDlete < sheet.getLastRowNum()) {
+				sheet.shiftRows(rowToDlete + 1, sheet.getLastRowNum(), -1);
+			}
+		}
 	}
 	
 	
@@ -720,6 +738,16 @@ public class ExcelFile {
 				}
 			}
 			return success;
+		}
+
+		@Override
+		void deleteRow(String sheetName, Row row) {
+			XSSFSheet sheet = sheetMap.get(sheetName);
+			int rowToDlete = row.getRowNum();
+			sheet.removeRow(row);
+			if (rowToDlete < sheet.getLastRowNum()) {
+				sheet.shiftRows(rowToDlete + 1, sheet.getLastRowNum(), -1);
+			}
 		}
 	}
 }

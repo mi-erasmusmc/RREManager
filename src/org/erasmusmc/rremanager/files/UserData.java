@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.erasmusmc.rremanager.RREManager;
 import org.erasmusmc.rremanager.changelog.AddUserLogEntry;
+import org.erasmusmc.rremanager.changelog.DeleteUserLogEntry;
 import org.erasmusmc.rremanager.changelog.ModifyUserLogEntry;
 import org.erasmusmc.rremanager.changelog.NonScriptedChangeLogEntry;
 import org.erasmusmc.rremanager.gui.MainFrame;
@@ -404,6 +407,94 @@ public class UserData {
 				mainFrame.logWithTimeLn(logLn + "FAILED");
 				mainFrame.logWithTimeLn(logLn + "  " + error);
 			}
+		}
+		
+		return success;
+	}
+	
+	
+	public boolean deleteUser(String[] user) {
+		boolean success = true;
+		String error = null;
+		
+		String usersFileName = RREManager.getIniFile().getValue("General","DataFile");
+		String sheetName = RREManager.getIniFile().getValue(settingsGroup,"Sheet");
+		File file = new File(usersFileName);
+		if (file.exists()) {
+			if (file.canWrite()) {
+				ExcelFile usersFile = new ExcelFile(usersFileName);
+				if (usersFile.open()) {
+					if (usersFile.getSheet(sheetName, true)) {
+						while (usersFile.hasNext(sheetName)) {
+							Row row = usersFile.getNext(sheetName);
+
+							String userName = usersFile.getStringValue(sheetName, row, RREManager.getIniFile().getValue(settingsGroup,"User Name Column"));
+							
+							if (userName.equals(user[USER_NAME])) {
+								usersFile.deleteRow(sheetName, row);
+								if (usersFile.write()) {
+									RREManager.changeLog.addLogEntry(new DeleteUserLogEntry(user[USER_NAME]));
+									success = true;
+								}
+								else {
+									error = "ERROR while deleting user " + user[FIRST_NAME] + " " + user[LAST_NAME] + " (" + user[USER_NAME] + ")";
+									success = false;
+								}
+								break;
+							}
+						}
+						usersFile.close();
+						getData();
+					}
+					else {
+						error = "ERROR sheet '" + sheetName + "' not found in users file '" + usersFileName + "'";
+						success = false;
+					}
+				}
+				else {
+					error = "ERROR cannot open users file '" + usersFileName + "'";
+					success = false;
+				}
+			}
+			else {
+				error = "ERROR cannot write users file '" + usersFileName + "'";
+				success = false;
+			}
+		}
+		else {
+			error = "ERROR cannot find users file '" + usersFileName + "'";
+			success = false;
+		}
+
+		String allTimeLogRecord = "Delete " + (settingsGroup.equals("Specials") ? "Special" : "User");
+		allTimeLogRecord += ",";
+		allTimeLogRecord += "," + "\"" + user[USER_NAME] + "\"";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		allTimeLogRecord += ",";
+		
+		String logLn = "Deleting " + (settingsGroup.equals("Specials") ? "Special" : "User") + " " + user[USER_NAME] + " ";
+		
+		if (success) {
+			allTimeLogRecord += "," + "Succeeded";
+			allTimeLogRecord += ",";
+			mainFrame.allTimeLog(allTimeLogRecord, "");
+			
+			mainFrame.logWithTimeLn(logLn + "SUCCEEDED");
+			
+			JOptionPane.showMessageDialog(null, "Don't forget to remove the user from " + ((!user[PROJECTS].equals("")) ? "Active Directory\nand " : "") + "Cerberus.", "Delete user", JOptionPane.WARNING_MESSAGE);
+		}
+		else {
+			allTimeLogRecord += "," + "Failed";
+			allTimeLogRecord += "," + "\"" + error + "\"";
+			
+			mainFrame.logWithTimeLn(logLn + "FAILED");
+			mainFrame.logWithTimeLn(logLn + "  " + error);
 		}
 		
 		return success;
